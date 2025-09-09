@@ -13,7 +13,13 @@ import {
   Menu,
   X,
   Sparkles,
+  Sun,
+  Moon,
+  Zap,
+  Bell,
+  Search,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -26,83 +32,103 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navigation() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
     <>
       {user && (
-        <>
-          <Link
-            href="/progress"
-            onClick={() => mobile && setMobileMenuOpen(false)}
+        <Link
+          href="/progress"
+          onClick={() => mobile && setMobileMenuOpen(false)}
+        >
+          <Button
+            variant="ghost"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 ${
+              mobile ? "w-full justify-start" : ""
+            }`}
           >
-            <Button
-              variant="ghost"
-              className={`flex items-center gap-2 hover:bg-primary/10 hover:text-primary transition-colors ${
-                mobile ? "w-full justify-start" : ""
-              }`}
-            >
-              <TrendingUp className="h-4 w-4" />
-              Progress
-            </Button>
-          </Link>
-        </>
+            <TrendingUp className="h-4 w-4" />
+            <span className="font-medium">Progress</span>
+          </Button>
+        </Link>
       )}
     </>
   );
 
   return (
-    <nav className="glass-morphism border-b border-border/50 sticky top-0 z-50 backdrop-blur-xl">
-      <div className="container-responsive">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 group">
+    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-slate-700">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-4">
             <div className="relative">
-              <BookOpen className="h-7 w-7 sm:h-8 sm:w-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 group-hover:drop-shadow-lg" />
-              <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-accent animate-pulse group-hover:animate-spin" />
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <BookOpen className="h-7 w-7 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                <Zap className="h-2.5 w-2.5 text-white" />
+              </div>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-lg sm:text-xl font-black gradient-text group-hover:text-shadow-glow transition-all duration-300">
-                English Lab
-              </h1>
-              <span className="text-xs text-muted-foreground hidden sm:block group-hover:text-primary/80 transition-colors">
+              <h1 className="text-2xl font-black gradient-text">English Lab</h1>
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 AI-Powered Learning
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-2">
             <NavLinks />
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
 
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-2 ml-4 modern-shadow hover:scale-105 transition-all focus-ring"
+                    className="flex items-center gap-3 ml-4 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center group-hover:shadow-lg transition-all duration-300">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
                     </div>
-                    <span className="hidden xl:inline font-medium group-hover:text-primary transition-colors">
+                    <span className="hidden xl:inline font-semibold">
                       {user?.name || "User"}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="glass-morphism">
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-lg p-2 min-w-[200px]"
+                >
                   <DropdownMenuItem
                     onClick={logout}
-                    className="hover:bg-destructive/10 hover:text-destructive transition-colors duration-200"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 cursor-pointer"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    <LogOut className="h-4 w-4" />
+                    <span className="font-medium">Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Link href="/auth/login" className="ml-4">
-                <Button className="modern-shadow hover:scale-105 transition-all focus-ring neon-glow hover:neon-glow">
+                <Button className="px-8 py-3 font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg transition-all duration-200">
                   Sign In
                 </Button>
               </Link>
@@ -110,13 +136,13 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-3">
             {!user && (
               <Link href="/auth/login">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="modern-shadow focus-ring"
+                  className="px-4 py-2 rounded-xl font-semibold"
                 >
                   Sign In
                 </Button>
@@ -126,7 +152,7 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 modern-shadow hover:scale-105 transition-all focus-ring"
+              className="p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -137,18 +163,56 @@ export function Navigation() {
           </div>
         </div>
 
+        {/* Search Bar */}
+        {searchOpen && (
+          <div className="lg:hidden mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search modules, lessons..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-border/50 glass-morphism animate-in slide-in-from-top-2 duration-200">
-            <div className="flex flex-col space-y-1 p-4">
+          <div className="lg:hidden border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <div className="flex flex-col space-y-2 p-6">
               <NavLinks mobile />
 
+              {/* Mobile Theme Toggle */}
+              <Button
+                variant="ghost"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-200"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4 mr-3" />
+                ) : (
+                  <Moon className="h-4 w-4 mr-3" />
+                )}
+                <span className="font-medium">
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </span>
+              </Button>
+
               {user && (
-                <div className="pt-4 mt-4 border-t border-border/50">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 mb-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-accent flex items-center justify-center">
-                      <User className="h-4 w-4 text-white" />
+                <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 mb-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+                      <User className="h-6 w-6 text-white" />
                     </div>
-                    <span className="font-medium">{user.name}</span>
+                    <div>
+                      <p className="font-semibold text-slate-900 dark:text-white">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Premium User
+                      </p>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"
@@ -156,10 +220,10 @@ export function Navigation() {
                       logout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full justify-start hover:bg-destructive/10 hover:text-destructive"
+                    className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    <LogOut className="h-4 w-4 mr-3" />
+                    <span className="font-medium">Logout</span>
                   </Button>
                 </div>
               )}

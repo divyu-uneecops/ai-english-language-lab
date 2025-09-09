@@ -17,12 +17,18 @@ import {
   Lock,
   Sparkles,
   Star,
+  Zap,
+  Play,
+  TrendingUp,
+  Award,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import { useState } from "react";
 
 export function ModuleCards() {
   const { user } = useAuth();
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   const ModuleCard = ({
     icon: Icon,
@@ -32,8 +38,10 @@ export function ModuleCards() {
     href,
     buttonText,
     variant = "default",
-    colorClass,
+    gradient,
     isPopular = false,
+    delay = 0,
+    index,
   }: {
     icon: any;
     title: string;
@@ -42,152 +50,166 @@ export function ModuleCards() {
     href: string;
     buttonText: string;
     variant?: "default" | "secondary" | "outline";
-    colorClass: string;
+    gradient: string;
     isPopular?: boolean;
+    delay?: number;
+    index: number;
   }) => (
-    <Card
-      className={`group relative overflow-hidden glass-morphism modern-shadow hover:scale-105 transition-all duration-500 border-2 ${colorClass} h-full card-3d scale-in`}
-      style={{ animationDelay: `${Math.random() * 0.5 + 0.6}s` }}
+    <div
+      className="group relative premium-card rounded-3xl p-8 card-hover magnetic-hover overflow-hidden cyber-border dark:bg-slate-800/60 bg-white/80"
+      style={{
+        animationDelay: `${delay}ms`,
+        background: `linear-gradient(135deg, ${gradient})`,
+        transform:
+          hoveredCard === index
+            ? "translateY(-12px) scale(1.03)"
+            : "translateY(0) scale(1)",
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+      }}
+      onMouseEnter={() => setHoveredCard(index)}
+      onMouseLeave={() => setHoveredCard(null)}
     >
-      {isPopular && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-white text-xs font-bold shadow-lg pulse-glow">
-            <Star className="h-3 w-3 fill-current animate-pulse" />
-            Popular
-          </div>
-        </div>
-      )}
+      {/* Animated Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-      {/* 3D Hover Effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-110" />
-
-      <CardHeader className="pb-4 relative z-10">
-        <div className="flex items-center gap-4 mb-3">
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(5)].map((_, i) => (
           <div
-            className={`p-3 rounded-xl bg-gradient-to-br ${
-              colorClass.includes("primary")
-                ? "from-primary/10 to-primary/20"
-                : colorClass.includes("secondary")
-                ? "from-secondary/10 to-secondary/20"
-                : "from-accent/10 to-accent/20"
-            } group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 group-hover:shadow-lg`}
-          >
-            <Icon
-              className={`h-6 w-6 sm:h-7 sm:w-7 ${
-                colorClass.includes("primary")
-                  ? "text-primary"
-                  : colorClass.includes("secondary")
-                  ? "text-secondary"
-                  : "text-accent"
-              } group-hover:drop-shadow-lg`}
-            />
-          </div>
-          <div>
-            <CardTitle className="text-xl sm:text-2xl font-black">
-              {title}
-            </CardTitle>
-            <div className="flex items-center gap-1 mt-1">
-              <Sparkles className="h-3 w-3 text-accent animate-pulse" />
-              <span className="text-xs text-accent font-medium group-hover:text-accent/80 transition-colors">
-                AI-Enhanced
-              </span>
-            </div>
-          </div>
-        </div>
-        <CardDescription className="text-sm sm:text-base leading-relaxed">
-          {description}
-        </CardDescription>
-      </CardHeader>
+            key={i}
+            className="absolute w-1 h-1 bg-slate-400/60 dark:bg-white/30 rounded-full particle-effect"
+            style={{
+              left: `${20 + i * 15}%`,
+              top: `${20 + i * 10}%`,
+              animationDelay: `${i * 0.5}s`,
+            }}
+          />
+        ))}
+      </div>
 
-      <CardContent className="flex flex-col h-full relative z-10">
-        <div className="flex-grow mb-6">
-          <ul className="space-y-2">
+      <div className="relative z-10">
+        {/* Icon with 3D Effect */}
+        <div className="w-24 h-24 mb-8 rounded-3xl bg-slate-100/80 dark:bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 border border-slate-200 dark:border-white/30 hologram-effect">
+          <Icon className="h-12 w-12 text-slate-700 dark:text-white drop-shadow-lg" />
+        </div>
+
+        {/* Content */}
+        <div className="mb-8">
+          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 group-hover:text-glow transition-all duration-300">
+            {title}
+          </h3>
+          <p className="text-slate-700 dark:text-white/80 leading-relaxed mb-6 text-lg">
+            {description}
+          </p>
+
+          <ul className="space-y-4">
             {features.map((feature, index) => (
               <li
                 key={index}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
+                className="flex items-center gap-3 text-sm text-slate-600 dark:text-white/70 group-hover:text-slate-900 dark:group-hover:text-white/90 transition-colors duration-300"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-accent flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-slate-500 dark:bg-white/60 flex-shrink-0 group-hover:scale-125 transition-transform duration-300" />
                 {feature}
               </li>
             ))}
           </ul>
         </div>
 
+        {/* Button */}
         {user ? (
           <Link href={href}>
             <Button
               variant={variant}
-              className={`w-full transition-all duration-300 text-sm font-semibold py-3 modern-shadow hover:scale-105 focus-ring ${
+              className={`w-full py-4 font-bold text-base transition-all duration-500 group-hover:scale-105 ${
                 variant === "default"
-                  ? "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary neon-glow hover:neon-glow"
+                  ? "bg-slate-900/80 hover:bg-slate-900 text-white border border-slate-300 dark:border-white/30 hover:border-slate-400 dark:hover:border-white/50 backdrop-blur-sm neon-glow"
                   : variant === "secondary"
-                  ? "bg-gradient-to-r from-secondary to-secondary/90 hover:from-secondary/90 hover:to-secondary"
-                  : "bg-gradient-to-r from-accent/10 to-accent/20 hover:from-accent/20 hover:to-accent/30 border-accent/30 hover:border-accent/50"
+                  ? "bg-slate-800/60 hover:bg-slate-800 text-white border border-slate-200 dark:border-white/20 hover:border-slate-300 dark:hover:border-white/40 backdrop-blur-sm"
+                  : "bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-white/30 hover:border-slate-400 dark:hover:border-white/50 backdrop-blur-sm"
               }`}
             >
+              <Play className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
               {buttonText}
-              <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
           </Link>
         ) : (
           <Link href="/auth/login">
             <Button
               variant="outline"
-              className="w-full glass-morphism modern-shadow hover:scale-105 transition-all text-sm font-semibold py-3 bg-transparent focus-ring"
+              className="w-full py-4 font-bold text-base bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-900 dark:text-white border-2 border-slate-300 dark:border-white/30 hover:border-slate-400 dark:hover:border-white/50 backdrop-blur-sm transition-all duration-500 group-hover:scale-105"
             >
-              <Lock className="h-4 w-4 mr-2" />
+              <Lock className="h-5 w-5 mr-2" />
               Sign In to Access
             </Button>
           </Link>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Shimmer Effect */}
+      <div className="absolute inset-0 -top-10 -left-10 w-20 h-20 bg-gradient-to-r from-transparent via-slate-200/40 dark:via-white/20 to-transparent rotate-45 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-500" />
+
+      {/* Holographic Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-100/20 dark:via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    </div>
   );
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24 px-4 relative overflow-hidden">
-      {/* Enhanced Background */}
-      <div className="absolute inset-0 background-pattern" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
+    <section className="py-32 px-4 relative overflow-hidden">
+      {/* 2025 Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-200/20 via-transparent to-purple-200/20 dark:from-indigo-900/20 dark:to-purple-900/20" />
 
-      {/* Floating Background Elements */}
-      <div className="absolute top-10 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl floating-animation" />
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-r from-indigo-400/10 to-purple-400/10 rounded-full blur-3xl floating-element" />
       <div
-        className="absolute bottom-10 right-10 w-60 h-60 bg-accent/10 rounded-full blur-3xl floating-animation"
-        style={{ animationDelay: "3s" }}
-      />
-      <div
-        className="absolute top-1/2 left-1/2 w-32 h-32 bg-secondary/10 rounded-full blur-2xl floating-animation"
-        style={{ animationDelay: "1.5s" }}
+        className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-cyan-400/10 to-pink-400/10 rounded-full blur-3xl floating-element"
+        style={{ animationDelay: "2s" }}
       />
 
-      <div className="relative z-10">
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-morphism text-primary text-sm font-medium mb-6 slide-up pulse-glow">
-            <Sparkles className="h-4 w-4 animate-spin" />
-            Choose Your Learning Path
+      {/* Matrix Rain Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-xs text-indigo-400/10 font-mono matrix-rain"
+            style={{
+              left: `${i * 10}%`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          >
+            {[...Array(15)].map((_, j) => (
+              <div key={j} className="opacity-30">
+                {Math.random() > 0.5 ? "1" : "0"}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="relative max-w-7xl mx-auto">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-3 px-8 py-4 rounded-full premium-card border-glow mb-8 group hover:scale-105 transition-all duration-500 cyber-border">
+            <div className="w-3 h-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse neon-glow" />
+            <span className="text-sm font-bold gradient-text">
+              Choose Your Learning Path
+            </span>
+            <Sparkles className="h-4 w-4 text-indigo-500 dark:text-indigo-400 animate-spin" />
           </div>
 
-          <h2
-            className="text-responsive-3xl gradient-text mb-4 sm:mb-6 slide-up text-shadow-glow"
-            style={{ animationDelay: "0.2s" }}
-          >
+          <h2 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white mb-8 leading-tight hologram-effect">
             Learning Modules
           </h2>
-          <p
-            className="text-responsive-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4 slide-up"
-            style={{ animationDelay: "0.4s" }}
-          >
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed font-light">
             {user
               ? "Continue your English learning journey with our AI-powered modules designed to enhance your skills"
               : "Sign in to unlock all learning modules and start your personalized English learning experience"}
           </p>
         </div>
 
-        <div className="grid-responsive-cards max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <ModuleCard
             icon={BookOpen}
             title="Reading Lab"
@@ -200,8 +222,10 @@ export function ModuleCards() {
             ]}
             href="/reading"
             buttonText="Start Reading"
-            colorClass="hover:border-primary/30"
+            gradient="from-indigo-500 to-purple-600"
             isPopular={true}
+            delay={0}
+            index={0}
           />
 
           <ModuleCard
@@ -217,7 +241,9 @@ export function ModuleCards() {
             href="/speaking"
             buttonText="Start Speaking"
             variant="secondary"
-            colorClass="hover:border-secondary/30"
+            gradient="from-purple-500 to-pink-600"
+            delay={200}
+            index={1}
           />
 
           <ModuleCard
@@ -233,7 +259,9 @@ export function ModuleCards() {
             href="/writing"
             buttonText="Start Writing"
             variant="outline"
-            colorClass="hover:border-accent/30"
+            gradient="from-cyan-500 to-blue-600"
+            delay={400}
+            index={2}
           />
 
           <ModuleCard
@@ -249,7 +277,9 @@ export function ModuleCards() {
             href="/chat"
             buttonText="Chat with AI"
             variant="outline"
-            colorClass="hover:border-muted/30"
+            gradient="from-emerald-500 to-teal-600"
+            delay={600}
+            index={3}
           />
         </div>
       </div>
