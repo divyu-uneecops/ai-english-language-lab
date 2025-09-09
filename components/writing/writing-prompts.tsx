@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Clock, Users, Star } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Clock, Users, Star } from "lucide-react";
 
 const prompts = {
   letter: [
@@ -24,7 +24,8 @@ const prompts = {
     {
       id: "letter-2",
       title: "Formal Complaint Letter",
-      description: "Write a complaint letter to a company about a defective product",
+      description:
+        "Write a complaint letter to a company about a defective product",
       difficulty: "Medium",
       timeEstimate: "20 mins",
       audience: "Business",
@@ -54,7 +55,8 @@ const prompts = {
     {
       id: "article-1",
       title: "School Event Report",
-      description: "Write an article about a recent school sports day or cultural event",
+      description:
+        "Write an article about a recent school sports day or cultural event",
       difficulty: "Easy",
       timeEstimate: "20 mins",
       audience: "School Community",
@@ -68,7 +70,8 @@ const prompts = {
     {
       id: "article-2",
       title: "Environmental Awareness",
-      description: "Write an article about climate change and its impact on your community",
+      description:
+        "Write an article about climate change and its impact on your community",
       difficulty: "Medium",
       timeEstimate: "25 mins",
       audience: "General Public",
@@ -98,7 +101,8 @@ const prompts = {
     {
       id: "notice-1",
       title: "School Notice",
-      description: "Write a notice about upcoming school holidays and important dates",
+      description:
+        "Write a notice about upcoming school holidays and important dates",
       difficulty: "Easy",
       timeEstimate: "10 mins",
       audience: "Students & Parents",
@@ -112,7 +116,8 @@ const prompts = {
     {
       id: "notice-2",
       title: "Community Event Notice",
-      description: "Write a notice about a community cleanup drive or social event",
+      description:
+        "Write a notice about a community cleanup drive or social event",
       difficulty: "Medium",
       timeEstimate: "15 mins",
       audience: "Community Members",
@@ -126,7 +131,8 @@ const prompts = {
     {
       id: "notice-3",
       title: "Official Government Notice",
-      description: "Write an official notice about new traffic rules or regulations",
+      description:
+        "Write an official notice about new traffic rules or regulations",
       difficulty: "Hard",
       timeEstimate: "20 mins",
       audience: "General Public",
@@ -138,25 +144,32 @@ const prompts = {
       ],
     },
   ],
-}
+};
 
 interface WritingPromptsProps {
-  writingType: string
-  onBack: () => void
-  onStartWriting: (prompt: any) => void
+  writingType: string;
+  onBack: () => void;
+  onStartWriting: (prompt: any) => void;
 }
 
-export function WritingPrompts({ writingType, onBack, onStartWriting }: WritingPromptsProps) {
-  const typePrompts = prompts[writingType as keyof typeof prompts] || []
-  const typeName = writingType.charAt(0).toUpperCase() + writingType.slice(1)
+export function WritingPrompts({
+  writingType,
+  onBack,
+  onStartWriting,
+}: WritingPromptsProps) {
+  const typePrompts = prompts[writingType as keyof typeof prompts] || [];
+  const typeName = writingType.charAt(0).toUpperCase() + writingType.slice(1);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={onBack}>
+        <div
+          onClick={onBack}
+          className="flex items-center gap-2 cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Types
-        </Button>
+        </div>
         <h2 className="text-2xl font-bold">{typeName} Writing Prompts</h2>
       </div>
 
@@ -171,8 +184,8 @@ export function WritingPrompts({ writingType, onBack, onStartWriting }: WritingP
                     prompt.difficulty === "Easy"
                       ? "default"
                       : prompt.difficulty === "Medium"
-                        ? "secondary"
-                        : "destructive"
+                      ? "secondary"
+                      : "destructive"
                   }
                 >
                   {prompt.difficulty}
@@ -205,7 +218,9 @@ export function WritingPrompts({ writingType, onBack, onStartWriting }: WritingP
                     </li>
                   ))}
                   {prompt.guidelines.length > 2 && (
-                    <li className="text-xs text-muted-foreground">+{prompt.guidelines.length - 2} more guidelines</li>
+                    <li className="text-xs text-muted-foreground">
+                      +{prompt.guidelines.length - 2} more guidelines
+                    </li>
                   )}
                 </ul>
               </div>
@@ -218,5 +233,5 @@ export function WritingPrompts({ writingType, onBack, onStartWriting }: WritingP
         ))}
       </div>
     </div>
-  )
+  );
 }

@@ -1,14 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Mic, MessageCircle, CheckCircle, Clock } from "lucide-react"
-import Link from "next/link"
-import { PronunciationPractice } from "./pronunciation-practice"
-import { SpeakingExercise } from "./speaking-exercise"
-import { ChatPanel } from "../reading/chat-panel"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  Mic,
+  MessageCircle,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import Link from "next/link";
+import { PronunciationPractice } from "./pronunciation-practice";
+import { SpeakingExercise } from "./speaking-exercise";
+import { ChatPanel } from "../reading/chat-panel";
 
 const exercises = [
   {
@@ -23,7 +29,11 @@ const exercises = [
         { word: "hello", phonetic: "/həˈloʊ/", audio: "hello.mp3" },
         { word: "world", phonetic: "/wɜːrld/", audio: "world.mp3" },
         { word: "beautiful", phonetic: "/ˈbjuːtɪfəl/", audio: "beautiful.mp3" },
-        { word: "pronunciation", phonetic: "/prəˌnʌnsiˈeɪʃən/", audio: "pronunciation.mp3" },
+        {
+          word: "pronunciation",
+          phonetic: "/prəˌnʌnsiˈeɪʃən/",
+          audio: "pronunciation.mp3",
+        },
         { word: "language", phonetic: "/ˈlæŋɡwɪdʒ/", audio: "language.mp3" },
       ],
     },
@@ -33,7 +43,8 @@ const exercises = [
     title: "Story Reading Aloud",
     difficulty: "Intermediate",
     duration: "15 min",
-    description: "Read a short story aloud and practice fluency and expression.",
+    description:
+      "Read a short story aloud and practice fluency and expression.",
     type: "reading" as const,
     content: {
       title: "The Morning Walk",
@@ -61,50 +72,65 @@ This daily routine helps Sarah start her day with a positive mindset and renewed
       scenarios: [
         {
           situation: "Introducing yourself at a job interview",
-          prompt: "Tell me about yourself and why you're interested in this position.",
-          tips: ["Speak clearly and confidently", "Use professional language", "Maintain good pace"],
+          prompt:
+            "Tell me about yourself and why you're interested in this position.",
+          tips: [
+            "Speak clearly and confidently",
+            "Use professional language",
+            "Maintain good pace",
+          ],
         },
         {
           situation: "Ordering food at a restaurant",
-          prompt: "You're at a restaurant. Order your meal and ask about ingredients.",
-          tips: ["Be polite and clear", "Ask follow-up questions", "Use appropriate intonation"],
+          prompt:
+            "You're at a restaurant. Order your meal and ask about ingredients.",
+          tips: [
+            "Be polite and clear",
+            "Ask follow-up questions",
+            "Use appropriate intonation",
+          ],
         },
         {
           situation: "Giving directions to a tourist",
           prompt: "A tourist asks you for directions to the nearest museum.",
-          tips: ["Speak slowly and clearly", "Use simple, direct language", "Be helpful and friendly"],
+          tips: [
+            "Speak slowly and clearly",
+            "Use simple, direct language",
+            "Be helpful and friendly",
+          ],
         },
       ],
     },
   },
-]
+];
 
 export function SpeakingInterface() {
-  const [selectedExercise, setSelectedExercise] = useState<number | null>(null)
-  const [showChat, setShowChat] = useState(false)
-  const [completedExercises, setCompletedExercises] = useState<number[]>([])
+  const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [completedExercises, setCompletedExercises] = useState<number[]>([]);
 
-  const currentExercise = selectedExercise ? exercises.find((e) => e.id === selectedExercise) : null
+  const currentExercise = selectedExercise
+    ? exercises.find((e) => e.id === selectedExercise)
+    : null;
 
   const handleExerciseComplete = (exerciseId: number) => {
-    setCompletedExercises((prev) => [...prev, exerciseId])
-  }
+    setCompletedExercises((prev) => [...prev, exerciseId]);
+  };
 
   if (selectedExercise && currentExercise) {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
+          <div
             onClick={() => {
-              setSelectedExercise(null)
-              setShowChat(false)
+              setSelectedExercise(null);
+              setShowChat(false);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Exercises
-          </Button>
+          </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{currentExercise.difficulty}</Badge>
             <Badge variant="outline" className="flex items-center gap-1">
@@ -112,7 +138,11 @@ export function SpeakingInterface() {
               {currentExercise.duration}
             </Badge>
           </div>
-          <Button variant="outline" onClick={() => setShowChat(!showChat)} className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowChat(!showChat)}
+            className="ml-auto flex items-center gap-2"
+          >
             <MessageCircle className="h-4 w-4" />
             Ask AI for Help
           </Button>
@@ -135,34 +165,37 @@ export function SpeakingInterface() {
 
           {showChat && (
             <div className="lg:col-span-1">
-              <ChatPanel storyContext={{ title: currentExercise.title, content: currentExercise.description }} />
+              <ChatPanel
+                storyContext={{
+                  title: currentExercise.title,
+                  content: currentExercise.description,
+                }}
+              />
             </div>
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex items-center gap-4 mb-8">
         <Link href="/">
-          <Button variant="ghost" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
-          </Button>
-        </Link>
-        <div className="flex items-center gap-2">
-          <Mic className="h-6 w-6 text-secondary" />
-          <h1 className="text-2xl font-bold">Speaking Lab</h1>
-        </div>
+          </div>
+        </Link>{" "}
       </div>
 
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Choose a Speaking Exercise</h2>
+        <h2 className="text-xl font-semibold mb-2">
+          Choose a Speaking Exercise
+        </h2>
         <p className="text-muted-foreground">
-          Select an exercise below to practice your speaking skills. You can record yourself, get feedback, and ask our
-          AI assistant for help.
+          Select an exercise below to practice your speaking skills. You can
+          record yourself, get feedback, and ask our AI assistant for help.
         </p>
       </div>
 
@@ -176,7 +209,9 @@ export function SpeakingInterface() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">{exercise.title}</CardTitle>
-                {completedExercises.includes(exercise.id) && <CheckCircle className="h-5 w-5 text-secondary" />}
+                {completedExercises.includes(exercise.id) && (
+                  <CheckCircle className="h-5 w-5 text-secondary" />
+                )}
               </div>
               <div className="flex gap-2">
                 <Badge variant="secondary">{exercise.difficulty}</Badge>
@@ -187,7 +222,9 @@ export function SpeakingInterface() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">{exercise.description}</p>
+              <p className="text-muted-foreground mb-4">
+                {exercise.description}
+              </p>
               <Button variant="secondary" className="w-full">
                 <Mic className="h-4 w-4 mr-2" />
                 Start Practice
@@ -197,5 +234,5 @@ export function SpeakingInterface() {
         ))}
       </div>
     </div>
-  )
+  );
 }

@@ -1,56 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { BookOpen, Mic, MessageCircle, TrendingUp, User, LogOut, PenTool, Menu, X } from "lucide-react"
-import Link from "next/link"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/contexts/auth-context"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  BookOpen,
+  Mic,
+  MessageCircle,
+  TrendingUp,
+  User,
+  LogOut,
+  PenTool,
+  Menu,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/auth-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navigation() {
-  const { user, logout } = useAuth()
-  const isMobile = useIsMobile()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, logout } = useAuth();
+  const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
     <>
       {user && (
-        <>
-          <Link href="/reading" onClick={() => mobile && setMobileMenuOpen(false)}>
-            <Button variant="ghost" className={`flex items-center gap-2 ${mobile ? "w-full justify-start" : ""}`}>
-              <BookOpen className="h-4 w-4" />
-              Reading
-            </Button>
-          </Link>
-          <Link href="/speaking" onClick={() => mobile && setMobileMenuOpen(false)}>
-            <Button variant="ghost" className={`flex items-center gap-2 ${mobile ? "w-full justify-start" : ""}`}>
-              <Mic className="h-4 w-4" />
-              Speaking
-            </Button>
-          </Link>
-          <Link href="/writing" onClick={() => mobile && setMobileMenuOpen(false)}>
-            <Button variant="ghost" className={`flex items-center gap-2 ${mobile ? "w-full justify-start" : ""}`}>
-              <PenTool className="h-4 w-4" />
-              Writing
-            </Button>
-          </Link>
-          <Link href="/chat" onClick={() => mobile && setMobileMenuOpen(false)}>
-            <Button variant="ghost" className={`flex items-center gap-2 ${mobile ? "w-full justify-start" : ""}`}>
-              <MessageCircle className="h-4 w-4" />
-              AI Chat
-            </Button>
-          </Link>
-          <Link href="/progress" onClick={() => mobile && setMobileMenuOpen(false)}>
-            <Button variant="ghost" className={`flex items-center gap-2 ${mobile ? "w-full justify-start" : ""}`}>
-              <TrendingUp className="h-4 w-4" />
-              Progress
-            </Button>
-          </Link>
-        </>
+        <Link
+          href="/progress"
+          onClick={() => mobile && setMobileMenuOpen(false)}
+        >
+          <Button
+            variant="ghost"
+            className={`flex items-center gap-2 ${
+              mobile ? "w-full justify-start" : ""
+            }`}
+          >
+            <TrendingUp className="h-4 w-4" />
+            Progress
+          </Button>
+        </Link>
       )}
     </>
-  )
+  );
 
   return (
     <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -58,7 +55,9 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-            <h1 className="text-lg sm:text-xl font-bold text-foreground">English Lab</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">
+              English Lab
+            </h1>
           </Link>
 
           {/* Desktop Navigation */}
@@ -67,10 +66,10 @@ export function Navigation() {
 
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    <span className="hidden lg:inline">{user.name}</span>
+                    <span className="hidden lg:inline">{user?.name || ""}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -96,8 +95,17 @@ export function Navigation() {
                 </Button>
               </Link>
             )}
-            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -117,8 +125,8 @@ export function Navigation() {
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      logout()
-                      setMobileMenuOpen(false)
+                      logout();
+                      setMobileMenuOpen(false);
                     }}
                     className="w-full justify-start"
                   >
@@ -132,5 +140,5 @@ export function Navigation() {
         )}
       </div>
     </nav>
-  )
+  );
 }

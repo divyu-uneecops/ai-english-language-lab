@@ -1,14 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, BookOpen, MessageCircle, CheckCircle, Clock } from "lucide-react"
-import Link from "next/link"
-import { StoryReader } from "./story-reader"
-import { QuestionPanel } from "./question-panel"
-import { ChatPanel } from "./chat-panel"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  BookOpen,
+  MessageCircle,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import Link from "next/link";
+import { StoryReader } from "./story-reader";
+import { QuestionPanel } from "./question-panel";
+import { ChatPanel } from "./chat-panel";
 
 const stories = [
   {
@@ -16,7 +22,8 @@ const stories = [
     title: "The Lost Treasure",
     difficulty: "Beginner",
     readTime: "5 min",
-    description: "A young explorer discovers an ancient map leading to hidden treasure.",
+    description:
+      "A young explorer discovers an ancient map leading to hidden treasure.",
     content: `Once upon a time, in a small coastal village, there lived a curious young girl named Maya. She loved exploring the old buildings and forgotten corners of her hometown.
 
 One rainy afternoon, while cleaning her grandmother's attic, Maya discovered an old wooden chest hidden behind dusty books. Inside the chest, wrapped in faded silk, was an ancient map with strange symbols and a red X marking a location near the village harbor.
@@ -34,18 +41,29 @@ Maya realized she had found something more valuable than treasure - she had disc
       {
         id: 1,
         question: "Where did Maya find the treasure map?",
-        options: ["In her bedroom", "In her grandmother's attic", "At the village square", "Near the lighthouse"],
+        options: [
+          "In her bedroom",
+          "In her grandmother's attic",
+          "At the village square",
+          "Near the lighthouse",
+        ],
         correct: 1,
       },
       {
         id: 2,
         question: "What did Maya find in the cave?",
-        options: ["Gold and jewels", "Old coins", "Messages in bottles", "Ancient artifacts"],
+        options: [
+          "Gold and jewels",
+          "Old coins",
+          "Messages in bottles",
+          "Ancient artifacts",
+        ],
         correct: 2,
       },
       {
         id: 3,
-        question: "Why did Maya think the messages were more valuable than treasure?",
+        question:
+          "Why did Maya think the messages were more valuable than treasure?",
         options: [
           "They were worth more money",
           "They contained stories and memories",
@@ -61,7 +79,8 @@ Maya realized she had found something more valuable than treasure - she had disc
     title: "The Magic Garden",
     difficulty: "Intermediate",
     readTime: "7 min",
-    description: "A young botanist discovers a garden where plants can communicate.",
+    description:
+      "A young botanist discovers a garden where plants can communicate.",
     content: `Dr. Elena Rodriguez had always been fascinated by plants, but nothing had prepared her for what she discovered in the remote Amazon rainforest. As a botanist studying rare species, she had traveled to this untouched region hoping to catalog new plant varieties.
 
 On her third day in the jungle, Elena noticed something unusual. The plants around a particular clearing seemed to move differently - not just swaying in the wind, but responding to each other in coordinated patterns. Intrigued, she set up her research equipment and began to observe more carefully.
@@ -106,40 +125,41 @@ She decided to document her findings carefully while working with local indigeno
       },
     ],
   },
-]
+];
 
 export function ReadingInterface() {
-  const [selectedStory, setSelectedStory] = useState<number | null>(null)
-  const [showQuestions, setShowQuestions] = useState(false)
-  const [showChat, setShowChat] = useState(false)
-  const [completedQuestions, setCompletedQuestions] = useState<number[]>([])
+  const [selectedStory, setSelectedStory] = useState<number | null>(null);
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
 
-  const currentStory = selectedStory ? stories.find((s) => s.id === selectedStory) : null
+  const currentStory = selectedStory
+    ? stories.find((s) => s.id === selectedStory)
+    : null;
 
   const handleStoryComplete = () => {
-    setShowQuestions(true)
-  }
+    setShowQuestions(true);
+  };
 
   const handleQuestionsComplete = (questionIds: number[]) => {
-    setCompletedQuestions((prev) => [...prev, ...questionIds])
-  }
+    setCompletedQuestions((prev) => [...prev, ...questionIds]);
+  };
 
   if (selectedStory && currentStory) {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
+          <div
             onClick={() => {
-              setSelectedStory(null)
-              setShowQuestions(false)
-              setShowChat(false)
+              setSelectedStory(null);
+              setShowQuestions(false);
+              setShowChat(false);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Stories
-          </Button>
+          </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{currentStory.difficulty}</Badge>
             <Badge variant="outline" className="flex items-center gap-1">
@@ -147,7 +167,11 @@ export function ReadingInterface() {
               {currentStory.readTime}
             </Badge>
           </div>
-          <Button variant="outline" onClick={() => setShowChat(!showChat)} className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowChat(!showChat)}
+            className="ml-auto flex items-center gap-2"
+          >
             <MessageCircle className="h-4 w-4" />
             Ask AI for Help
           </Button>
@@ -156,9 +180,15 @@ export function ReadingInterface() {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {!showQuestions ? (
-              <StoryReader story={currentStory} onComplete={handleStoryComplete} />
+              <StoryReader
+                story={currentStory}
+                onComplete={handleStoryComplete}
+              />
             ) : (
-              <QuestionPanel questions={currentStory.questions} onComplete={handleQuestionsComplete} />
+              <QuestionPanel
+                questions={currentStory.questions}
+                onComplete={handleQuestionsComplete}
+              />
             )}
           </div>
 
@@ -169,29 +199,25 @@ export function ReadingInterface() {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center gap-4 mb-8">
+      <div className="mb-8">
         <Link href="/">
-          <Button variant="ghost" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
-          </Button>
+          </div>
         </Link>
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Reading Lab</h1>
-        </div>
       </div>
 
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Choose a Story to Read</h2>
         <p className="text-muted-foreground">
-          Select a story below to start reading. After reading, you'll answer comprehension questions and can ask our AI
-          assistant for help.
+          Select a story below to start reading. After reading, you'll answer
+          comprehension questions and can ask our AI assistant for help.
         </p>
       </div>
 
@@ -205,9 +231,9 @@ export function ReadingInterface() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">{story.title}</CardTitle>
-                {completedQuestions.some((id) => story.questions.some((q) => q.id === id)) && (
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                )}
+                {completedQuestions.some((id) =>
+                  story.questions.some((q) => q.id === id)
+                ) && <CheckCircle className="h-5 w-5 text-primary" />}
               </div>
               <div className="flex gap-2">
                 <Badge variant="secondary">{story.difficulty}</Badge>
@@ -225,5 +251,5 @@ export function ReadingInterface() {
         ))}
       </div>
     </div>
-  )
+  );
 }

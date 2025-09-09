@@ -1,45 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Save, RotateCcw, Eye, Clock, Target, CheckCircle, Loader2, Sparkles } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
-import { EvaluationResults } from "./evaluation-results"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  Save,
+  RotateCcw,
+  Eye,
+  Clock,
+  Target,
+  CheckCircle,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { EvaluationResults } from "./evaluation-results";
 
 interface WritingEditorProps {
-  prompt: any
-  writingType: string | null
-  onBack: () => void
+  prompt: any;
+  writingType: string | null;
+  onBack: () => void;
 }
 
-export function WritingEditor({ prompt, writingType, onBack }: WritingEditorProps) {
-  const [content, setContent] = useState("")
-  const [wordCount, setWordCount] = useState(0)
-  const [showGuidelines, setShowGuidelines] = useState(true)
-  const [timeSpent, setTimeSpent] = useState(0)
-  const [isEvaluating, setIsEvaluating] = useState(false)
-  const [evaluation, setEvaluation] = useState(null)
-  const [showEvaluation, setShowEvaluation] = useState(false)
+export function WritingEditor({
+  prompt,
+  writingType,
+  onBack,
+}: WritingEditorProps) {
+  const [content, setContent] = useState("");
+  const [wordCount, setWordCount] = useState(0);
+  const [showGuidelines, setShowGuidelines] = useState(true);
+  const [timeSpent, setTimeSpent] = useState(0);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
+  const [showEvaluation, setShowEvaluation] = useState(false);
 
   const handleContentChange = (value: string) => {
-    setContent(value)
+    setContent(value);
     const words = value
       .trim()
       .split(/\s+/)
-      .filter((word) => word.length > 0)
-    setWordCount(words.length)
-  }
+      .filter((word) => word.length > 0);
+    setWordCount(words.length);
+  };
 
   const handleSubmitForEvaluation = async () => {
     if (!content.trim()) {
-      alert("Please write something before submitting for evaluation")
-      return
+      alert("Please write something before submitting for evaluation");
+      return;
     }
 
-    setIsEvaluating(true)
+    setIsEvaluating(true);
 
     try {
       const response = await fetch("/api/evaluate-writing", {
@@ -52,46 +66,55 @@ export function WritingEditor({ prompt, writingType, onBack }: WritingEditorProp
           writingType,
           prompt: prompt.id,
         }),
-      })
+      });
 
       if (response.ok) {
-        const evaluationData = await response.json()
-        setEvaluation(evaluationData)
-        setShowEvaluation(true)
+        const evaluationData = await response.json();
+        setEvaluation(evaluationData);
+        setShowEvaluation(true);
       } else {
-        alert("Failed to evaluate writing. Please try again.")
+        alert("Failed to evaluate writing. Please try again.");
       }
     } catch (error) {
-      alert("An error occurred while evaluating your writing.")
+      alert("An error occurred while evaluating your writing.");
     } finally {
-      setIsEvaluating(false)
+      setIsEvaluating(false);
     }
-  }
+  };
 
   const handleCloseEvaluation = () => {
-    setShowEvaluation(false)
-  }
+    setShowEvaluation(false);
+  };
 
   const handleReviseWriting = () => {
-    setShowEvaluation(false)
+    setShowEvaluation(false);
     // Focus back on the textarea for revision
-  }
+  };
 
-  const targetWordCount = 200
-  const progress = Math.min((wordCount / targetWordCount) * 100, 100)
+  const targetWordCount = 200;
+  const progress = Math.min((wordCount / targetWordCount) * 100, 100);
 
   if (showEvaluation && evaluation) {
-    return <EvaluationResults evaluation={evaluation} onClose={handleCloseEvaluation} onRevise={handleReviseWriting} />
+    return (
+      <EvaluationResults
+        evaluation={evaluation}
+        onClose={handleCloseEvaluation}
+        onRevise={handleReviseWriting}
+      />
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={onBack}>
+          <div
+            onClick={onBack}
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Prompts
-          </Button>
+          </div>
           <div>
             <h2 className="text-2xl font-bold">{prompt.title}</h2>
             <p className="text-muted-foreground">{prompt.description}</p>
@@ -143,7 +166,11 @@ export function WritingEditor({ prompt, writingType, onBack }: WritingEditorProp
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
-            <Button className="ml-auto" onClick={handleSubmitForEvaluation} disabled={isEvaluating || !content.trim()}>
+            <Button
+              className="ml-auto"
+              onClick={handleSubmitForEvaluation}
+              disabled={isEvaluating || !content.trim()}
+            >
               {isEvaluating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -235,5 +262,5 @@ export function WritingEditor({ prompt, writingType, onBack }: WritingEditorProp
         </div>
       </div>
     </div>
-  )
+  );
 }
