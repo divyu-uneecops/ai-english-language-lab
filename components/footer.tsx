@@ -17,7 +17,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-32 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
+    <footer className="relative mt-32 bg-gradient-to-br from-gray-800 via-gray-700 to-blue-900 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-purple-500/10" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-pink-500/10" />
@@ -124,72 +124,6 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h4 className="text-xl font-bold text-white mb-6 gradient-text-secondary">
-              Company
-            </h4>
-            <ul className="space-y-4">
-              <li>
-                <Link
-                  href="/"
-                  className="text-slate-300 hover:text-white transition-colors duration-300 group flex items-center gap-2"
-                >
-                  <div className="w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/progress"
-                  className="text-slate-300 hover:text-white transition-colors duration-300 group flex items-center gap-2"
-                >
-                  <div className="w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  Progress
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/login"
-                  className="text-slate-300 hover:text-white transition-colors duration-300 group flex items-center gap-2"
-                >
-                  <div className="w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  Sign In
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/signup"
-                  className="text-slate-300 hover:text-white transition-colors duration-300 group flex items-center gap-2"
-                >
-                  <div className="w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  Create Account
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Newsletter Signup */}
-          <div>
-            <h4 className="text-xl font-bold text-white mb-6 gradient-text-accent">
-              Stay Updated
-            </h4>
-            <p className="text-slate-300 mb-6 leading-relaxed">
-              Get the latest updates on new features, learning tips, and AI
-              advancements.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
-              />
-              <button className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 hover:scale-105 border-glow">
-                Subscribe
-              </button>
-            </div>
           </div>
         </div>
 
