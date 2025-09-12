@@ -9,29 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { OtpVerification } from "./otp-verification";
 
-export function SignupForm() {
+export function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
-    standard: "",
-    school: "",
-    state: "",
-    city: "",
   });
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [isOtpSent, setIsOtpSent] = useState(false);
 
-  const { register, isLoading } = useAuth();
+  const { resetPassword, isLoading } = useAuth();
 
   const calculatePasswordStrength = (password: string) => {
     let strength = 0;
@@ -45,40 +36,6 @@ export function SignupForm() {
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      errors.name = "Full name is required";
-    } else if (formData.name.trim().length < 2) {
-      errors.name = "Name must be at least 2 characters";
-    }
-
-    if (!formData.phone) {
-      errors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-      errors.phone = "Please enter a valid phone number";
-    }
-
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
-
-    if (!formData.standard) {
-      errors.standard = "Please select your standard";
-    }
-
-    if (!formData.school.trim()) {
-      errors.school = "School name is required";
-    } else if (formData.school.trim().length < 2) {
-      errors.school = "School name must be at least 2 characters";
-    }
-
-    if (!formData.state) {
-      errors.state = "State is required";
-    }
-
-    if (!formData.city.trim()) {
-      errors.city = "City is required";
-    }
 
     if (!formData.password) {
       errors.password = "Password is required";
@@ -106,12 +63,9 @@ export function SignupForm() {
     }
 
     try {
-      const { confirmPassword, ...registerPayload } = formData;
-      await register(registerPayload);
-      setIsOtpSent(true);
+      await resetPassword({ password: formData.password });
     } catch (error) {
-      // Error is handled by the auth context
-      console.error("Registration error:", error);
+      console.error("Password reset error:", error);
     }
   };
 
@@ -147,176 +101,20 @@ export function SignupForm() {
     return "Strong";
   };
 
-  // Show OTP verification if OTP has been sent
-  if (isOtpSent) {
-    return <OtpVerification onBack={() => window.location.reload()} />;
-  }
-
   return (
     <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold">
+          Reset Your Password
+        </CardTitle>
+        <p className="text-slate-600 dark:text-slate-400">
+          Create a new password for your account
+        </p>
+      </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              className={
-                validationErrors.name
-                  ? "border-red-500 focus:border-red-500"
-                  : ""
-              }
-              required
-            />
-            {validationErrors.name && (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {validationErrors.name}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number *</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="Enter your phone number"
-              value={formData.phone}
-              onChange={(e) => handleInputChange("phone", e.target.value)}
-              className={
-                validationErrors.phone
-                  ? "border-red-500 focus:border-red-500"
-                  : ""
-              }
-              required
-            />
-            {validationErrors.phone && (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {validationErrors.phone}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address (Optional)</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email (optional)"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
-              className={
-                validationErrors.email
-                  ? "border-red-500 focus:border-red-500"
-                  : ""
-              }
-            />
-            {validationErrors.email && (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {validationErrors.email}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="standard">Standard *</Label>
-            <select
-              id="standard"
-              value={formData.standard}
-              onChange={(e) => handleInputChange("standard", e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md bg-background text-foreground ${
-                validationErrors.standard
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-input focus:border-ring"
-              }`}
-            >
-              <option value="">Select your standard</option>
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Class {i + 1}
-                </option>
-              ))}
-            </select>
-            {validationErrors.standard && (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {validationErrors.standard}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="school">School Name *</Label>
-            <Input
-              id="school"
-              type="text"
-              placeholder="Enter your school name"
-              value={formData.school}
-              onChange={(e) => handleInputChange("school", e.target.value)}
-              className={
-                validationErrors.school
-                  ? "border-red-500 focus:border-red-500"
-                  : ""
-              }
-              required
-            />
-            {validationErrors.school && (
-              <p className="text-sm text-red-600 dark:text-red-400">
-                {validationErrors.school}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="state">State *</Label>
-              <Input
-                id="state"
-                type="text"
-                placeholder="Enter state"
-                value={formData.state}
-                onChange={(e) => handleInputChange("state", e.target.value)}
-                className={
-                  validationErrors.state
-                    ? "border-red-500 focus:border-red-500"
-                    : ""
-                }
-                required
-              />
-              {validationErrors.state && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {validationErrors.state}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                type="text"
-                placeholder="Enter city"
-                value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                className={
-                  validationErrors.city
-                    ? "border-red-500 focus:border-red-500"
-                    : ""
-                }
-                required
-              />
-              {validationErrors.city && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {validationErrors.city}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">New Password *</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -406,12 +204,12 @@ export function SignupForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password *</Label>
+            <Label htmlFor="confirmPassword">Confirm New Password *</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm your password"
+                placeholder="Confirm your new password"
                 value={formData.confirmPassword}
                 onChange={(e) =>
                   handleInputChange("confirmPassword", e.target.value)
@@ -447,7 +245,7 @@ export function SignupForm() {
             disabled={isLoading}
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? "Resetting Password..." : "Reset Password"}
           </Button>
         </form>
       </CardContent>

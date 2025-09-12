@@ -96,31 +96,6 @@ export function Hero() {
           whenever you need it.
         </p>
 
-        {/* Premium CTA Buttons */}
-        {!user && (
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
-            <Link href="/auth/login">
-              <Button
-                size="lg"
-                className="group px-12 py-6 text-lg font-bold bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-1 hover:scale-105"
-              >
-                <Play className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
-                <span className="relative z-10">Start Learning</span>
-                <ArrowRight className="h-6 w-6 ml-3 group-hover:translate-x-1 transition-transform duration-300" />
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button
-                variant="outline"
-                size="lg"
-                className="px-12 py-6 text-lg font-bold border-2 border-blue-300 hover:border-blue-400 hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-all duration-500 hover:-translate-y-1 hover:scale-105 premium-card"
-              >
-                Create Account
-              </Button>
-            </Link>
-          </div>
-        )}
-
         {/* Eye-Comfort Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           <div className="group text-center p-8 rounded-2xl premium-card hover-lift">

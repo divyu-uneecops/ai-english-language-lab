@@ -117,7 +117,7 @@ export function ModuleCards() {
         </div>
 
         {/* Button */}
-        {user ? (
+        {user && (
           <Link href={href}>
             <Button
               variant={variant}
@@ -132,16 +132,6 @@ export function ModuleCards() {
               <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
               {buttonText}
               <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-            </Button>
-          </Link>
-        ) : (
-          <Link href="/auth/login">
-            <Button
-              variant="outline"
-              className="w-full py-3 font-bold text-sm bg-transparent hover:bg-blue-50 text-blue-600 border-2 border-blue-200 hover:border-blue-300 transition-all duration-500 group-hover:scale-105"
-            >
-              <Lock className="h-4 w-4 mr-2" />
-              Sign In to Access
             </Button>
           </Link>
         )}
