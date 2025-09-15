@@ -17,23 +17,12 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-32 bg-gradient-to-br from-gray-800 via-gray-700 to-blue-900 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-purple-500/10" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-pink-500/10" />
-
-      {/* Floating Elements */}
-      <div className="absolute top-10 left-20 w-32 h-32 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl floating-element" />
-      <div
-        className="absolute bottom-10 right-20 w-48 h-48 bg-gradient-to-r from-cyan-400/20 to-pink-400/20 rounded-full blur-3xl floating-element"
-        style={{ animationDelay: "2s" }}
-      />
-
+    <footer className="relative bg-gradient-to-br from-gray-800 via-gray-700 to-blue-900 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 py-20">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="flex flex-col sm:flex-row justify-between gap-6 mb-16">
           {/* Brand Section */}
-          <div className="lg:col-span-1">
+          <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                 <Zap className="h-6 w-6 text-white" />
