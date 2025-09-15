@@ -181,13 +181,12 @@ export function ModuleCards() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <ModuleCard
             icon={BookOpen}
-            title="Reading Lab"
+            title="Reading Practice"
             description="Immerse yourself in engaging stories and enhance comprehension"
             features={[
-              "Interactive story reading",
-              "AI comprehension questions",
+              "Interactive Stories",
+              "Comprehension Questions",
               "Vocabulary building",
-              "Progress tracking",
             ]}
             href="/reading"
             buttonText="Start Reading"
@@ -199,13 +198,12 @@ export function ModuleCards() {
 
           <ModuleCard
             icon={Mic}
-            title="Speaking Lab"
-            description="Perfect your pronunciation with AI-guided practice sessions"
+            title="Speaking Practice"
+            description="Enhance your pronunciation and fluency with AI-powered speech exercises"
             features={[
-              "Pronunciation analysis",
-              "Speaking exercises",
-              "Voice recording",
-              "Instant AI feedback",
+              "Pronunciation Training",
+              "Fluency Exercises",
+              "AI Feedback",
             ]}
             href="/speaking"
             buttonText="Start Speaking"
@@ -217,14 +215,9 @@ export function ModuleCards() {
 
           <ModuleCard
             icon={PenTool}
-            title="Writing Lab"
-            description="Master writing styles with comprehensive AI evaluation"
-            features={[
-              "Letter composition",
-              "Article writing",
-              "AI evaluation system",
-              "Improvement suggestions",
-            ]}
+            title="Writing Practice"
+            description="Develop your writing skills with guided exercises and AI evaluation"
+            features={["Guided Writing", "Grammar Check", "AI Evaluation"]}
             href="/writing"
             buttonText="Start Writing"
             variant="outline"

@@ -103,7 +103,7 @@ export function Hero() {
               <BookOpen className="h-8 w-8 text-blue-500" />
             </div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3 gradient-text">
-              Reading Lab
+              Reading
             </h3>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
               Interactive stories with AI-powered comprehension
@@ -115,7 +115,7 @@ export function Hero() {
               <Mic className="h-8 w-8 text-green-500" />
             </div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3 gradient-text-secondary">
-              Speaking Lab
+              Speaking
             </h3>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
               Voice practice with instant pronunciation feedback
@@ -127,7 +127,7 @@ export function Hero() {
               <PenTool className="h-8 w-8 text-blue-500" />
             </div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-3 gradient-text-accent">
-              Writing Lab
+              Writing
             </h3>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
               AI evaluation with personalized improvement tips

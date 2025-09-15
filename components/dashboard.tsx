@@ -23,7 +23,7 @@ const modulesData = [
     id: "reading",
     title: "Reading Practice",
     description:
-      "Improve your reading comprehension with interactive stories and exercises",
+      "Immerse yourself in engaging stories and enhance comprehension",
     icon: BookOpen,
     color: "from-blue-500 to-cyan-500",
     hoverColor: "from-blue-600 to-cyan-600",
@@ -82,9 +82,8 @@ const modulesData = [
   },
   {
     id: "chat",
-    title: "AI Chat Practice",
-    description:
-      "Practice conversational English with our intelligent AI assistant",
+    title: "AI Assistant",
+    description: "Get instant, intelligent support for all your questions",
     icon: MessageCircle,
     color: "from-orange-500 to-red-500",
     hoverColor: "from-orange-600 to-red-600",
@@ -96,11 +95,7 @@ const modulesData = [
       timeSpent: "0 min",
       difficulty: "All Levels",
     },
-    features: [
-      "Conversational Practice",
-      "Real-time Feedback",
-      "Topic Discussions",
-    ],
+    features: ["24/7 AI support", "Grammar explanations", "Learning tips"],
     href: "/chat",
   },
 ];
