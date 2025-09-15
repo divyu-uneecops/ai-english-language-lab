@@ -129,12 +129,6 @@ export function Dashboard() {
               Continue your English learning journey
             </p>
           </div>
-          <Link href="/progress">
-            <Button variant="outline" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              View Progress
-            </Button>
-          </Link>
         </div>
 
         {/* Quick Stats */}
