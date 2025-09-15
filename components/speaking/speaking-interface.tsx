@@ -106,7 +106,6 @@ This daily routine helps Sarah start her day with a positive mindset and renewed
 
 export function SpeakingInterface() {
   const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
-  const [showChat, setShowChat] = useState(false);
   const [completedExercises, setCompletedExercises] = useState<number[]>([]);
 
   const currentExercise = selectedExercise
@@ -124,7 +123,6 @@ export function SpeakingInterface() {
           <div
             onClick={() => {
               setSelectedExercise(null);
-              setShowChat(false);
             }}
             className="flex items-center gap-2 cursor-pointer"
           >
@@ -138,18 +136,10 @@ export function SpeakingInterface() {
               {currentExercise.duration}
             </Badge>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowChat(!showChat)}
-            className="ml-auto flex items-center gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Ask AI for Help
-          </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div>
+          <div>
             {currentExercise.type === "pronunciation" ? (
               <PronunciationPractice
                 exercise={currentExercise}
@@ -162,17 +152,6 @@ export function SpeakingInterface() {
               />
             )}
           </div>
-
-          {showChat && (
-            <div className="lg:col-span-1">
-              <ChatPanel
-                storyContext={{
-                  title: currentExercise.title,
-                  content: currentExercise.description,
-                }}
-              />
-            </div>
-          )}
         </div>
       </div>
     );

@@ -13,6 +13,7 @@ import {
   Clock,
   Star,
   ArrowRight,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
@@ -22,80 +23,53 @@ const modulesData = [
   {
     id: "reading",
     title: "Reading Practice",
-    description:
-      "Immerse yourself in engaging stories and enhance comprehension",
+    description: "Interactive stories and comprehension exercises",
     icon: BookOpen,
-    color: "from-blue-500 to-cyan-500",
-    hoverColor: "from-blue-600 to-cyan-600",
-    bgColor: "bg-blue-50 dark:bg-blue-950/20",
-    iconColor: "text-blue-600 dark:text-blue-400",
     stats: {
       completed: 2,
       total: 4,
       timeSpent: "15 min",
       difficulty: "Beginner",
     },
-    features: [
-      "Interactive Stories",
-      "Comprehension Questions",
-      "Vocabulary Building",
-    ],
     href: "/reading",
   },
   {
     id: "speaking",
     title: "Speaking Practice",
-    description:
-      "Enhance your pronunciation and fluency with AI-powered speech exercises",
+    description: "AI-powered pronunciation and fluency training",
     icon: Mic,
-    color: "from-green-500 to-emerald-500",
-    hoverColor: "from-green-600 to-emerald-600",
-    bgColor: "bg-green-50 dark:bg-green-950/20",
-    iconColor: "text-green-600 dark:text-green-400",
     stats: {
       completed: 3,
       total: 6,
       timeSpent: "25 min",
       difficulty: "Intermediate",
     },
-    features: ["Pronunciation Training", "Fluency Exercises", "AI Feedback"],
     href: "/speaking",
   },
   {
     id: "writing",
     title: "Writing Practice",
-    description:
-      "Develop your writing skills with guided exercises and AI evaluation",
+    description: "Guided writing with AI evaluation",
     icon: PenTool,
-    color: "from-purple-500 to-violet-500",
-    hoverColor: "from-purple-600 to-violet-600",
-    bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    iconColor: "text-purple-600 dark:text-purple-400",
     stats: {
       completed: 1,
       total: 5,
       timeSpent: "10 min",
       difficulty: "Beginner",
     },
-    features: ["Guided Writing", "AI Evaluation", "Grammar Check"],
     href: "/writing",
   },
   {
     id: "chat",
-    title: "AI Assistant",
-    description: "Get instant, intelligent support for all your questions",
+    title: "AI Chat Practice",
+    description: "Conversational practice with AI assistant",
     icon: MessageCircle,
-    color: "from-orange-500 to-red-500",
-    hoverColor: "from-orange-600 to-red-600",
-    bgColor: "bg-orange-50 dark:bg-orange-950/20",
-    iconColor: "text-orange-600 dark:text-orange-400",
     stats: {
       completed: 0,
       total: 3,
       timeSpent: "0 min",
       difficulty: "All Levels",
     },
-    features: ["24/7 AI support", "Grammar explanations", "Learning tips"],
     href: "/chat",
   },
 ];
@@ -117,172 +91,191 @@ export function Dashboard() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Welcome back, {user?.name || "Student"}!
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Continue your English learning journey
-            </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground mb-1">
+                Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Welcome back, {user?.name || "Student"}
+              </p>
+            </div>
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="border border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      Overall Progress
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      {overallProgress}%
+                    </p>
+                  </div>
+                  <div className="p-2 rounded-md bg-blue-50 dark:bg-blue-950/30">
+                    <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      Time Spent
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      {overallStats.timeSpent}
+                    </p>
+                  </div>
+                  <div className="p-2 rounded-md bg-green-50 dark:bg-green-950/30">
+                    <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      Current Streak
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      {overallStats.currentStreak} days
+                    </p>
+                  </div>
+                  <div className="p-2 rounded-md bg-purple-50 dark:bg-purple-950/30">
+                    <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      Average Score
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      {overallStats.averageScore}%
+                    </p>
+                  </div>
+                  <div className="p-2 rounded-md bg-orange-50 dark:bg-orange-950/30">
+                    <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" />
-                <div>
-                  <div className="text-2xl font-bold">{overallProgress}%</div>
-                  <div className="text-xs text-muted-foreground">
-                    Overall Progress
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-secondary" />
-                <div>
-                  <div className="text-2xl font-bold">
-                    {overallStats.timeSpent}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Time Spent
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-accent" />
-                <div>
-                  <div className="text-2xl font-bold">
-                    {overallStats.currentStreak}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Day Streak
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <div>
-                  <div className="text-2xl font-bold">
-                    {overallStats.averageScore}%
-                  </div>
-                  <div className="text-xs text-muted-foreground">Avg Score</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Learning Modules */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6">Learning Modules</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {modulesData.map((module) => {
-            const IconComponent = module.icon;
-            const progress = Math.round(
-              (module.stats.completed / module.stats.total) * 100
-            );
-
-            return (
-              <Card
-                key={module.id}
-                className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md"
+        {/* Learning Modules */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-foreground">
+              Learning Modules
+            </h2>
+            <Link href="/progress">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className={`p-3 rounded-lg ${module.bgColor} mb-4`}>
-                      <IconComponent
-                        className={`h-6 w-6 ${module.iconColor}`}
-                      />
-                    </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {module.stats.difficulty}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-xl mb-2">{module.title}</CardTitle>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {module.description}
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Progress */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span className="font-medium">
-                        {module.stats.completed}/{module.stats.total} completed
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full bg-gradient-to-r ${module.color}`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
+                View all
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
 
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <div className="text-muted-foreground">Time Spent</div>
-                      <div className="font-medium">
-                        {module.stats.timeSpent}
+          <div className="grid md:grid-cols-2 gap-4">
+            {modulesData.map((module) => {
+              const IconComponent = module.icon;
+              const progress = Math.round(
+                (module.stats.completed / module.stats.total) * 100
+              );
+
+              return (
+                <Card
+                  key={module.id}
+                  className="border border-border/50 hover:border-border transition-colors"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-md bg-muted">
+                          <IconComponent className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">
+                            {module.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {module.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <div className="text-muted-foreground">Progress</div>
-                      <div className="font-medium">{progress}%</div>
-                    </div>
-                  </div>
 
-                  {/* Features */}
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium">Features:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {module.features.map((feature, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="text-xs"
-                        >
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+                    <div className="space-y-4">
+                      {/* Progress */}
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">
+                            Progress
+                          </span>
+                          <span className="font-medium">
+                            {module.stats.completed}/{module.stats.total}{" "}
+                            completed
+                          </span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-primary transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
 
-                  {/* Action Button */}
-                  <Link href={module.href} className="block">
-                    <Button
-                      className={`w-full bg-gradient-to-r ${module.color} hover:${module.hoverColor} text-white font-semibold group-hover:shadow-lg transition-all duration-300`}
-                    >
-                      {module.stats.completed > 0 ? "Continue" : "Start"} Module
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            );
-          })}
+                      {/* Stats */}
+                      <div className="flex justify-between text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Time: </span>
+                          <span className="font-medium">
+                            {module.stats.timeSpent}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Progress:{" "}
+                          </span>
+                          <span className="font-medium">{progress}%</span>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Link href={module.href} className="block">
+                        <Button className="w-full" size="sm">
+                          {module.stats.completed > 0 ? "Continue" : "Start"}{" "}
+                          Module
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

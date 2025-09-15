@@ -1,143 +1,210 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { CheckCircle, XCircle, Trophy } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import {
+  CheckCircle,
+  XCircle,
+  Trophy,
+  ArrowRight,
+  RotateCcw,
+} from "lucide-react";
 
 interface Question {
-  id: number
-  question: string
-  options: string[]
-  correct: number
+  id: number;
+  question: string;
+  options: string[];
+  correct: number;
 }
 
 interface QuestionPanelProps {
-  questions: Question[]
-  onComplete: (questionIds: number[]) => void
+  questions: Question[];
+  onComplete: (questionIds: number[]) => void;
 }
 
 export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [answers, setAnswers] = useState<{ [key: number]: number }>({})
-  const [showResults, setShowResults] = useState(false)
-  const [selectedAnswer, setSelectedAnswer] = useState<string>("")
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<{ [key: number]: number }>({});
+  const [showResults, setShowResults] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string>("");
 
   const handleAnswerSelect = (value: string) => {
-    setSelectedAnswer(value)
-  }
+    setSelectedAnswer(value);
+  };
 
   const handleNextQuestion = () => {
     if (selectedAnswer) {
       setAnswers((prev) => ({
         ...prev,
         [questions[currentQuestion].id]: Number.parseInt(selectedAnswer),
-      }))
+      }));
 
       if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion((prev) => prev + 1)
-        setSelectedAnswer("")
+        setCurrentQuestion((prev) => prev + 1);
+        setSelectedAnswer("");
       } else {
-        setShowResults(true)
-        onComplete(questions.map((q) => q.id))
+        setShowResults(true);
+        onComplete(questions.map((q) => q.id));
       }
     }
-  }
+  };
 
-  const correctAnswers = Object.entries(answers).filter(([questionId, answer]) => {
-    const question = questions.find((q) => q.id === Number.parseInt(questionId))
-    return question && question.correct === answer
-  }).length
+  const correctAnswers = Object.entries(answers).filter(
+    ([questionId, answer]) => {
+      const question = questions.find(
+        (q) => q.id === Number.parseInt(questionId)
+      );
+      return question && question.correct === answer;
+    }
+  ).length;
 
-  const scorePercentage = Math.round((correctAnswers / questions.length) * 100)
+  const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
 
   if (showResults) {
     return (
-      <Card>
-        <CardHeader className="text-center">
+      <div className="p-6">
+        {/* Results Header */}
+        <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Trophy className="h-12 w-12 text-primary" />
+            <div className="p-3 rounded-full bg-green-50 dark:bg-green-950/30">
+              <Trophy className="h-8 w-8 text-green-600 dark:text-green-400" />
+            </div>
           </div>
-          <CardTitle className="text-2xl">Quiz Complete!</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-6">
-          <div className="space-y-2">
-            <div className="text-4xl font-bold text-primary">{scorePercentage}%</div>
-            <p className="text-muted-foreground">
-              You got {correctAnswers} out of {questions.length} questions correct
-            </p>
+          <h2 className="text-xl font-semibold mb-2">Quiz Complete!</h2>
+          <p className="text-muted-foreground">Here are your results</p>
+        </div>
+
+        {/* Score */}
+        <div className="text-center mb-8">
+          <div className="text-4xl font-bold text-foreground mb-2">
+            {scorePercentage}%
           </div>
+          <p className="text-muted-foreground">
+            You got {correctAnswers} out of {questions.length} questions correct
+          </p>
+        </div>
 
-          <div className="space-y-4">
-            {questions.map((question, index) => {
-              const userAnswer = answers[question.id]
-              const isCorrect = userAnswer === question.correct
+        {/* Question Review */}
+        <div className="space-y-4 mb-8">
+          <h3 className="font-semibold text-foreground">Question Review</h3>
+          {questions.map((question, index) => {
+            const userAnswer = answers[question.id];
+            const isCorrect = userAnswer === question.correct;
 
-              return (
-                <div key={question.id} className="text-left p-4 border rounded-lg">
-                  <div className="flex items-start gap-2 mb-2">
-                    {isCorrect ? (
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-500 mt-0.5" />
-                    )}
-                    <div className="flex-1">
-                      <p className="font-medium">{question.question}</p>
-                      <p className="text-sm text-muted-foreground mt-1">Your answer: {question.options[userAnswer]}</p>
+            return (
+              <div
+                key={question.id}
+                className="p-4 border border-border/50 rounded-lg"
+              >
+                <div className="flex items-start gap-3">
+                  {isCorrect ? (
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground mb-2">
+                      {question.question}
+                    </p>
+                    <div className="space-y-1 text-sm">
+                      <p className="text-muted-foreground">
+                        Your answer:{" "}
+                        <span className="font-medium">
+                          {question.options[userAnswer]}
+                        </span>
+                      </p>
                       {!isCorrect && (
-                        <p className="text-sm text-green-600 mt-1">
-                          Correct answer: {question.options[question.correct]}
+                        <p className="text-green-600 dark:text-green-400">
+                          Correct answer:{" "}
+                          <span className="font-medium">
+                            {question.options[question.correct]}
+                          </span>
                         </p>
                       )}
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            );
+          })}
+        </div>
 
-          <Button onClick={() => window.location.reload()} size="lg">
+        {/* Action Button */}
+        <div className="text-center">
+          <Button
+            onClick={() => window.location.reload()}
+            className="flex items-center gap-2"
+          >
+            <RotateCcw className="h-4 w-4" />
             Try Another Story
           </Button>
-        </CardContent>
-      </Card>
-    )
+        </div>
+      </div>
+    );
   }
 
-  const question = questions[currentQuestion]
+  const question = questions[currentQuestion];
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>
+    <div className="p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">
             Question {currentQuestion + 1} of {questions.length}
-          </CardTitle>
+          </h2>
           <div className="text-sm text-muted-foreground">
-            {Math.round(((currentQuestion + 1) / questions.length) * 100)}% Complete
+            {Math.round(progress)}% Complete
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <h3 className="text-lg font-medium">{question.question}</h3>
+        <Progress value={progress} className="h-2" />
+      </div>
+
+      {/* Question */}
+      <div className="mb-6">
+        <h3 className="text-base font-medium text-foreground mb-4">
+          {question.question}
+        </h3>
 
         <RadioGroup value={selectedAnswer} onValueChange={handleAnswerSelect}>
-          {question.options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50">
-              <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-              <Label htmlFor={`option-${index}`} className="flex-1 cursor-pointer">
-                {option}
-              </Label>
-            </div>
-          ))}
+          <div className="space-y-2">
+            {question.options.map((option, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-3 p-3 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
+              >
+                <RadioGroupItem
+                  value={index.toString()}
+                  id={`option-${index}`}
+                />
+                <Label
+                  htmlFor={`option-${index}`}
+                  className="flex-1 cursor-pointer text-sm"
+                >
+                  {option}
+                </Label>
+              </div>
+            ))}
+          </div>
         </RadioGroup>
+      </div>
 
-        <Button onClick={handleNextQuestion} disabled={!selectedAnswer} className="w-full" size="lg">
-          {currentQuestion < questions.length - 1 ? "Next Question" : "Finish Quiz"}
-        </Button>
-      </CardContent>
-    </Card>
-  )
+      {/* Action Button */}
+      <Button
+        onClick={handleNextQuestion}
+        disabled={!selectedAnswer}
+        className="w-full flex items-center gap-2"
+      >
+        {currentQuestion < questions.length - 1
+          ? "Next Question"
+          : "Finish Quiz"}
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
 }

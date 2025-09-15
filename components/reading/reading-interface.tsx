@@ -10,6 +10,8 @@ import {
   MessageCircle,
   CheckCircle,
   Clock,
+  ChevronRight,
+  Play,
 } from "lucide-react";
 import Link from "next/link";
 import { StoryReader } from "./story-reader";
@@ -130,7 +132,6 @@ She decided to document her findings carefully while working with local indigeno
 export function ReadingInterface() {
   const [selectedStory, setSelectedStory] = useState<number | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
-  const [showChat, setShowChat] = useState(false);
   const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
 
   const currentStory = selectedStory
@@ -147,38 +148,46 @@ export function ReadingInterface() {
 
   if (selectedStory && currentStory) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div
-            onClick={() => {
-              setSelectedStory(null);
-              setShowQuestions(false);
-              setShowChat(false);
-            }}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Stories
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedStory(null);
+                    setShowQuestions(false);
+                  }}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Stories
+                </Button>
+                <div className="h-4 w-px bg-border" />
+                <h1 className="text-lg font-semibold text-foreground">
+                  {currentStory.title}
+                </h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  {currentStory.difficulty}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="text-xs flex items-center gap-1"
+                >
+                  <Clock className="h-3 w-3" />
+                  {currentStory.readTime}
+                </Badge>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{currentStory.difficulty}</Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {currentStory.readTime}
-            </Badge>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowChat(!showChat)}
-            className="ml-auto flex items-center gap-2"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Ask AI for Help
-          </Button>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          {/* Content */}
+          <div className="border border-border/50 rounded-lg">
             {!showQuestions ? (
               <StoryReader
                 story={currentStory}
@@ -191,64 +200,155 @@ export function ReadingInterface() {
               />
             )}
           </div>
-
-          {showChat && (
-            <div className="lg:col-span-1">
-              <ChatPanel storyContext={currentStory} />
-            </div>
-          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-8">
-        <Link href="/">
-          <div className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground mb-1">
+                Reading Practice
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Improve your reading comprehension with interactive stories
+              </p>
+            </div>
+            <Link href="/dashboard">
+              <div className="flex items-center gap-2 cursor-pointer transition-colors hover:text-primary hover:-translate-x-1 duration-150">
+                <ArrowLeft className="h-4 w-4 transition-transform duration-150 group-hover:-translate-x-1" />
+                Dashboard
+              </div>
+            </Link>
           </div>
-        </Link>
-      </div>
+        </div>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Choose a Story to Read</h2>
-        <p className="text-muted-foreground">
-          Select a story below to start reading. After reading, you'll answer
-          comprehension questions and can ask our AI assistant for help.
-        </p>
-      </div>
+        {/* Stories Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-foreground">
+              Available Stories
+            </h2>
+            <div className="text-sm text-muted-foreground">
+              {stories.length} stories available
+            </div>
+          </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {stories.map((story) => (
-          <Card
-            key={story.id}
-            className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20"
-            onClick={() => setSelectedStory(story.id)}
-          >
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{story.title}</CardTitle>
-                {completedQuestions.some((id) =>
-                  story.questions.some((q) => q.id === id)
-                ) && <CheckCircle className="h-5 w-5 text-primary" />}
+          <div className="grid md:grid-cols-2 gap-4">
+            {stories.map((story) => {
+              const isCompleted = completedQuestions.some((id) =>
+                story.questions.some((q) => q.id === id)
+              );
+
+              return (
+                <Card
+                  key={story.id}
+                  className="border border-border/50 hover:border-border transition-colors cursor-pointer"
+                  onClick={() => setSelectedStory(story.id)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-md bg-muted">
+                          <BookOpen className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-1">
+                            {story.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {story.description}
+                          </p>
+                        </div>
+                      </div>
+                      {isCompleted && (
+                        <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Story Info */}
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {story.difficulty}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {story.readTime}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {story.questions.length} questions
+                        </div>
+                      </div>
+
+                      {/* Progress */}
+                      {isCompleted && (
+                        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                          <CheckCircle className="h-4 w-4" />
+                          Completed
+                        </div>
+                      )}
+
+                      {/* Action Button */}
+                      <Button className="w-full" size="sm">
+                        {isCompleted ? "Review Story" : "Start Reading"}
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <Card className="border border-border/50">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              How It Works
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-6 text-sm">
+              <div className="space-y-2">
+                <div className="font-medium text-foreground">
+                  1. Read the Story
+                </div>
+                <div className="text-muted-foreground">
+                  Take your time to read through the story carefully. You can
+                  read at your own pace.
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary">{story.difficulty}</Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {story.readTime}
-                </Badge>
+              <div className="space-y-2">
+                <div className="font-medium text-foreground">
+                  2. Answer Questions
+                </div>
+                <div className="text-muted-foreground">
+                  After reading, answer comprehension questions to test your
+                  understanding.
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">{story.description}</p>
-              <Button className="w-full">Start Reading</Button>
-            </CardContent>
-          </Card>
-        ))}
+              <div className="space-y-2">
+                <div className="font-medium text-foreground">
+                  3. Get Feedback
+                </div>
+                <div className="text-muted-foreground">
+                  Receive instant feedback on your answers and track your
+                  progress.
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
