@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import {
   CheckCircle,
@@ -18,7 +19,8 @@ interface Question {
   id: number;
   question: string;
   options: string[];
-  correct: number;
+  correct: number | string;
+  explanation?: string;
 }
 
 interface QuestionPanelProps {
@@ -28,24 +30,35 @@ interface QuestionPanelProps {
 
 export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<{ [key: number]: number }>({});
+  const [answers, setAnswers] = useState<{ [key: number]: number | string }>(
+    {}
+  );
   const [showResults, setShowResults] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
+  const [textAnswer, setTextAnswer] = useState<string>("");
 
   const handleAnswerSelect = (value: string) => {
     setSelectedAnswer(value);
   };
 
   const handleNextQuestion = () => {
-    if (selectedAnswer) {
+    const question = questions[currentQuestion];
+    const hasOptions = question.options && question.options.length > 0;
+    const hasAnswer = hasOptions ? selectedAnswer : textAnswer.trim();
+
+    if (hasAnswer) {
+      const answerValue = hasOptions
+        ? Number.parseInt(selectedAnswer)
+        : textAnswer.trim();
       setAnswers((prev) => ({
         ...prev,
-        [questions[currentQuestion].id]: Number.parseInt(selectedAnswer),
+        [question.id]: answerValue,
       }));
 
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion((prev) => prev + 1);
         setSelectedAnswer("");
+        setTextAnswer("");
       } else {
         setShowResults(true);
         onComplete(questions.map((q) => q.id));
@@ -58,7 +71,21 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
       const question = questions.find(
         (q) => q.id === Number.parseInt(questionId)
       );
-      return question && question.correct === answer;
+      if (!question) return false;
+
+      // For multiple choice questions
+      if (question.options && question.options.length > 0) {
+        return question.correct === answer;
+      }
+
+      // For text questions - case-insensitive comparison
+      if (typeof question.correct === "string" && typeof answer === "string") {
+        return (
+          question.correct.toLowerCase().trim() === answer.toLowerCase().trim()
+        );
+      }
+
+      return false;
     }
   ).length;
 
@@ -93,7 +120,29 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
           <h3 className="font-semibold text-foreground">Question Review</h3>
           {questions.map((question, index) => {
             const userAnswer = answers[question.id];
-            const isCorrect = userAnswer === question.correct;
+            const hasOptions = question.options && question.options.length > 0;
+            let isCorrect = false;
+            let userAnswerText = "";
+            let correctAnswerText = "";
+
+            if (hasOptions) {
+              // Multiple choice question
+              isCorrect = userAnswer === question.correct;
+              userAnswerText =
+                question.options[userAnswer as number] || "No answer";
+              correctAnswerText =
+                question.options[question.correct as number] || "";
+            } else {
+              // Text question
+              isCorrect =
+                typeof question.correct === "string" &&
+                typeof userAnswer === "string"
+                  ? question.correct.toLowerCase().trim() ===
+                    userAnswer.toLowerCase().trim()
+                  : false;
+              userAnswerText = (userAnswer as string) || "No answer";
+              correctAnswerText = (question.correct as string) || "";
+            }
 
             return (
               <div
@@ -113,16 +162,20 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
                     <div className="space-y-1 text-sm">
                       <p className="text-muted-foreground">
                         Your answer:{" "}
-                        <span className="font-medium">
-                          {question.options[userAnswer]}
-                        </span>
+                        <span className="font-medium">{userAnswerText}</span>
                       </p>
                       {!isCorrect && (
                         <p className="text-green-600 dark:text-green-400">
                           Correct answer:{" "}
                           <span className="font-medium">
-                            {question.options[question.correct]}
+                            {correctAnswerText}
                           </span>
+                        </p>
+                      )}
+                      {question.explanation && (
+                        <p className="text-blue-600 dark:text-blue-400 mt-2">
+                          <span className="font-medium">Explanation:</span>{" "}
+                          {question.explanation}
                         </p>
                       )}
                     </div>
@@ -171,33 +224,57 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
           {question.question}
         </h3>
 
-        <RadioGroup value={selectedAnswer} onValueChange={handleAnswerSelect}>
-          <div className="space-y-2">
-            {question.options.map((option, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-3 p-3 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
-              >
-                <RadioGroupItem
-                  value={index.toString()}
-                  id={`option-${index}`}
-                />
-                <Label
-                  htmlFor={`option-${index}`}
-                  className="flex-1 cursor-pointer text-sm"
+        {/* Multiple Choice Questions */}
+        {question.options && question.options.length > 0 ? (
+          <RadioGroup value={selectedAnswer} onValueChange={handleAnswerSelect}>
+            <div className="space-y-2">
+              {question.options.map((option, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-3 p-3 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
                 >
-                  {option}
-                </Label>
-              </div>
-            ))}
+                  <RadioGroupItem
+                    value={index.toString()}
+                    id={`option-${index}`}
+                  />
+                  <Label
+                    htmlFor={`option-${index}`}
+                    className="flex-1 cursor-pointer text-sm"
+                  >
+                    {option}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        ) : (
+          /* Text Input Questions */
+          <div className="space-y-2">
+            <Label htmlFor="text-answer" className="text-sm font-medium">
+              Your Answer:
+            </Label>
+            <Textarea
+              id="text-answer"
+              placeholder="Type your answer here..."
+              value={textAnswer}
+              onChange={(e) => setTextAnswer(e.target.value)}
+              className="min-h-[100px] resize-none"
+            />
+            <p className="text-xs text-muted-foreground">
+              Write your answer in the text area above.
+            </p>
           </div>
-        </RadioGroup>
+        )}
       </div>
 
       {/* Action Button */}
       <Button
         onClick={handleNextQuestion}
-        disabled={!selectedAnswer}
+        disabled={
+          question.options && question.options.length > 0
+            ? !selectedAnswer
+            : !textAnswer.trim()
+        }
         className="w-full flex items-center gap-2"
       >
         {currentQuestion < questions.length - 1

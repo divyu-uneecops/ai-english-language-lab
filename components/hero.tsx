@@ -19,7 +19,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export function Hero() {
-  const { user } = useAuth();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
