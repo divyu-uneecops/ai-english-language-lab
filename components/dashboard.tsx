@@ -91,31 +91,39 @@ export function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Header */}
+        {/* Professional Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-1">
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
                 Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Welcome back, {user?.name || "Student"}
               </p>
             </div>
+            <div className="text-right">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Overall Progress
+              </div>
+              <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                {overallProgress}%
+              </div>
+            </div>
           </div>
 
-          {/* Key Metrics */}
+          {/* Professional Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card className="border border-border/50">
+            <Card className="border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                       Overall Progress
                     </p>
-                    <p className="text-2xl font-semibold text-foreground">
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                       {overallProgress}%
                     </p>
                   </div>
@@ -123,16 +131,23 @@ export function Dashboard() {
                     <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
+                <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${overallProgress}%` }}
+                  ></div>
+                </div>
               </CardContent>
             </Card>
-            <Card className="border border-border/50">
+
+            <Card className="border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                       Time Spent
                     </p>
-                    <p className="text-2xl font-semibold text-foreground">
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                       {overallStats.timeSpent}
                     </p>
                   </div>
@@ -140,16 +155,20 @@ export function Dashboard() {
                     <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
+                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  This week
+                </div>
               </CardContent>
             </Card>
-            <Card className="border border-border/50">
+
+            <Card className="border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                       Current Streak
                     </p>
-                    <p className="text-2xl font-semibold text-foreground">
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                       {overallStats.currentStreak} days
                     </p>
                   </div>
@@ -157,16 +176,20 @@ export function Dashboard() {
                     <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
+                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  Keep it up!
+                </div>
               </CardContent>
             </Card>
-            <Card className="border border-border/50">
+
+            <Card className="border border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                       Average Score
                     </p>
-                    <p className="text-2xl font-semibold text-foreground">
+                    <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                       {overallStats.averageScore}%
                     </p>
                   </div>
@@ -174,22 +197,25 @@ export function Dashboard() {
                     <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
+                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  Across all modules
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Learning Modules */}
+        {/* Professional Learning Modules */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Learning Modules
             </h2>
             <Link href="/progress">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 View all
                 <ChevronRight className="ml-1 h-4 w-4" />
@@ -204,43 +230,64 @@ export function Dashboard() {
                 (module.stats.completed / module.stats.total) * 100
               );
 
+              const getDifficultyColor = (difficulty: string) => {
+                switch (difficulty.toLowerCase()) {
+                  case "beginner":
+                    return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
+                  case "intermediate":
+                    return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800";
+                  case "advanced":
+                    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
+                  default:
+                    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
+                }
+              };
+
               return (
                 <Card
                   key={module.id}
-                  className="border border-border/50 hover:border-border transition-colors"
+                  className="border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-muted">
-                          <IconComponent className="h-5 w-5 text-muted-foreground" />
+                        <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800">
+                          <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-foreground">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                             {module.title}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
                             {module.description}
                           </p>
                         </div>
                       </div>
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs font-medium border ${getDifficultyColor(
+                          module.stats.difficulty
+                        )}`}
+                      >
+                        {module.stats.difficulty}
+                      </Badge>
                     </div>
 
                     <div className="space-y-4">
                       {/* Progress */}
                       <div>
                         <div className="flex justify-between text-sm mb-2">
-                          <span className="text-muted-foreground">
+                          <span className="text-gray-600 dark:text-gray-400">
                             Progress
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
                             {module.stats.completed}/{module.stats.total}{" "}
                             completed
                           </span>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div
-                            className="h-2 rounded-full bg-primary transition-all duration-300"
+                            className="h-2 rounded-full bg-blue-600 transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -249,16 +296,20 @@ export function Dashboard() {
                       {/* Stats */}
                       <div className="flex justify-between text-sm">
                         <div>
-                          <span className="text-muted-foreground">Time: </span>
-                          <span className="font-medium">
+                          <span className="text-gray-600 dark:text-gray-400">
+                            Time:{" "}
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
                             {module.stats.timeSpent}
                           </span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">
+                          <span className="text-gray-600 dark:text-gray-400">
                             Progress:{" "}
                           </span>
-                          <span className="font-medium">{progress}%</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
+                            {progress}%
+                          </span>
                         </div>
                       </div>
 
