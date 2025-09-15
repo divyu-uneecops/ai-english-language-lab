@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("user", JSON.stringify(response.user));
 
       setUser(response.user);
-      router.push("/");
+      router.push("/dashboard");
     } catch (error: any) {
       setError(error.message || "Login failed");
       throw error;
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(response.user);
       setIsOtpSent(false);
-      router.push("/");
+      router.push("/dashboard");
     } catch (error: any) {
       setError(error.message || "OTP verification failed");
       throw error;
