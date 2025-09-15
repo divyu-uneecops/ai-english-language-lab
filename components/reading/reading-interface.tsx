@@ -94,44 +94,57 @@ export function ReadingInterface() {
 
   if (selectedStory && currentStory) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-6 py-8 max-w-7xl">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div
-                  onClick={() => {
-                    setSelectedStory(null);
-                    setShowQuestions(false);
-                  }}
-                  className="flex items-center gap-2 cursor-pointer transition-colors hover:text-primary hover:-translate-x-1 duration-150"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Stories
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Modern Header */}
+          <div className="mb-8">
+            <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <button
+                onClick={() => {
+                  setSelectedStory(null);
+                  setShowQuestions(false);
+                }}
+                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              >
+                Reading
+              </button>
+              <span>/</span>
+              <span className="text-gray-900 dark:text-gray-100 font-medium">
+                {currentStory.title}
+              </span>
+            </nav>
+
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <Badge
+                    variant="secondary"
+                    className={`text-xs font-medium ${
+                      currentStory.difficulty === "beginner" ||
+                      currentStory.difficulty === "easy"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
+                        : currentStory.difficulty === "intermediate" ||
+                          currentStory.difficulty === "medium"
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
+                    }`}
+                  >
+                    {currentStory.difficulty}
+                  </Badge>
+                  <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                    <Clock className="h-4 w-4" />
+                    <span>{currentStory.readTime}</span>
+                  </div>
                 </div>
-                <div className="h-4 w-px bg-border" />
-                <h1 className="text-lg font-semibold text-foreground">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3 leading-tight">
                   {currentStory.title}
                 </h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  {currentStory.difficulty}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="text-xs flex items-center gap-1"
-                >
-                  <Clock className="h-3 w-3" />
-                  {currentStory.readTime}
-                </Badge>
               </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="border border-border/50 rounded-lg">
+          {/* Modern Content */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             {!showQuestions ? (
               <StoryReader
                 story={currentStory}
@@ -150,76 +163,114 @@ export function ReadingInterface() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-1">
-                Reading Practice
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Improve your reading comprehension with interactive stories
-              </p>
-            </div>
-            <Link href="/dashboard">
-              <div className="flex items-center gap-2 cursor-pointer transition-colors hover:text-primary hover:-translate-x-1 duration-150">
-                <ArrowLeft className="h-4 w-4 transition-transform duration-150 group-hover:-translate-x-1" />
-                Dashboard
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Modern Ed-Tech Header */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-4">
+              <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <Link
+                  href="/dashboard"
+                  className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <span>/</span>
+                <span className="text-gray-900 dark:text-gray-100 font-medium">
+                  Reading
+                </span>
+              </nav>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  Reading Practice
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Improve your reading comprehension with interactive stories
+                  and questions
+                </p>
               </div>
-            </Link>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Progress
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {completedQuestions.length} /{" "}
+                {stories.reduce(
+                  (acc, story) => acc + (story.questions?.length || 0),
+                  0
+                )}
+              </div>
+              <div className="text-xs text-gray-400 dark:text-gray-500">
+                Questions completed
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Stories Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-foreground">
-              Available Stories
-            </h2>
-            <div className="text-sm text-muted-foreground">
+        {/* Modern Content Section */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Available Stories
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Choose a story to start your reading practice
+              </p>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {loading ? "Loading..." : `${stories.length} stories available`}
             </div>
           </div>
 
-          {/* Loading State */}
+          {/* Modern Loading State */}
           {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="text-muted-foreground">
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Loading stories...
-                </span>
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Please wait while we fetch the content
+                </p>
               </div>
             </div>
           )}
 
-          {/* Error State */}
+          {/* Modern Error State */}
           {error && (
-            <div className="text-center py-12">
-              <div className="text-red-600 dark:text-red-400 mb-4">
-                <MessageCircle className="h-8 w-8 mx-auto mb-2" />
-                <p className="font-medium">Failed to load stories</p>
-                <p className="text-sm text-muted-foreground">{error}</p>
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <MessageCircle className="h-12 w-12 text-red-500 dark:text-red-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Unable to load stories
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Try Again
+                </button>
               </div>
-              <Button
-                onClick={() => window.location.reload()}
-                variant="outline"
-                size="sm"
-              >
-                Try Again
-              </Button>
             </div>
           )}
 
-          {/* Stories Grid */}
+          {/* Modern Story Grid */}
           {!loading && !error && (
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stories.length === 0 ? (
-                <div className="col-span-2 text-center py-12">
-                  <BookOpen className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No stories available</p>
+                <div className="col-span-full text-center py-16">
+                  <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No stories available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Check back later for new reading materials
+                  </p>
                 </div>
               ) : (
                 stories.map((story) => {
@@ -228,64 +279,70 @@ export function ReadingInterface() {
                   );
 
                   return (
-                    <Card
+                    <div
                       key={story?.id}
-                      className="border border-border/50 hover:border-border transition-colors cursor-pointer"
+                      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                       onClick={() => setSelectedStory(story?.id)}
                     >
-                      <CardContent className="p-6">
+                      <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-md bg-muted">
-                              <BookOpen className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-foreground mb-1">
-                                {story?.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground text truncate w-90">
-                                {story?.description}
-                              </p>
-                            </div>
-                          </div>
-                          {isCompleted && (
-                            <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                          )}
-                        </div>
-
-                        <div className="space-y-4">
-                          {/* Story Info */}
-                          <div className="flex items-center gap-4 text-sm">
-                            <div className="flex items-center gap-1">
-                              <Badge variant="secondary" className="text-xs">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Badge
+                                variant="secondary"
+                                className={`text-xs font-medium ${
+                                  story?.difficulty === "beginner" ||
+                                  story?.difficulty === "easy"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
+                                    : story?.difficulty === "intermediate" ||
+                                      story?.difficulty === "medium"
+                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
+                                }`}
+                              >
                                 {story?.difficulty}
                               </Badge>
+                              {isCompleted && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Completed
+                                </Badge>
+                              )}
                             </div>
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {story?.readTime}
-                            </div>
-                            <div className="text-muted-foreground">
-                              {story?.questions?.length} questions
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
+                              {story?.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                              {story?.description?.substring(0, 300) + "....."}
+                            </p>
                           </div>
+                        </div>
 
-                          {/* Progress */}
-                          {isCompleted && (
-                            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                              <CheckCircle className="h-4 w-4" />
-                              Completed
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>{story?.readTime}</span>
                             </div>
-                          )}
-
-                          {/* Action Button */}
-                          <Button className="w-full" size="sm">
-                            {isCompleted ? "Review Story" : "Start Reading"}
-                            <ChevronRight className="ml-2 h-4 w-4" />
+                            <div>{story?.questions?.length} questions</div>
+                          </div>
+                          <Button
+                            size="sm"
+                            className={`${
+                              isCompleted
+                                ? "bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
+                                : "bg-blue-600 hover:bg-blue-700 text-white"
+                            }`}
+                          >
+                            {isCompleted ? "Review" : "Start"}
+                            <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   );
                 })
               )}
@@ -293,46 +350,58 @@ export function ReadingInterface() {
           )}
         </div>
 
-        {/* Instructions */}
-        <Card className="border border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
+        {/* Modern How It Works */}
+        <div className="mt-16 pt-12 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               How It Works
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div className="space-y-2">
-                <div className="font-medium text-foreground">
-                  1. Read the Story
-                </div>
-                <div className="text-muted-foreground">
-                  Take your time to read through the story carefully. You can
-                  read at your own pace.
-                </div>
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Simple steps to improve your reading comprehension skills
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="space-y-2">
-                <div className="font-medium text-foreground">
-                  2. Answer Questions
-                </div>
-                <div className="text-muted-foreground">
-                  After reading, answer comprehension questions to test your
-                  understanding.
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="font-medium text-foreground">
-                  3. Get Feedback
-                </div>
-                <div className="text-muted-foreground">
-                  Receive instant feedback on your answers and track your
-                  progress.
-                </div>
-              </div>
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                1. Read the Story
+              </h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                Take your time to read through the story carefully and
+                understand the main ideas.
+              </p>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <MessageCircle className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                2. Answer Questions
+              </h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                Test your understanding by answering questions about the story
+                content.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                3. Get Feedback
+              </h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                Receive instant feedback and explanations to help you learn and
+                improve.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

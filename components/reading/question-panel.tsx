@@ -93,31 +93,35 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
 
   if (showResults) {
     return (
-      <div className="p-6">
-        {/* Results Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full bg-green-50 dark:bg-green-950/30">
-              <Trophy className="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
+      <div className="p-12">
+        {/* Enterprise Results Header */}
+        <div className="text-center mb-12">
+          <div className="w-20 h-20 mx-auto mb-6 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+            <Trophy className="h-10 w-10 text-neutral-600 dark:text-neutral-400" />
           </div>
-          <h2 className="text-xl font-semibold mb-2">Quiz Complete!</h2>
-          <p className="text-muted-foreground">Here are your results</p>
-        </div>
-
-        {/* Score */}
-        <div className="text-center mb-8">
-          <div className="text-4xl font-bold text-foreground mb-2">
-            {scorePercentage}%
-          </div>
-          <p className="text-muted-foreground">
-            You got {correctAnswers} out of {questions.length} questions correct
+          <h2 className="text-3xl font-light text-neutral-900 dark:text-neutral-100 mb-4 tracking-tight">
+            Assessment Complete
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-400 font-light">
+            Review your performance and understanding
           </p>
         </div>
 
-        {/* Question Review */}
-        <div className="space-y-4 mb-8">
-          <h3 className="font-semibold text-foreground">Question Review</h3>
+        {/* Enterprise Score */}
+        <div className="text-center mb-12">
+          <div className="text-6xl font-light text-neutral-900 dark:text-neutral-100 mb-4 tracking-tight">
+            {scorePercentage}%
+          </div>
+          <p className="text-lg text-neutral-500 dark:text-neutral-400 font-light">
+            {correctAnswers} of {questions.length} questions answered correctly
+          </p>
+        </div>
+
+        {/* Enterprise Question Review */}
+        <div className="space-y-6 mb-12">
+          <h3 className="text-xl font-light text-neutral-900 dark:text-neutral-100 mb-8">
+            Detailed Review
+          </h3>
           {questions.map((question, index) => {
             const userAnswer = answers[question.id];
             const hasOptions = question.options && question.options.length > 0;
@@ -147,36 +151,54 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
             return (
               <div
                 key={question.id}
-                className="p-4 border border-border/50 rounded-lg"
+                className="p-8 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50"
               >
-                <div className="flex items-start gap-3">
-                  {isCorrect ? (
-                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
-                  )}
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center mt-1 ${
+                      isCorrect
+                        ? "bg-green-100 dark:bg-green-900/30"
+                        : "bg-red-100 dark:bg-red-900/30"
+                    }`}
+                  >
+                    {isCorrect ? (
+                      <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    )}
+                  </div>
                   <div className="flex-1">
-                    <p className="font-medium text-foreground mb-2">
+                    <p className="text-lg font-light text-neutral-900 dark:text-neutral-100 mb-4 leading-relaxed">
                       {question.question}
                     </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-muted-foreground">
-                        Your answer:{" "}
-                        <span className="font-medium">{userAnswerText}</span>
-                      </p>
+                    <div className="space-y-3 text-sm">
+                      <div className="p-3 bg-white dark:bg-neutral-800 rounded-sm border border-neutral-200 dark:border-neutral-700">
+                        <span className="text-neutral-500 dark:text-neutral-400 font-medium">
+                          Your answer:
+                        </span>
+                        <span className="ml-2 font-light text-neutral-900 dark:text-neutral-100">
+                          {userAnswerText}
+                        </span>
+                      </div>
                       {!isCorrect && (
-                        <p className="text-green-600 dark:text-green-400">
-                          Correct answer:{" "}
-                          <span className="font-medium">
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-sm border border-green-200 dark:border-green-800">
+                          <span className="text-green-700 dark:text-green-400 font-medium">
+                            Correct answer:
+                          </span>
+                          <span className="ml-2 font-light text-green-800 dark:text-green-300">
                             {correctAnswerText}
                           </span>
-                        </p>
+                        </div>
                       )}
                       {question.explanation && (
-                        <p className="text-blue-600 dark:text-blue-400 mt-2">
-                          <span className="font-medium">Explanation:</span>{" "}
-                          {question.explanation}
-                        </p>
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800">
+                          <span className="text-blue-700 dark:text-blue-400 font-medium">
+                            Explanation:
+                          </span>
+                          <p className="mt-2 text-blue-800 dark:text-blue-300 font-light leading-relaxed">
+                            {question.explanation}
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -186,15 +208,15 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
           })}
         </div>
 
-        {/* Action Button */}
+        {/* Enterprise Action Button */}
         <div className="text-center">
-          <Button
+          <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2"
+            className="px-8 py-4 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-3 mx-auto"
           >
-            <RotateCcw className="h-4 w-4" />
-            Try Another Story
-          </Button>
+            <RotateCcw className="h-5 w-5" />
+            Continue Learning
+          </button>
         </div>
       </div>
     );
@@ -204,42 +226,45 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
+    <div className="p-8">
+      {/* Modern Header */}
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            Question {currentQuestion + 1} of {questions.length}
-          </h2>
-          <div className="text-sm text-muted-foreground">
-            {Math.round(progress)}% Complete
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Question {currentQuestion + 1} of {questions.length}
+            </h2>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {Math.round(progress)}% Complete
+            </div>
           </div>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Question */}
-      <div className="mb-6">
-        <h3 className="text-base font-medium text-foreground mb-4">
+      {/* Modern Question */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 leading-relaxed">
           {question.question}
         </h3>
 
-        {/* Multiple Choice Questions */}
+        {/* Modern Multiple Choice Questions */}
         {question.options && question.options.length > 0 ? (
           <RadioGroup value={selectedAnswer} onValueChange={handleAnswerSelect}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {question.options.map((option, index) => (
                 <div
                   key={index}
-                  className="flex items-center space-x-3 p-3 border border-border/50 rounded-lg hover:bg-muted/30 transition-colors"
+                  className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer bg-white dark:bg-gray-800 rounded-lg"
                 >
                   <RadioGroupItem
                     value={index.toString()}
                     id={`option-${index}`}
+                    className="border-gray-300 dark:border-gray-600"
                   />
                   <Label
                     htmlFor={`option-${index}`}
-                    className="flex-1 cursor-pointer text-sm"
+                    className="flex-1 cursor-pointer text-gray-900 dark:text-gray-100"
                   >
                     {option}
                   </Label>
@@ -248,26 +273,29 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
             </div>
           </RadioGroup>
         ) : (
-          /* Text Input Questions */
-          <div className="space-y-2">
-            <Label htmlFor="text-answer" className="text-sm font-medium">
-              Your Answer:
+          /* Modern Text Input Questions */
+          <div className="space-y-4">
+            <Label
+              htmlFor="text-answer"
+              className="text-sm font-medium text-gray-900 dark:text-gray-100"
+            >
+              Your Answer
             </Label>
             <Textarea
               id="text-answer"
-              placeholder="Type your answer here..."
+              placeholder="Enter your answer here..."
               value={textAnswer}
               onChange={(e) => setTextAnswer(e.target.value)}
-              className="min-h-[100px] resize-none"
+              className="min-h-[120px] resize-none border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
             />
-            <p className="text-xs text-muted-foreground">
-              Write your answer in the text area above.
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Provide your response based on your understanding of the passage.
             </p>
           </div>
         )}
       </div>
 
-      {/* Action Button */}
+      {/* Modern Action Button */}
       <Button
         onClick={handleNextQuestion}
         disabled={
@@ -275,12 +303,12 @@ export function QuestionPanel({ questions, onComplete }: QuestionPanelProps) {
             ? !selectedAnswer
             : !textAnswer.trim()
         }
-        className="w-full flex items-center gap-2"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
       >
         {currentQuestion < questions.length - 1
           ? "Next Question"
           : "Finish Quiz"}
-        <ArrowRight className="h-4 w-4" />
+        <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
     </div>
   );

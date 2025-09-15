@@ -21,38 +21,37 @@ export function StoryReader({ story, onComplete }: StoryReaderProps) {
   const paragraphs = story.content.split("\n\n").filter((p) => p.trim());
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <CardTitle className="text-xl font-semibold">{story.title}</CardTitle>
-        </div>
-      </div>
-
-      {/* Story Content */}
-      <div className="space-y-6 mb-8">
-        {paragraphs.map((paragraph, index) => (
-          <p key={index} className="text-base leading-relaxed text-foreground">
-            {paragraph}
-          </p>
-        ))}
-      </div>
-
-      {/* Completion Section */}
-      {
-        <div className="pt-6 border-t border-border/50">
-          <div className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              You've finished reading the story. Now let's test your
-              comprehension.
+    <div className="p-8">
+      {/* Modern Story Content */}
+      <div className="max-w-3xl mx-auto">
+        <div className="space-y-6 mb-8">
+          {paragraphs.map((paragraph, index) => (
+            <p
+              key={index}
+              className="text-lg leading-relaxed text-gray-700 dark:text-gray-300"
+            >
+              {paragraph}
             </p>
-            <Button onClick={onComplete} className="flex items-center gap-2">
-              Answer Comprehension Questions
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+          ))}
         </div>
-      }
+      </div>
+
+      {/* Modern Completion Section */}
+      <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+            You've finished reading the story. Now let's test your comprehension
+            with some questions.
+          </p>
+          <Button
+            onClick={onComplete}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Start Questions
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
