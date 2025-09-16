@@ -16,8 +16,8 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { EvaluationResults } from "./evaluation-results";
+import { writingService } from "@/services/writingService";
 
 interface WritingEditorProps {
   prompt: any;
@@ -33,7 +33,6 @@ export function WritingEditor({
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [showGuidelines, setShowGuidelines] = useState(true);
-  const [timeSpent, setTimeSpent] = useState(0);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
@@ -56,27 +55,17 @@ export function WritingEditor({
     setIsEvaluating(true);
 
     try {
-      const response = await fetch("/api/evaluate-writing", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content,
-          writingType,
-          prompt: prompt.id,
-        }),
-      });
-
-      if (response.ok) {
-        const evaluationData = await response.json();
-        setEvaluation(evaluationData);
-        setShowEvaluation(true);
-      } else {
-        alert("Failed to evaluate writing. Please try again.");
-      }
+      const evaluationData = await writingService.submitForEvaluation(
+        content,
+        prompt.id
+      );
+      setEvaluation(evaluationData);
+      setShowEvaluation(true);
     } catch (error) {
-      alert("An error occurred while evaluating your writing.");
+      console.error("Error evaluating writing:", error);
+      alert(
+        "An error occurred while evaluating your writing. Please try again."
+      );
     } finally {
       setIsEvaluating(false);
     }
@@ -90,9 +79,6 @@ export function WritingEditor({
     setShowEvaluation(false);
     // Focus back on the textarea for revision
   };
-
-  const targetWordCount = 200;
-  const progress = Math.min((wordCount / targetWordCount) * 100, 100);
 
   if (showEvaluation && evaluation) {
     return (
@@ -108,13 +94,6 @@ export function WritingEditor({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div
-            onClick={onBack}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Prompts
-          </div>
           <div>
             <h2 className="text-2xl font-bold">{prompt.title}</h2>
             <p className="text-muted-foreground">{prompt.description}</p>
@@ -126,6 +105,13 @@ export function WritingEditor({
             {prompt.timeEstimate}
           </Badge>
           <Badge variant="outline">{prompt.difficulty}</Badge>
+          <div
+            onClick={onBack}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Prompts
+          </div>
         </div>
       </div>
 
@@ -137,9 +123,8 @@ export function WritingEditor({
                 <CardTitle>Your Writing</CardTitle>
                 <div className="flex items-center gap-4">
                   <div className="text-sm text-muted-foreground">
-                    {wordCount} / {targetWordCount} words
+                    {wordCount} words
                   </div>
-                  <Progress value={progress} className="w-24" />
                 </div>
               </div>
             </CardHeader>
@@ -147,21 +132,13 @@ export function WritingEditor({
               <Textarea
                 placeholder="Start writing here..."
                 value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
+                onChange={(e) => handleContentChange(e?.target?.value)}
                 className="min-h-[400px] resize-none"
               />
             </CardContent>
           </Card>
 
           <div className="flex items-center gap-2">
-            <Button>
-              <Save className="h-4 w-4 mr-2" />
-              Save Draft
-            </Button>
-            <Button variant="outline">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
             <Button variant="outline">
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
@@ -207,40 +184,6 @@ export function WritingEditor({
               </CardContent>
             </Card>
           )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Writing Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Word Count</span>
-                  <span>
-                    {wordCount}/{targetWordCount}
-                  </span>
-                </div>
-                <Progress value={progress} />
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Audience:</span>
-                  <span className="font-medium">{prompt.audience}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Type:</span>
-                  <span className="font-medium capitalize">{writingType}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Difficulty:</span>
-                  <Badge variant="outline" className="text-xs">
-                    {prompt.difficulty}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader>

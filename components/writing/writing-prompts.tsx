@@ -1,150 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Users, Star } from "lucide-react";
+import { ArrowLeft, Clock, Users, Star, Loader2 } from "lucide-react";
+import { writingService } from "@/services/writingService";
 
-const prompts = {
-  letter: [
-    {
-      id: "letter-1",
-      title: "Letter to a Friend",
-      description: "Write a letter to your friend about your recent vacation",
-      difficulty: "Easy",
-      timeEstimate: "15 mins",
-      audience: "Personal",
-      guidelines: [
-        "Use informal language and tone",
-        "Include personal experiences and emotions",
-        "Ask questions about your friend's life",
-        "Use proper letter format with date and greeting",
-      ],
-    },
-    {
-      id: "letter-2",
-      title: "Formal Complaint Letter",
-      description:
-        "Write a complaint letter to a company about a defective product",
-      difficulty: "Medium",
-      timeEstimate: "20 mins",
-      audience: "Business",
-      guidelines: [
-        "Use formal language and professional tone",
-        "Clearly state the problem and desired solution",
-        "Include relevant details and dates",
-        "Be polite but firm in your request",
-      ],
-    },
-    {
-      id: "letter-3",
-      title: "Job Application Letter",
-      description: "Write a cover letter for your dream job application",
-      difficulty: "Hard",
-      timeEstimate: "25 mins",
-      audience: "Professional",
-      guidelines: [
-        "Research the company and position",
-        "Highlight relevant skills and experience",
-        "Show enthusiasm for the role",
-        "Use professional formatting and language",
-      ],
-    },
-  ],
-  article: [
-    {
-      id: "article-1",
-      title: "School Event Report",
-      description:
-        "Write an article about a recent school sports day or cultural event",
-      difficulty: "Easy",
-      timeEstimate: "20 mins",
-      audience: "School Community",
-      guidelines: [
-        "Include who, what, when, where, why",
-        "Use engaging headlines and subheadings",
-        "Include quotes from participants",
-        "Write in third person perspective",
-      ],
-    },
-    {
-      id: "article-2",
-      title: "Environmental Awareness",
-      description:
-        "Write an article about climate change and its impact on your community",
-      difficulty: "Medium",
-      timeEstimate: "25 mins",
-      audience: "General Public",
-      guidelines: [
-        "Present facts and statistics",
-        "Include expert opinions or research",
-        "Suggest practical solutions",
-        "Use persuasive but balanced language",
-      ],
-    },
-    {
-      id: "article-3",
-      title: "Technology Review",
-      description: "Write a review article about a new smartphone or gadget",
-      difficulty: "Hard",
-      timeEstimate: "30 mins",
-      audience: "Tech Enthusiasts",
-      guidelines: [
-        "Compare features with competitors",
-        "Include pros and cons analysis",
-        "Use technical terminology appropriately",
-        "Provide a clear recommendation",
-      ],
-    },
-  ],
-  notice: [
-    {
-      id: "notice-1",
-      title: "School Notice",
-      description:
-        "Write a notice about upcoming school holidays and important dates",
-      difficulty: "Easy",
-      timeEstimate: "10 mins",
-      audience: "Students & Parents",
-      guidelines: [
-        "Use clear, concise language",
-        "Include all essential information",
-        "Use proper notice format with heading",
-        "Mention authority and date",
-      ],
-    },
-    {
-      id: "notice-2",
-      title: "Community Event Notice",
-      description:
-        "Write a notice about a community cleanup drive or social event",
-      difficulty: "Medium",
-      timeEstimate: "15 mins",
-      audience: "Community Members",
-      guidelines: [
-        "Include event details (date, time, venue)",
-        "Explain the purpose and benefits",
-        "Provide contact information",
-        "Use formal but accessible language",
-      ],
-    },
-    {
-      id: "notice-3",
-      title: "Official Government Notice",
-      description:
-        "Write an official notice about new traffic rules or regulations",
-      difficulty: "Hard",
-      timeEstimate: "20 mins",
-      audience: "General Public",
-      guidelines: [
-        "Use official and authoritative tone",
-        "Include legal references if applicable",
-        "Clearly state consequences of non-compliance",
-        "Follow government notice format",
-      ],
-    },
-  ],
-};
+// API Response interfaces
+interface ApiTopic {
+  topic_id: string;
+  category: string;
+  title: string;
+  description: string;
+  standard: number;
+  difficulty: string;
+  audience: string;
+  guidelines: string[];
+}
+
+interface PaginatedResponse {
+  page: number;
+  page_size: number;
+  total: number;
+  results: ApiTopic[];
+}
+
+// Internal Topic interface
+interface Topic {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  timeEstimate: string;
+  audience: string;
+  guidelines: string[];
+}
 
 interface WritingPromptsProps {
   writingType: string;
@@ -157,81 +48,179 @@ export function WritingPrompts({
   onBack,
   onStartWriting,
 }: WritingPromptsProps) {
-  const typePrompts = prompts[writingType as keyof typeof prompts] || [];
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const typeName = writingType.charAt(0).toUpperCase() + writingType.slice(1);
+
+  // Fetch topics from API
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await writingService.fetchTopics(writingType, 1, 10);
+        const paginatedData: PaginatedResponse = response;
+        const transformedTopics: Topic[] = paginatedData.results.map(
+          (topic) => ({
+            id: topic.topic_id,
+            title: topic.title,
+            description: topic.description,
+            difficulty: topic.difficulty,
+            timeEstimate: getTimeEstimate(topic.difficulty),
+            audience: topic.audience,
+            guidelines: topic.guidelines,
+          })
+        );
+        setTopics(transformedTopics);
+      } catch (err) {
+        console.error("Error fetching topics:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch writing topics"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopics();
+  }, [writingType]);
+
+  // Helper function to estimate time based on difficulty and standard
+  function getTimeEstimate(difficulty: string): string {
+    const baseTime = {
+      easy: 15,
+      medium: 20,
+      hard: 25,
+    };
+
+    const time =
+      baseTime[difficulty.toLowerCase() as keyof typeof baseTime] || 20;
+    return `${time} mins`;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">{typeName} Writing Prompts</h2>
         <div
           onClick={onBack}
-          className="flex items-center gap-2 cursor-pointer"
+          className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
+          <ArrowLeft className="h-4 w-4" />
           Back to Types
         </div>
-        <h2 className="text-2xl font-bold">{typeName} Writing Prompts</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {typePrompts.map((prompt) => (
-          <Card key={prompt.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{prompt.title}</CardTitle>
-                <Badge
-                  variant={
-                    prompt.difficulty === "Easy"
-                      ? "default"
-                      : prompt.difficulty === "Medium"
-                      ? "secondary"
-                      : "destructive"
-                  }
-                >
-                  {prompt.difficulty}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground">{prompt.description}</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {prompt.timeEstimate}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {prompt.audience}
-                </div>
-              </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <span className="text-gray-600 dark:text-gray-300">
+              Loading writing prompts...
+            </span>
+          </div>
+        </div>
+      )}
 
-              <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-1">
-                  <Star className="h-4 w-4" />
-                  Guidelines
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {prompt.guidelines.slice(0, 2).map((guideline, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
-                      {guideline}
-                    </li>
-                  ))}
-                  {prompt.guidelines.length > 2 && (
-                    <li className="text-xs text-muted-foreground">
-                      +{prompt.guidelines.length - 2} more guidelines
-                    </li>
-                  )}
-                </ul>
-              </div>
+      {/* Error State */}
+      {error && (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">Failed to load prompts</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              {error}
+            </div>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      )}
 
-              <Button className="w-full" onClick={() => onStartWriting(prompt)}>
-                Start Writing
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Topics Grid */}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {topics.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <div className="text-gray-500 dark:text-gray-400 mb-2">
+                No prompts available
+              </div>
+              <div className="text-sm text-gray-400 dark:text-gray-500">
+                Check back later for new writing topics
+              </div>
+            </div>
+          ) : (
+            topics.map((topic) => (
+              <Card
+                key={topic?.id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">{topic?.title}</CardTitle>
+                    <Badge
+                      variant={
+                        topic.difficulty === "Easy"
+                          ? "default"
+                          : topic.difficulty === "Medium"
+                          ? "secondary"
+                          : "destructive"
+                      }
+                    >
+                      {topic?.difficulty}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground">{topic?.description}</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {topic?.timeEstimate}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-4 w-4" />
+                      {topic?.audience}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2 flex items-center gap-1">
+                      <Star className="h-4 w-4" />
+                      Guidelines
+                    </h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {topic?.guidelines
+                        ?.slice(0, 2)
+                        .map((guideline: any, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-primary">•</span>
+                            {guideline}
+                          </li>
+                        ))}
+                      {topic?.guidelines?.length > 2 && (
+                        <li className="text-xs text-muted-foreground">
+                          +{topic.guidelines.length - 2} more guidelines
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    onClick={() => onStartWriting(topic)}
+                  >
+                    Start Writing
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
