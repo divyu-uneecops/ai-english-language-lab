@@ -12,8 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { StoryReader } from "./story-reader";
-import { QuestionPanel } from "./question-panel";
+import { useRouter } from "next/navigation";
 import { readingService } from "@/services/readingService";
 
 // API Story interface
@@ -42,12 +41,10 @@ interface PaginatedResponse {
 }
 
 export function ReadingInterface() {
+  const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStory, setSelectedStory] = useState<string | null>(null);
-  const [showQuestions, setShowQuestions] = useState(false);
-  const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
 
   // Fetch stories from API
   useEffect(() => {
@@ -83,88 +80,6 @@ export function ReadingInterface() {
 
     fetchStories();
   }, []);
-
-  const currentStory = selectedStory
-    ? stories.find((s) => s?.id === selectedStory)
-    : null;
-
-  const handleStoryComplete = () => {
-    setShowQuestions(true);
-  };
-
-  const handleQuestionsComplete = (questionIds: number[]) => {
-    setCompletedQuestions((prev) => [...prev, ...questionIds]);
-  };
-
-  if (selectedStory && currentStory) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Modern Header */}
-          <div className="mb-8">
-            <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-              <button
-                onClick={() => {
-                  setSelectedStory(null);
-                  setShowQuestions(false);
-                }}
-                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              >
-                Reading
-              </button>
-              <span>/</span>
-              <span className="text-gray-900 dark:text-gray-100 font-medium">
-                {currentStory.title}
-              </span>
-            </nav>
-
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <Badge
-                    variant="secondary"
-                    className={`text-xs font-medium ${
-                      currentStory.difficulty === "beginner" ||
-                      currentStory.difficulty === "easy"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-                        : currentStory.difficulty === "intermediate" ||
-                          currentStory.difficulty === "medium"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
-                    }`}
-                  >
-                    {currentStory.difficulty}
-                  </Badge>
-                  <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                    <Clock className="h-4 w-4" />
-                    <span>{currentStory.readTime}</span>
-                  </div>
-                </div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3 leading-tight">
-                  {currentStory.title}
-                </h1>
-              </div>
-            </div>
-          </div>
-
-          {/* Modern Content */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            {!showQuestions ? (
-              <StoryReader
-                story={currentStory}
-                onComplete={handleStoryComplete}
-              />
-            ) : (
-              <QuestionPanel
-                questions={currentStory.questions}
-                onComplete={handleQuestionsComplete}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -221,7 +136,7 @@ export function ReadingInterface() {
               </p>
             </div>
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {loading ? "Loading..." : `${stories.length} stories available`}
+              {loading ? "Loading..." : `${stories?.length} stories available`}
             </div>
           </div>
 
@@ -278,7 +193,9 @@ export function ReadingInterface() {
                     <div
                       key={story?.id}
                       className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
-                      onClick={() => setSelectedStory(story?.id)}
+                      onClick={() =>
+                        router.push(`/reading/stories/${story?.id}`)
+                      }
                     >
                       <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
