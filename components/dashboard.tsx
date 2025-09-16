@@ -29,7 +29,6 @@ const modulesData = [
       completed: 2,
       total: 4,
       timeSpent: "15 min",
-      difficulty: "Beginner",
     },
     href: "/reading",
   },
@@ -42,7 +41,6 @@ const modulesData = [
       completed: 3,
       total: 6,
       timeSpent: "25 min",
-      difficulty: "Intermediate",
     },
     href: "/speaking",
   },
@@ -55,7 +53,6 @@ const modulesData = [
       completed: 1,
       total: 5,
       timeSpent: "10 min",
-      difficulty: "Beginner",
     },
     href: "/writing",
   },
@@ -68,7 +65,6 @@ const modulesData = [
       completed: 0,
       total: 3,
       timeSpent: "0 min",
-      difficulty: "All Levels",
     },
     href: "/chat",
   },
@@ -211,16 +207,6 @@ export function Dashboard() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Learning Modules
             </h2>
-            <Link href="/progress">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-              >
-                View all
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -229,19 +215,6 @@ export function Dashboard() {
               const progress = Math.round(
                 (module.stats.completed / module.stats.total) * 100
               );
-
-              const getDifficultyColor = (difficulty: string) => {
-                switch (difficulty.toLowerCase()) {
-                  case "beginner":
-                    return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
-                  case "intermediate":
-                    return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800";
-                  case "advanced":
-                    return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
-                  default:
-                    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
-                }
-              };
 
               return (
                 <Card
@@ -263,14 +236,6 @@ export function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <Badge
-                        variant="secondary"
-                        className={`text-xs font-medium border ${getDifficultyColor(
-                          module.stats.difficulty
-                        )}`}
-                      >
-                        {module.stats.difficulty}
-                      </Badge>
                     </div>
 
                     <div className="space-y-4">

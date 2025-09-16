@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   BookOpen,
   MessageCircle,
   CheckCircle,
@@ -18,27 +16,36 @@ import { StoryReader } from "./story-reader";
 import { QuestionPanel } from "./question-panel";
 import { readingService } from "@/services/readingService";
 
-// Story interface
+// API Story interface
+interface ApiStory {
+  passage_id: string;
+  title: string;
+  passage: string;
+  difficulty: string;
+  standard: number;
+}
+
+// Internal Story interface
 interface Story {
-  id: number;
+  id: string;
   title: string;
   difficulty: string;
   readTime: string;
   description: string;
-  content: string;
-  questions: {
-    id: number;
-    question: string;
-    options: string[];
-    correct: number;
-  }[];
+}
+
+interface PaginatedResponse {
+  page: number;
+  page_size: number;
+  total: number;
+  results: ApiStory[];
 }
 
 export function ReadingInterface() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStory, setSelectedStory] = useState<number | null>(null);
+  const [selectedStory, setSelectedStory] = useState<string | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
   const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
 
@@ -49,24 +56,21 @@ export function ReadingInterface() {
         setLoading(true);
         setError(null);
 
-        const response = await readingService.fetchStories();
-        const data = response.map((story: any) => ({
-          id: story?.passage_id,
-          title: story?.title,
-          difficulty: story?.difficulty,
-          readTime: story?.readTime || "5 Min",
-          description: story?.passage,
-          content: story?.passage,
-          questions: story?.questions?.map((question: any) => ({
-            id: question?.question_id,
-            question: question?.question,
-            options: question?.options,
-            correct: question?.answer,
-            explanation: question?.explanation,
-          })),
-        }));
+        const response = await readingService.fetchStories(1, 10);
+        const paginatedData: PaginatedResponse = response;
 
-        setStories(data);
+        // Transform the API data to match our interface
+        const transformedStories: Story[] = paginatedData.results.map(
+          (story) => ({
+            id: story.passage_id,
+            title: story.title,
+            difficulty: story.difficulty,
+            readTime: "5 Min", // Default read time since API doesn't provide it
+            description: story.passage,
+          })
+        );
+
+        setStories(transformedStories);
       } catch (err) {
         console.error("Error fetching stories:", err);
         setError(
@@ -196,14 +200,10 @@ export function ReadingInterface() {
                 Progress
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {completedQuestions.length} /{" "}
-                {stories.reduce(
-                  (acc, story) => acc + (story.questions?.length || 0),
-                  0
-                )}
+                5 / 20
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500">
-                Questions completed
+                Stories completed
               </div>
             </div>
           </div>
@@ -274,10 +274,6 @@ export function ReadingInterface() {
                 </div>
               ) : (
                 stories.map((story) => {
-                  const isCompleted = completedQuestions.some((id) =>
-                    story.questions.some((q) => q?.id === id)
-                  );
-
                   return (
                     <div
                       key={story?.id}
@@ -302,21 +298,12 @@ export function ReadingInterface() {
                               >
                                 {story?.difficulty}
                               </Badge>
-                              {isCompleted && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                >
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Completed
-                                </Badge>
-                              )}
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
                               {story?.title}
                             </h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                              {story?.description?.substring(0, 300) + "....."}
+                              {story?.description}
                             </p>
                           </div>
                         </div>
@@ -327,17 +314,12 @@ export function ReadingInterface() {
                               <Clock className="h-4 w-4" />
                               <span>{story?.readTime}</span>
                             </div>
-                            <div>{story?.questions?.length} questions</div>
                           </div>
                           <Button
                             size="sm"
-                            className={`${
-                              isCompleted
-                                ? "bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
-                                : "bg-blue-600 hover:bg-blue-700 text-white"
-                            }`}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
                           >
-                            {isCompleted ? "Review" : "Start"}
+                            Start
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
                         </div>

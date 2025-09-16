@@ -42,13 +42,6 @@ export function Footer() {
               <Link
                 href="#"
                 className="group p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 transition-all duration-300 hover:scale-110"
-                aria-label="GitHub"
-              >
-                <Github className="h-5 w-5 text-slate-300 group-hover:text-white transition-colors duration-300" />
-              </Link>
-              <Link
-                href="#"
-                className="group p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 transition-all duration-300 hover:scale-110"
                 aria-label="Twitter"
               >
                 <Twitter className="h-5 w-5 text-slate-300 group-hover:text-white transition-colors duration-300" />
@@ -61,7 +54,7 @@ export function Footer() {
                 <Linkedin className="h-5 w-5 text-slate-300 group-hover:text-white transition-colors duration-300" />
               </Link>
               <Link
-                href="mailto:support@example.com"
+                href="#"
                 className="group p-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 transition-all duration-300 hover:scale-110"
                 aria-label="Email"
               >

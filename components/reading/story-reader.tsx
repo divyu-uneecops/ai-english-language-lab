@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, ArrowRight } from "lucide-react";
 
 interface Story {
-  id: number;
+  id: string;
   title: string;
   content: string;
 }
