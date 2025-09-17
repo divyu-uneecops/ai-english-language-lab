@@ -278,7 +278,7 @@ export default function StoryPage() {
                               Your answer:{" "}
                             </span>
                             <span className="text-gray-900 dark:text-gray-100">
-                              {result?.answer}
+                              {result?.your_answer}
                             </span>
                           </div>
                           {!isCorrect && (

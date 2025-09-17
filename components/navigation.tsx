@@ -84,7 +84,7 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-2">
-            <NavLinks />
+            {/* <NavLinks /> */}
 
             {/* Theme Toggle */}
             <Button

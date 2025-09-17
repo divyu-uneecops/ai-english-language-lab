@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Users, Star, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Users,
+  Star,
+  Loader2,
+  FileText,
+  MessageCircle,
+  ChevronRight,
+} from "lucide-react";
 import { writingService } from "@/services/writingService";
 
 // API Response interfaces
@@ -101,126 +110,186 @@ export function WritingPrompts({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{typeName} Writing Prompts</h2>
-        <div
-          onClick={onBack}
-          className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Types
-        </div>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex items-center gap-3">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            <span className="text-gray-600 dark:text-gray-300">
-              Loading writing prompts...
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="text-red-500 mb-2">Failed to load prompts</div>
-            <div className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              {error}
-            </div>
-            <Button onClick={() => window.location.reload()} variant="outline">
-              Try Again
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Topics Grid */}
-      {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {topics.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <div className="text-gray-500 dark:text-gray-400 mb-2">
-                No prompts available
-              </div>
-              <div className="text-sm text-gray-400 dark:text-gray-500">
-                Check back later for new writing topics
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Modern Header */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div className="space-y-4">
+              <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <span
+                  className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
+                  onClick={onBack}
+                >
+                  Writing
+                </span>
+                <span>/</span>
+                <span className="text-gray-900 dark:text-gray-100 font-medium">
+                  {typeName}
+                </span>
+              </nav>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  {typeName} Writing
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Choose a {typeName} to start your writing practice
+                </p>
               </div>
             </div>
-          ) : (
-            topics.map((topic) => (
-              <Card
-                key={topic?.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{topic?.title}</CardTitle>
-                    <Badge
-                      variant={
-                        topic.difficulty === "Easy"
-                          ? "default"
-                          : topic.difficulty === "Medium"
-                          ? "secondary"
-                          : "destructive"
-                      }
-                    >
-                      {topic?.difficulty}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground">{topic?.description}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {topic?.timeEstimate}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {topic?.audience}
-                    </div>
-                  </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Available
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {loading ? "..." : topics.length}
+              </div>
+              <div className="text-xs text-gray-400 dark:text-gray-500">
+                Writing prompts
+              </div>
+            </div>
+          </div>
+        </div>
 
-                  <div>
-                    <h4 className="font-semibold mb-2 flex items-center gap-1">
-                      <Star className="h-4 w-4" />
-                      Guidelines
-                    </h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      {topic?.guidelines
-                        ?.slice(0, 2)
-                        .map((guideline: any, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            {guideline}
-                          </li>
-                        ))}
-                      {topic?.guidelines?.length > 2 && (
-                        <li className="text-xs text-muted-foreground">
-                          +{topic.guidelines.length - 2} more guidelines
-                        </li>
-                      )}
-                    </ul>
-                  </div>
+        {/* Modern Content Section */}
+        <div className="mb-12">
+          {/* Modern Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Loading...
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Please wait while we fetch the writing topics
+                </p>
+              </div>
+            </div>
+          )}
 
-                  <Button
-                    className="w-full"
+          {/* Modern Error State */}
+          {error && (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <MessageCircle className="h-12 w-12 text-red-500 dark:text-red-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Unable to load prompts
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Modern Prompts Grid */}
+          {!loading && !error && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {topics.length === 0 ? (
+                <div className="col-span-full text-center py-16">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No prompts available
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Check back later for new writing topics
+                  </p>
+                </div>
+              ) : (
+                topics.map((topic) => (
+                  <div
+                    key={topic?.id}
+                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                     onClick={() => onStartWriting(topic)}
                   >
-                    Start Writing
-                  </Button>
-                </CardContent>
-              </Card>
-            ))
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge
+                              variant="secondary"
+                              className={`text-xs font-medium ${
+                                topic.difficulty === "Easy" ||
+                                topic.difficulty === "easy"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
+                                  : topic.difficulty === "Medium" ||
+                                    topic.difficulty === "medium"
+                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
+                                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
+                              }`}
+                            >
+                              {topic?.difficulty}
+                            </Badge>
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
+                            {topic?.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                            {topic?.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{topic?.timeEstimate}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span>{topic?.audience}</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                            <Star className="h-4 w-4" />
+                            Guidelines
+                          </h4>
+                          <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                            {topic?.guidelines
+                              ?.slice(0, 2)
+                              .map((guideline: any, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-2"
+                                >
+                                  <span className="text-blue-500 mt-1">•</span>
+                                  <span className="leading-relaxed">
+                                    {guideline}
+                                  </span>
+                                </li>
+                              ))}
+                            {topic?.guidelines?.length > 2 && (
+                              <li className="text-xs text-gray-400 dark:text-gray-500">
+                                +{topic.guidelines.length - 2} more guidelines
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={() => onStartWriting(topic)}
+                      >
+                        Start Writing
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
