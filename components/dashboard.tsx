@@ -13,7 +13,7 @@ import {
   Clock,
   Star,
   ArrowRight,
-  ChevronRight,
+  BookMarked,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
@@ -33,17 +33,29 @@ const modulesData = [
     href: "/reading",
   },
   {
-    id: "speaking",
-    title: "Speaking Practice",
-    description: "AI-powered pronunciation and fluency training",
-    icon: Mic,
+    id: "vocabulary",
+    title: "Vocabulary Practice",
+    description: "Interactive vocabulary learning and quizzes",
+    icon: BookMarked,
     stats: {
-      completed: 3,
-      total: 6,
-      timeSpent: "25 min",
+      completed: 1,
+      total: 3,
+      timeSpent: "12 min",
     },
-    href: "/speaking",
+    href: "/vocabulary",
   },
+  // {
+  //   id: "speaking",
+  //   title: "Speaking Practice",
+  //   description: "AI-powered pronunciation and fluency training",
+  //   icon: Mic,
+  //   stats: {
+  //     completed: 3,
+  //     total: 6,
+  //     timeSpent: "25 min",
+  //   },
+  //   href: "/speaking",
+  // },
   {
     id: "writing",
     title: "Writing Practice",
@@ -71,10 +83,10 @@ const modulesData = [
 ];
 
 const overallStats = {
-  totalModules: 4,
-  completedModules: 6,
-  totalExercises: 18,
-  timeSpent: "50 min",
+  totalModules: 5,
+  completedModules: 7,
+  totalExercises: 21,
+  timeSpent: "62 min",
   currentStreak: 5,
   averageScore: 85,
 };
@@ -83,7 +95,7 @@ export function Dashboard() {
   const { user } = useAuth();
 
   const overallProgress = Math.round(
-    (overallStats.completedModules / overallStats.totalExercises) * 100
+    (overallStats?.completedModules / overallStats?.totalExercises) * 100
   );
 
   return (

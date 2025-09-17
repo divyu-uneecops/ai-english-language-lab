@@ -21,6 +21,7 @@ import {
   Play,
   TrendingUp,
   Award,
+  BookMarked,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
@@ -178,7 +179,7 @@ export function ModuleCards() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           <ModuleCard
             icon={BookOpen}
             title="Reading Practice"
@@ -197,6 +198,23 @@ export function ModuleCards() {
           />
 
           <ModuleCard
+            icon={BookMarked}
+            title="Vocabulary Practice"
+            description="Expand your vocabulary with interactive learning and quizzes"
+            features={[
+              "Word Learning",
+              "Interactive Quizzes",
+              "Pronunciation Guide",
+            ]}
+            href="/vocabulary"
+            buttonText="Start Learning"
+            variant="secondary"
+            gradient="from-purple-400 to-purple-500"
+            delay={100}
+            index={1}
+          />
+
+          {/* <ModuleCard
             icon={Mic}
             title="Speaking Practice"
             description="Enhance your pronunciation and fluency with AI-powered speech exercises"
@@ -210,8 +228,8 @@ export function ModuleCards() {
             variant="secondary"
             gradient="from-green-400 to-green-500"
             delay={200}
-            index={1}
-          />
+            index={2}
+          /> */}
 
           <ModuleCard
             icon={PenTool}
