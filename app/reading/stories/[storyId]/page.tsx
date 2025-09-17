@@ -17,6 +17,11 @@ import {
   Trophy,
   RotateCcw,
   Clock,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Square,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
@@ -56,6 +61,13 @@ export default function StoryPage() {
   const [verificationResults, setVerificationResults] = useState<any[]>([]);
   const [verifyingAnswers, setVerifyingAnswers] = useState(false);
 
+  // Text-to-speech state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(-1);
+  const [speechUtterance, setSpeechUtterance] =
+    useState<SpeechSynthesisUtterance | null>(null);
+
   useEffect(() => {
     const fetchStory = async () => {
       try {
@@ -83,6 +95,103 @@ export default function StoryPage() {
       fetchStory();
     }
   }, [storyId]);
+
+  // Text-to-speech functions
+  const splitTextIntoWords = (text: string) => {
+    return text.split(/\s+/).filter((word) => word.trim().length > 0);
+  };
+
+  const speakText = (text: string) => {
+    if (!story) return;
+
+    // Stop any existing speech
+    if (speechUtterance) {
+      speechSynthesis.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.8; // Slightly slower for better comprehension
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const words = splitTextIntoWords(text);
+    let currentIndex = 0;
+
+    utterance.onboundary = (event) => {
+      if (event.name === "word") {
+        setCurrentWordIndex(currentIndex);
+        currentIndex++;
+      }
+    };
+
+    utterance.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setCurrentWordIndex(-1);
+      setSpeechUtterance(null);
+    };
+
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+      setCurrentWordIndex(-1);
+      setSpeechUtterance(null);
+    };
+
+    setSpeechUtterance(utterance);
+    speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+    setIsPaused(false);
+  };
+
+  const pauseSpeech = () => {
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+      speechSynthesis.pause();
+      setIsPaused(true);
+    }
+  };
+
+  const resumeSpeech = () => {
+    if (speechSynthesis.paused) {
+      speechSynthesis.resume();
+      setIsPaused(false);
+    }
+  };
+
+  const stopSpeech = () => {
+    speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentWordIndex(-1);
+    setSpeechUtterance(null);
+  };
+
+  const handleSpeakerClick = () => {
+    if (!story) return;
+
+    if (isPlaying) {
+      if (isPaused) {
+        resumeSpeech();
+      } else {
+        pauseSpeech();
+      }
+    } else {
+      speakText(story.passage);
+    }
+  };
+
+  const handleStopClick = () => {
+    stopSpeech();
+  };
+
+  // Cleanup speech on component unmount
+  useEffect(() => {
+    return () => {
+      if (speechUtterance) {
+        speechSynthesis.cancel();
+      }
+    };
+  }, [speechUtterance]);
 
   const handleAnswerSelect = (value: string) => {
     setSelectedAnswer(value);
@@ -145,6 +254,41 @@ export default function StoryPage() {
       default:
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
     }
+  };
+
+  const renderStoryWithHighlighting = (text: string) => {
+    if (!text) return null;
+
+    // Split text into words and spaces separately for better control
+    const parts = text.split(/(\s+)/);
+    let wordCount = 0;
+
+    return (
+      <div className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+        {parts.map((part, index) => {
+          const isWord = part.trim().length > 0 && !/^\s+$/.test(part);
+          const isHighlighted =
+            isWord && wordCount === currentWordIndex && isPlaying;
+
+          if (isWord) {
+            wordCount++;
+          }
+
+          return (
+            <span
+              key={index}
+              className={`transition-all duration-200 ${
+                isHighlighted
+                  ? "bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 px-1 rounded"
+                  : ""
+              }`}
+            >
+              {part}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   if (loading) {
@@ -312,7 +456,7 @@ export default function StoryPage() {
           <div className="flex justify-between">
             <Button
               variant="outline"
-              className="border-gray-300 dark:border-gray-600"
+              className="border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 px-6 py-2"
               onClick={() => {
                 setShowResults(false);
                 setShowQuestions(false);
@@ -328,7 +472,7 @@ export default function StoryPage() {
               Back to Story
             </Button>
             <Link href="/reading">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button className="bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 px-6 py-2 font-medium tracking-wide border border-violet-500 hover:border-violet-600">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Continue Learning
               </Button>
@@ -460,7 +604,7 @@ export default function StoryPage() {
           <div className="mt-8 flex justify-between">
             <Button
               variant="outline"
-              className="border-gray-300 dark:border-gray-600"
+              className="border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 px-6 py-2"
               onClick={() => setShowQuestions(false)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -473,7 +617,7 @@ export default function StoryPage() {
                   ? !selectedAnswer
                   : !textAnswer.trim()
               }
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg px-6 py-2 font-medium tracking-wide border border-emerald-500 hover:border-emerald-600"
             >
               {currentQuestion < story.questions.length - 1
                 ? "Next Question"
@@ -535,8 +679,55 @@ export default function StoryPage() {
           <div className="p-8">
             <div className="max-w-3xl mx-auto">
               <div className="space-y-6">
-                <div className="text-lg leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {story?.passage}
+                {/* Speaker Controls */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSpeakerClick}
+                      className={`flex items-center gap-2 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 ${
+                        isPlaying
+                          ? "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/25 dark:to-indigo-900/25 border-blue-200 dark:border-blue-600 text-blue-700 dark:text-blue-300 shadow-sm"
+                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+                      } hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:text-blue-700 dark:hover:text-blue-300`}
+                    >
+                      {isPlaying ? (
+                        isPaused ? (
+                          <>
+                            <Play className="h-4 w-4" />
+                            Resume
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="h-4 w-4" />
+                            Pause
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <Volume2 className="h-4 w-4" />
+                          Listen
+                        </>
+                      )}
+                    </Button>
+                    {isPlaying && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleStopClick}
+                        className="flex items-center gap-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5"
+                      >
+                        <Square className="h-4 w-4" />
+                        Stop
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Story Text with Highlighting */}
+                <div className="whitespace-pre-wrap break-words overflow-hidden">
+                  {renderStoryWithHighlighting(story?.passage || "")}
                 </div>
               </div>
             </div>
@@ -547,7 +738,7 @@ export default function StoryPage() {
         <div className="mt-8 flex justify-end">
           <Button
             onClick={() => setShowQuestions(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 px-8 py-3 font-medium tracking-wide border border-slate-600 hover:border-slate-700"
           >
             Start Questions
           </Button>
