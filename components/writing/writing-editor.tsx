@@ -2,14 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
-  Save,
   RotateCcw,
-  Eye,
   Clock,
   Target,
   CheckCircle,
@@ -32,7 +28,7 @@ export function WritingEditor({
 }: WritingEditorProps) {
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
-  const [showGuidelines, setShowGuidelines] = useState(true);
+
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
@@ -169,7 +165,7 @@ export function WritingEditor({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setContent("")}
+                      onClick={() => handleContentChange("")}
                       disabled={!content.trim()}
                     >
                       <RotateCcw className="h-4 w-4 mr-2" />
@@ -211,33 +207,26 @@ export function WritingEditor({
           </div>
 
           <div className="space-y-6">
-            {showGuidelines && (
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Guidelines
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <ul className="space-y-3">
-                    {prompt.guidelines.map(
-                      (guideline: string, index: number) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-3 text-sm"
-                        >
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {guideline}
-                          </span>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Guidelines
+                </h3>
               </div>
-            )}
+              <div className="p-6">
+                <ul className="space-y-3">
+                  {prompt.guidelines.map((guideline: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {guideline}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">

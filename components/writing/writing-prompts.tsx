@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   Clock,
   Users,
   Star,
@@ -142,10 +140,10 @@ export function WritingPrompts({
                 Available
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {loading ? "..." : topics.length}
+                {loading ? "..." : topics?.length}
               </div>
               <div className="text-xs text-gray-400 dark:text-gray-500">
-                Writing prompts
+                {typeName}
               </div>
             </div>
           </div>
@@ -162,7 +160,7 @@ export function WritingPrompts({
                   Loading...
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Please wait while we fetch the writing topics
+                  Please wait while we fetch the writing {typeName}
                 </p>
               </div>
             </div>
@@ -174,7 +172,7 @@ export function WritingPrompts({
               <div className="max-w-md mx-auto">
                 <MessageCircle className="h-12 w-12 text-red-500 dark:text-red-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Unable to load prompts
+                  Unable to load {typeName}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
                 <button
@@ -194,7 +192,7 @@ export function WritingPrompts({
                 <div className="col-span-full text-center py-16">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    No prompts available
+                    No {typeName} available
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
                     Check back later for new writing topics
@@ -214,11 +212,11 @@ export function WritingPrompts({
                             <Badge
                               variant="secondary"
                               className={`text-xs font-medium ${
-                                topic.difficulty === "Easy" ||
-                                topic.difficulty === "easy"
+                                topic?.difficulty === "Easy" ||
+                                topic?.difficulty === "easy"
                                   ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-                                  : topic.difficulty === "Medium" ||
-                                    topic.difficulty === "medium"
+                                  : topic?.difficulty === "Medium" ||
+                                    topic?.difficulty === "medium"
                                   ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
                                   : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
                               }`}

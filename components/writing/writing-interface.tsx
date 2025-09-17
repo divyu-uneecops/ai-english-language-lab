@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WritingEditor } from "./writing-editor";
@@ -11,10 +10,7 @@ import {
   Mail,
   Newspaper,
   Clock,
-  Target,
-  BookOpen,
   ChevronRight,
-  Loader2,
   MessageCircle,
   CheckCircle,
 } from "lucide-react";
@@ -66,7 +62,7 @@ export function WritingInterface() {
     setSelectedType(null);
   };
 
-  if (isWriting && selectedPrompt) {
+  if (isWriting && selectedPrompt && selectedType) {
     return (
       <WritingEditor
         prompt={selectedPrompt}
@@ -151,37 +147,37 @@ export function WritingInterface() {
               const IconComponent = type.icon;
               return (
                 <div
-                  key={type.id}
+                  key={type?.id}
                   className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
-                  onClick={() => setSelectedType(type.id)}
+                  onClick={() => setSelectedType(type?.id)}
                 >
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-3">
                           <div
-                            className={`w-12 h-12 ${type.color} rounded-lg flex items-center justify-center`}
+                            className={`w-12 h-12 ${type?.color} rounded-lg flex items-center justify-center`}
                           >
                             <IconComponent className="h-6 w-6 text-white" />
                           </div>
                           <Badge
                             variant="secondary"
                             className={`text-xs font-medium ${
-                              type.difficulty === "Beginner"
+                              type?.difficulty === "Beginner"
                                 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-                                : type.difficulty === "Intermediate"
+                                : type?.difficulty === "Intermediate"
                                 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
                                 : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
                             }`}
                           >
-                            {type.difficulty}
+                            {type?.difficulty}
                           </Badge>
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 leading-tight">
-                          {type.title}
+                          {type?.title}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                          {type.description}
+                          {type?.description}
                         </p>
                       </div>
                     </div>
@@ -190,7 +186,7 @@ export function WritingInterface() {
                       <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          <span>{type.timeEstimate}</span>
+                          <span>{type?.timeEstimate}</span>
                         </div>
                       </div>
                       <Button

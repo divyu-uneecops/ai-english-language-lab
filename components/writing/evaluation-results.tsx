@@ -50,7 +50,7 @@ export function EvaluationResults({
   };
 
   // Convert score from 0-1 to 0-100 for display
-  const displayScore = Math.round(evaluation.score * 100);
+  const displayScore = Math.round(evaluation?.score);
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
@@ -109,13 +109,13 @@ export function EvaluationResults({
                 {displayScore}
               </div>
               <div className="flex-1">
-                <Progress value={displayScore} className="mb-4 h-3" />
+                <Progress value={displayScore * 10} className="mb-4 h-3" />
                 <p
                   className={`text-xl font-semibold ${getScoreColor(
-                    evaluation.score
+                    evaluation?.score
                   )}`}
                 >
-                  {getScoreLabel(evaluation.score)}
+                  {getScoreLabel(evaluation?.score)}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                   Based on grammar, structure, and content quality
@@ -135,9 +135,9 @@ export function EvaluationResults({
               </h3>
             </div>
             <div className="p-6">
-              {evaluation.feedback.strengths.length > 0 ? (
+              {evaluation?.feedback?.strengths?.length > 0 ? (
                 <ul className="space-y-3">
-                  {evaluation.feedback.strengths.map(
+                  {evaluation?.feedback?.strengths.map(
                     (strength: string, index: number) => (
                       <li
                         key={index}
@@ -167,9 +167,9 @@ export function EvaluationResults({
               </h3>
             </div>
             <div className="p-6">
-              {evaluation.feedback.areas_for_improvement.length > 0 ? (
+              {evaluation?.feedback?.areas_for_improvement?.length > 0 ? (
                 <ul className="space-y-3">
-                  {evaluation.feedback.areas_for_improvement.map(
+                  {evaluation?.feedback?.areas_for_improvement?.map(
                     (improvement: string, index: number) => (
                       <li
                         key={index}
@@ -206,7 +206,7 @@ export function EvaluationResults({
           <div className="p-6">
             <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
               <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 leading-relaxed font-mono">
-                {evaluation.example_answer}
+                {evaluation?.example_answer}
               </pre>
             </div>
           </div>
