@@ -166,13 +166,11 @@ export function VocabularyCard({
                         ✓ Learned
                       </Badge>
                     )}
-                    <div className="flex items-center justify-center gap-2 mb-6">
+                    <div className="flex items-center justify-center gap-3 mb-6">
                       <Button
                         onClick={() => speakWord(currentWord.word)}
                         disabled={isPlaying}
-                        variant="outline"
-                        size="sm"
-                        className="bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
                       >
                         <Volume2
                           className={`h-4 w-4 mr-2 ${
@@ -183,15 +181,15 @@ export function VocabularyCard({
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <Button
                       onClick={() => setIsFlipped(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold"
                     >
-                      <Sparkles className="h-4 w-4 mr-2" />
+                      <Sparkles className="h-5 w-5 mr-2" />
                       Flip Card
                     </Button>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                       Click to reveal the meaning
                     </p>
                   </div>
@@ -261,11 +259,9 @@ export function VocabularyCard({
                   <div className="mb-3 flex-shrink-0">
                     <Button
                       onClick={() => setShowExamples(!showExamples)}
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 mb-2"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium mb-2"
                     >
-                      <Star className="h-3 w-3 mr-1" />
+                      <Star className="h-4 w-4 mr-2" />
                       {showExamples ? "Hide" : "Show"} Examples
                     </Button>
 
@@ -302,27 +298,24 @@ export function VocabularyCard({
                   <div className="flex-grow"></div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2 flex-shrink-0 mt-4">
+                  <div className="flex gap-3 flex-shrink-0 mt-4">
                     <Button
                       onClick={() => setIsFlipped(false)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      className="flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium"
                     >
-                      <RotateCcw className="h-3 w-3 mr-1" />
+                      <RotateCcw className="h-4 w-4 mr-2" />
                       Flip Back
                     </Button>
                     <Button
                       onClick={markWordLearned}
                       disabled={isWordLearned}
-                      size="sm"
-                      className={`flex-1 px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ${
+                      className={`flex-1 px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium ${
                         isWordLearned
-                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700 text-white"
+                          ? "bg-gray-400 text-gray-200 cursor-not-allowed transform-none disabled:hover:shadow-lg"
+                          : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
                       }`}
                     >
-                      <CheckCircle className="h-3 w-3 mr-1" />
+                      <CheckCircle className="h-4 w-4 mr-2" />
                       {isWordLearned ? "Learned" : "Got it!"}
                     </Button>
                   </div>
@@ -333,25 +326,23 @@ export function VocabularyCard({
         </div>
       </div>
 
-      {/* Simple Navigation */}
-      <div className="flex items-center justify-center gap-3 mt-6">
+      {/* Enhanced Navigation */}
+      <div className="flex items-center justify-center gap-4 mt-8">
         <Button
           onClick={previousWord}
           disabled={currentWordIndex === 0}
-          variant="outline"
-          size="sm"
-          className="px-4 py-2"
+          className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
         >
-          <ArrowLeft className="h-4 w-4 mr-1" />
+          <ArrowLeft className="h-5 w-5 mr-2" />
           Previous
         </Button>
 
         <Button
           onClick={nextWord}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 font-semibold"
         >
-          {isLastWord ? "Complete" : "Next"}
-          <ArrowRight className="h-4 w-4 ml-1" />
+          {isLastWord ? "🎉 Complete" : "Next Word"}
+          <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       </div>
     </div>
