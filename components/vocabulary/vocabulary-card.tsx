@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Volume2,
   ArrowRight,
@@ -80,13 +79,6 @@ export function VocabularyCard({
     }
   };
 
-  const resetProgress = () => {
-    setCurrentWordIndex(0);
-    setLearnedWords(new Set());
-    setShowExamples(false);
-    setIsFlipped(false);
-  };
-
   if (!currentWord || wordsToLearn.length === 0) {
     return (
       <div className="text-center py-20">
@@ -126,9 +118,9 @@ export function VocabularyCard({
       </div>
 
       {/* Interactive Flashcard */}
-      <div className="relative mb-8 flex justify-center">
+      <div className="relative mb-12 flex justify-center">
         <div
-          className="relative w-full max-w-md h-80"
+          className="relative w-full max-w-md h-[28rem]"
           style={{ perspective: "1000px" }}
         >
           <div
@@ -151,7 +143,7 @@ export function VocabularyCard({
                     : "border-gray-200 dark:border-gray-700"
                 }`}
               >
-                <CardContent className="h-full flex flex-col items-center justify-center p-8 text-center">
+                <CardContent className="h-full flex flex-col items-center justify-center p-6 text-center">
                   <div className="mb-6">
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
@@ -224,92 +216,115 @@ export function VocabularyCard({
                     : "border-gray-200 dark:border-gray-700"
                 }`}
               >
-                <CardContent className="h-full flex flex-col justify-center p-8">
-                  <div className="text-center mb-6">
+                <CardContent className="h-full flex flex-col p-6">
+                  {/* Header Section */}
+                  <div className="text-center mb-3 flex-shrink-0">
                     <div
-                      className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
                         isWordLearned
                           ? "bg-green-100 dark:bg-green-900/30"
                           : "bg-green-100 dark:bg-green-900/30"
                       }`}
                     >
                       {isWordLearned ? (
-                        <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                        <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                       ) : (
-                        <Lightbulb className="h-8 w-8 text-green-600 dark:text-green-400" />
+                        <Lightbulb className="h-6 w-6 text-green-600 dark:text-green-400" />
                       )}
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                       {currentWord.word}
                     </h3>
                     {isWordLearned && (
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mb-4">
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mb-2">
                         ✓ Learned
                       </Badge>
                     )}
+                  </div>
+
+                  {/* Meaning Section */}
+                  <div className="mb-3 flex-shrink-0">
                     <div
-                      className={`rounded-lg p-4 mb-4 ${
+                      className={`rounded-lg p-3 ${
                         isWordLearned
                           ? "bg-green-100 dark:bg-green-800/30"
                           : "bg-gray-50 dark:bg-gray-700"
                       }`}
                     >
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
                         {currentWord.meaning}
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  {/* Examples Section */}
+                  <div className="mb-3 flex-shrink-0">
                     <Button
                       onClick={() => setShowExamples(!showExamples)}
                       variant="outline"
-                      className="w-full bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      size="sm"
+                      className="w-full bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 mb-2"
                     >
-                      <Star className="h-4 w-4 mr-2" />
+                      <Star className="h-3 w-3 mr-1" />
                       {showExamples ? "Hide" : "Show"} Examples
                     </Button>
 
-                    {showExamples && (
-                      <div className="space-y-2 max-h-24 overflow-y-auto">
+                    <div
+                      className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                        showExamples
+                          ? "max-h-28 opacity-100"
+                          : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      <div>
                         {currentWord.example
                           .slice(0, 2)
                           .map((example, index) => (
                             <div
                               key={index}
-                              className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm border-l-4 border-blue-400"
+                              className="p-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg text-xs border-l-3 border-blue-400 shadow-sm hover:shadow-md transition-all duration-200 mb-1"
                             >
-                              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                                {index + 1}.
-                              </span>{" "}
-                              {example}
+                              <div className="flex items-start gap-2">
+                                <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-800/30 rounded-full w-4 h-4 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                                  {index + 1}
+                                </span>
+                                <span className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                  {example}
+                                </span>
+                              </div>
                             </div>
                           ))}
                       </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => setIsFlipped(false)}
-                        variant="outline"
-                        className="flex-1 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
-                      >
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Flip Back
-                      </Button>
-                      <Button
-                        onClick={markWordLearned}
-                        disabled={isWordLearned}
-                        className={`flex-1 px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ${
-                          isWordLearned
-                            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700 text-white"
-                        }`}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        {isWordLearned ? "Already Learned" : "Got it!"}
-                      </Button>
                     </div>
+                  </div>
+
+                  {/* Spacer to push buttons to bottom */}
+                  <div className="flex-grow"></div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 flex-shrink-0 mt-4">
+                    <Button
+                      onClick={() => setIsFlipped(false)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    >
+                      <RotateCcw className="h-3 w-3 mr-1" />
+                      Flip Back
+                    </Button>
+                    <Button
+                      onClick={markWordLearned}
+                      disabled={isWordLearned}
+                      size="sm"
+                      className={`flex-1 px-3 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ${
+                        isWordLearned
+                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      {isWordLearned ? "Learned" : "Got it!"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -319,12 +334,13 @@ export function VocabularyCard({
       </div>
 
       {/* Simple Navigation */}
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-3 mt-6">
         <Button
           onClick={previousWord}
           disabled={currentWordIndex === 0}
           variant="outline"
           size="sm"
+          className="px-4 py-2"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Previous
@@ -332,7 +348,7 @@ export function VocabularyCard({
 
         <Button
           onClick={nextWord}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
         >
           {isLastWord ? "Complete" : "Next"}
           <ArrowRight className="h-4 w-4 ml-1" />
