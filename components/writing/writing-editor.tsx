@@ -81,6 +81,7 @@ export function WritingEditor({
     return (
       <EvaluationResults
         evaluation={evaluation}
+        userContent={content}
         onClose={handleCloseEvaluation}
         onRevise={handleReviseWriting}
       />
@@ -163,13 +164,17 @@ export function WritingEditor({
                       {wordCount} words
                     </div>
                     <Button
-                      variant="outline"
                       size="sm"
+                      variant="outline"
                       onClick={() => handleContentChange("")}
                       disabled={!content.trim()}
+                      className={`border border-red-200 dark:border-red-700 text-red-600 dark:text-red-300 bg-white dark:bg-gray-800 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/30 transition-colors ${
+                        !content.trim()
+                          ? "opacity-60 cursor-not-allowed"
+                          : "hover:border-red-400"
+                      }`}
                     >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reset
+                      <span className="font-medium">Clear All</span>
                     </Button>
                   </div>
                 </div>
