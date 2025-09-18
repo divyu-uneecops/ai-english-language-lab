@@ -214,7 +214,7 @@ export function ModuleCards() {
             index={1}
           />
 
-          {/* <ModuleCard
+          <ModuleCard
             icon={Mic}
             title="Speaking Practice"
             description="Enhance your pronunciation and fluency with AI-powered speech exercises"
@@ -229,7 +229,7 @@ export function ModuleCards() {
             gradient="from-green-400 to-green-500"
             delay={200}
             index={2}
-          /> */}
+          />
 
           <ModuleCard
             icon={PenTool}
@@ -241,7 +241,7 @@ export function ModuleCards() {
             variant="outline"
             gradient="from-blue-300 to-green-400"
             delay={400}
-            index={2}
+            index={3}
           />
 
           <ModuleCard
@@ -259,7 +259,7 @@ export function ModuleCards() {
             variant="outline"
             gradient="from-green-400 to-blue-400"
             delay={600}
-            index={3}
+            index={4}
           />
         </div>
       </div>
