@@ -279,7 +279,7 @@ export default function StoryPage() {
               key={index}
               className={`transition-all duration-200 ${
                 isHighlighted
-                  ? "bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 px-1 rounded"
+                  ? "bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 rounded"
                   : ""
               }`}
             >
