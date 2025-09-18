@@ -111,36 +111,11 @@ export function WritingInterface() {
                 </p>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                Progress
-              </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                3 / 12
-              </div>
-              <div className="text-xs text-gray-400 dark:text-gray-500">
-                Exercises completed
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Modern Content Section */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Writing Types
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Choose a writing type to start practicing
-              </p>
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {writingTypes.length} types available
-            </div>
-          </div>
-
           {/* Modern Writing Types Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {writingTypes.map((type) => {

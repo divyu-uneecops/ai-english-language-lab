@@ -135,17 +135,6 @@ export function WritingPrompts({
                 </p>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                Available
-              </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {loading ? "..." : topics?.length}
-              </div>
-              <div className="text-xs text-gray-400 dark:text-gray-500">
-                {typeName}
-              </div>
-            </div>
           </div>
         </div>
 

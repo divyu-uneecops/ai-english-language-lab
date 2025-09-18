@@ -106,7 +106,7 @@ export default function StoryPage() {
 
     // Stop any existing speech
     if (speechUtterance) {
-      speechSynthesis.cancel();
+      speechSynthesis?.cancel();
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -139,27 +139,27 @@ export default function StoryPage() {
     };
 
     setSpeechUtterance(utterance);
-    speechSynthesis.speak(utterance);
+    speechSynthesis?.speak(utterance);
     setIsPlaying(true);
     setIsPaused(false);
   };
 
   const pauseSpeech = () => {
-    if (speechSynthesis.speaking && !speechSynthesis.paused) {
-      speechSynthesis.pause();
+    if (speechSynthesis?.speaking && !speechSynthesis?.paused) {
+      speechSynthesis?.pause();
       setIsPaused(true);
     }
   };
 
   const resumeSpeech = () => {
-    if (speechSynthesis.paused) {
-      speechSynthesis.resume();
+    if (speechSynthesis?.paused) {
+      speechSynthesis?.resume();
       setIsPaused(false);
     }
   };
 
   const stopSpeech = () => {
-    speechSynthesis.cancel();
+    speechSynthesis?.cancel();
     setIsPlaying(false);
     setIsPaused(false);
     setCurrentWordIndex(-1);
@@ -188,7 +188,7 @@ export default function StoryPage() {
   useEffect(() => {
     return () => {
       if (speechUtterance) {
-        speechSynthesis.cancel();
+        speechSynthesis?.cancel();
       }
     };
   }, [speechUtterance]);
@@ -737,7 +737,10 @@ export default function StoryPage() {
         {/* Action Buttons */}
         <div className="mt-8 flex justify-end">
           <Button
-            onClick={() => setShowQuestions(true)}
+            onClick={() => {
+              handleStopClick();
+              setShowQuestions(true);
+            }}
             className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 px-8 py-3 font-medium tracking-wide border border-slate-600 hover:border-slate-700"
           >
             Start Questions
