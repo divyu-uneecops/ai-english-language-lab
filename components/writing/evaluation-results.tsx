@@ -179,7 +179,9 @@ export function EvaluationResults({
                   </h3>
                   <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border">
                     <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-                      {evaluation?.example_answer}
+                      {typeof evaluation?.example_answer === "string"
+                        ? evaluation?.example_answer
+                        : ""}
                     </pre>
                   </div>
                 </div>
