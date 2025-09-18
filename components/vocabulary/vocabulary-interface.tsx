@@ -22,7 +22,7 @@ export function VocabularyInterface() {
     setLoading(true);
     setError(null);
     try {
-      const data = await vocabularyService.fetchVocabulary(1, 10);
+      const data = await vocabularyService.fetchVocabulary(1, 15);
       setVocabularyData(data?.results);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
