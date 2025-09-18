@@ -46,7 +46,7 @@ export function Navigation() {
         >
           <Button
             variant="ghost"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-300 group ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-700 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group ${
               mobile ? "w-full justify-start" : ""
             }`}
           >
@@ -59,24 +59,24 @@ export function Navigation() {
   );
 
   return (
-    <nav className="sticky top-0 z-50 bg-gray-50/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-slate-700 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+    <nav className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-slate-700 shadow-sm">
+      <div className="max-w-7xl mx-auto px-3 md:px-4">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-4 group">
+          <Link href="/" className="flex items-center gap-2 md:gap-4 group flex-shrink-0">
             <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center group-hover:scale-105 transition-all duration-300 shadow-lg">
-                <BookOpen className="h-7 w-7 text-white" />
+              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-all duration-300 shadow-lg">
+                <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                <Zap className="h-2.5 w-2.5 text-white" />
+              <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-3 h-3 md:w-5 md:h-5 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center">
+                <Zap className="h-1.5 w-1.5 md:h-2.5 md:w-2.5 text-white" />
               </div>
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-2xl font-black gradient-text group-hover:scale-105 transition-transform duration-300">
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white group-hover:scale-105 transition-transform duration-300 truncate">
                 English Lab
               </h1>
-              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300 truncate">
                 AI-Powered Learning
               </span>
             </div>
@@ -91,7 +91,7 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 group"
+              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group"
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
@@ -105,9 +105,9 @@ export function Navigation() {
                 <DropdownMenuTrigger>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-3 ml-4 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 group"
+                    className="flex items-center gap-3 ml-4 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                       <User className="h-5 w-5 text-white" />
                     </div>
                     <span className="hidden xl:inline font-semibold">
@@ -130,7 +130,7 @@ export function Navigation() {
               </DropdownMenu>
             ) : (
               <Link href="/auth/login" className="ml-4">
-                <Button className="px-8 py-3 font-bold bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">
+                <Button className="px-8 py-3 font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">
                   Sign In
                 </Button>
               </Link>
@@ -138,13 +138,13 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center gap-3">
+          <div className="lg:hidden flex items-center gap-1 md:gap-3 flex-shrink-0">
             {!user && (
               <Link href="/auth/login">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="px-4 py-2 rounded-xl font-semibold"
+                  className="px-3 md:px-4 py-2 rounded-lg md:rounded-xl font-semibold text-sm hover:bg-green-50 hover:text-green-600 transition-all duration-300"
                 >
                   Sign In
                 </Button>
@@ -154,7 +154,7 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 group"
+              className="p-2 md:p-3 rounded-lg md:rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
@@ -173,7 +173,7 @@ export function Navigation() {
               <input
                 type="text"
                 placeholder="Search modules, lessons..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
           </div>
@@ -181,15 +181,15 @@ export function Navigation() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-            <div className="flex flex-col space-y-2 p-6">
+          <div className="lg:hidden border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 animate-in slide-in-from-top-2 duration-300">
+            <div className="flex flex-col space-y-2 p-4 md:p-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
               <NavLinks mobile />
 
               {/* Mobile Theme Toggle */}
               <Button
                 variant="ghost"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 group"
+                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group min-h-[48px]"
               >
                 {theme === "dark" ? (
                   <Sun className="h-4 w-4 mr-3 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
@@ -203,12 +203,12 @@ export function Navigation() {
 
               {user && (
                 <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 dark:bg-slate-800 mb-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center">
-                      <User className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-green-50 dark:bg-slate-800 mb-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
+                      <User className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900 dark:text-white truncate">
                         {user.name}
                       </p>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -222,7 +222,7 @@ export function Navigation() {
                       logout();
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 group"
+                    className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 group min-h-[48px]"
                   >
                     <LogOut className="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-300" />
                     <span className="font-medium">Logout</span>
