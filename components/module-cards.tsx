@@ -21,20 +21,16 @@ import {
   Play,
   TrendingUp,
   Award,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function ModuleCards() {
   const { user } = useAuth();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(4); // Start from middle set (shows cards 4,5,6 with 5 as center)
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const originalModules = [
+  const modules = [
     {
       icon: BookOpen,
       title: "Reading Practice",
@@ -81,41 +77,7 @@ export function ModuleCards() {
     }
   ];
 
-  // Create infinite loop by duplicating modules
-  const modules = [...originalModules, ...originalModules, ...originalModules];
-  const totalOriginalSlides = originalModules.length;
-  
-  const nextSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => prev + 1);
-  };
-
-  const prevSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => prev - 1);
-  };
-
-  // Handle infinite loop transitions
-  useEffect(() => {
-    if (isTransitioning) {
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-        
-        // Reset position when reaching the end or beginning
-        if (currentSlide >= totalOriginalSlides * 2) {
-          setCurrentSlide(totalOriginalSlides);
-        } else if (currentSlide < 0) {
-          setCurrentSlide(totalOriginalSlides - 1);
-        }
-      }, 700); // Match transition duration
-      
-      return () => clearTimeout(timer);
-    }
-  }, [currentSlide, isTransitioning, totalOriginalSlides]);
-
-  const ModuleCard = ({ module, index, isCenter }: { module: any; index: number; isCenter: boolean; }) => (
+  const ModuleCard = ({ module, index }: { module: any; index: number; }) => (
       <div
       className="group relative overflow-hidden bg-white rounded-3xl transition-all duration-700 ease-out shadow-lg border border-gray-200 h-full"
       onMouseEnter={() => setHoveredCard(index)}
@@ -261,77 +223,14 @@ export function ModuleCards() {
           </p>
         </div>
 
-        {/* Desktop Carousel */}
-        <div className="hidden md:block relative max-w-6xl mx-auto mt-20">
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-20 w-14 h-14 bg-white hover:bg-orange-50 rounded-full shadow-xl border-2 border-orange-200 flex items-center justify-center transition-all duration-300 hover:scale-110 group"
-          >
-            <ChevronLeft className="h-6 w-6 text-orange-600 group-hover:text-orange-700" />
-          </button>
-          
-          <button
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-20 w-14 h-14 bg-white hover:bg-orange-50 rounded-full shadow-xl border-2 border-orange-200 flex items-center justify-center transition-all duration-300 hover:scale-110 group"
-          >
-            <ChevronRight className="h-6 w-6 text-orange-600 group-hover:text-orange-700" />
-          </button>
-
-          {/* Carousel Track - Shows 3 cards at once */}
-          <div className="overflow-hidden px-8 bg-white pb-5">
-            <div 
-              className={`flex gap-6 items-stretch ${isTransitioning ? 'transition-transform duration-700 ease-out' : ''}`}
-              style={{
-                transform: `translateX(-${currentSlide * 33.333}%)`
-              }}
-            >
-              {modules.map((module, index) => {
-                const originalIndex = index % totalOriginalSlides;
-                return (
-                  <div
-                    key={`${originalIndex}-${Math.floor(index / totalOriginalSlides)}`}
-                    className="w-1/3 flex-shrink-0"
-                  >
-                    <ModuleCard
-                      module={module}
-                      index={index}
-                      isCenter={index === currentSlide + 1}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Dots Indicator */}
-          <div className="flex justify-center mt-8 gap-3">
-            {originalModules.map((_, index) => {
-              const isActive = (currentSlide % totalOriginalSlides) === index;
-              return (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(totalOriginalSlides + index)} // Jump to middle set
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-to-r from-orange-400 to-pink-400 scale-125 shadow-lg"
-                      : "bg-gray-300 hover:bg-orange-300"
-                  }`}
-                />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Mobile Grid */}
-        <div className="block md:hidden">
-          <div className="grid grid-cols-1 gap-6 max-w-sm mx-auto">
-            {originalModules.map((module, index) => (
+        {/* Cards Grid */}
+        <div className="max-w-7xl mx-auto mt-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {modules.map((module, index) => (
               <ModuleCard
                 key={index}
                 module={module}
                 index={index}
-                isCenter={true}
               />
             ))}
           </div>
