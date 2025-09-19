@@ -21,95 +21,155 @@ import {
   Play,
   TrendingUp,
   Award,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function ModuleCards() {
   const { user } = useAuth();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(4); // Start from middle set (shows cards 4,5,6 with 5 as center)
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const ModuleCard = ({
-    icon: Icon,
-    title,
-    description,
-    features,
-    href,
-    buttonText,
-    variant = "default",
-    gradient,
-    isPopular = false,
-    delay = 0,
-    index,
-  }: {
-    icon: any;
-    title: string;
-    description: string;
-    features: string[];
-    href: string;
-    buttonText: string;
-    variant?: "default" | "secondary" | "outline";
-    gradient: string;
-    isPopular?: boolean;
-    delay?: number;
-    index: number;
-  }) => (
-    <div
-      className="group relative premium-card rounded-3xl p-8 hover-lift overflow-hidden bg-white dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700"
-      style={{
-        animationDelay: `${delay}ms`,
-        transform:
-          hoveredCard === index
-            ? "translateY(-8px) scale(1.02)"
-            : "translateY(0) scale(1)",
-        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-      }}
+  const originalModules = [
+    {
+      icon: BookOpen,
+      title: "Reading Practice",
+      description: "Immerse yourself in engaging stories and enhance comprehension",
+      features: ["Interactive Stories", "Comprehension Questions", "Vocabulary building"],
+      href: "/reading",
+      buttonText: "Start Reading",
+      variant: "default" as const,
+      gradient: "from-orange-400 to-orange-500",
+      color: "orange"
+    },
+    {
+      icon: Mic,
+      title: "Speaking Practice", 
+      description: "Enhance your pronunciation and fluency with AI-powered speech exercises",
+      features: ["Pronunciation Training", "Fluency Exercises", "AI Feedback"],
+      href: "/speaking",
+      buttonText: "Start Speaking",
+      variant: "secondary" as const,
+      gradient: "from-pink-400 to-pink-500",
+      color: "pink"
+    },
+    {
+      icon: PenTool,
+      title: "Writing Practice",
+      description: "Develop your writing skills with guided exercises and AI evaluation", 
+      features: ["Guided Writing", "Grammar Check", "AI Evaluation"],
+      href: "/writing",
+      buttonText: "Start Writing",
+      variant: "outline" as const,
+      gradient: "from-yellow-400 to-orange-400",
+      color: "yellow"
+    },
+    {
+      icon: MessageCircle,
+      title: "AI Assistant",
+      description: "Get instant, intelligent support for all your questions",
+      features: ["24/7 AI support", "Grammar explanations", "Vocabulary help", "Learning tips"],
+      href: "/chat", 
+      buttonText: "Chat with AI",
+      variant: "outline" as const,
+      gradient: "from-orange-400 to-pink-400",
+      color: "blue"
+    }
+  ];
+
+  // Create infinite loop by duplicating modules
+  const modules = [...originalModules, ...originalModules, ...originalModules];
+  const totalOriginalSlides = originalModules.length;
+  
+  const nextSlide = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => prev + 1);
+  };
+
+  const prevSlide = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => prev - 1);
+  };
+
+  // Handle infinite loop transitions
+  useEffect(() => {
+    if (isTransitioning) {
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        
+        // Reset position when reaching the end or beginning
+        if (currentSlide >= totalOriginalSlides * 2) {
+          setCurrentSlide(totalOriginalSlides);
+        } else if (currentSlide < 0) {
+          setCurrentSlide(totalOriginalSlides - 1);
+        }
+      }, 700); // Match transition duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentSlide, isTransitioning, totalOriginalSlides]);
+
+  const ModuleCard = ({ module, index, isCenter }: { module: any; index: number; isCenter: boolean; }) => (
+      <div
+      className="group relative overflow-hidden bg-white rounded-3xl transition-all duration-700 ease-out shadow-lg border border-gray-200 h-full"
       onMouseEnter={() => setHoveredCard(index)}
       onMouseLeave={() => setHoveredCard(null)}
     >
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-purple-50/50 dark:from-white/10 dark:via-transparent dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.05)_0%,transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400/60 dark:bg-white/40 rounded-full particle-effect"
-            style={{
-              left: `${20 + i * 30}%`,
-              top: `${20 + i * 20}%`,
-              animationDelay: `${i * 0.5}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10">
-        {/* Icon with 3D Effect */}
-        <div className="w-20 h-20 mb-6 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 dark:from-white/20 dark:to-white/10 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 border border-blue-200 dark:border-white/30">
-          <Icon className="h-10 w-10 text-blue-600 dark:text-white drop-shadow-lg" />
+      {/* Gradient Background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${
+        module.color === 'orange' ? 'from-orange-50 to-orange-100' :
+        module.color === 'pink' ? 'from-pink-50 to-pink-100' :
+        module.color === 'yellow' ? 'from-yellow-50 to-yellow-100' :
+        'from-blue-50 to-blue-100'
+      } opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      
+      {/* Content */}
+      <div className="relative p-8 h-full flex flex-col">
+        {/* Icon */}
+        <div className={`w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br ${
+          module.color === 'orange' ? 'from-orange-100 to-orange-200' :
+          module.color === 'pink' ? 'from-pink-100 to-pink-200' :
+          module.color === 'yellow' ? 'from-yellow-100 to-yellow-200' :
+          'from-blue-100 to-blue-200'
+        } flex items-center justify-center group-hover:scale-110 transition-all duration-500 shadow-md`}>
+          <module.icon className={`h-8 w-8 ${
+            module.color === 'orange' ? 'text-orange-600' :
+            module.color === 'pink' ? 'text-pink-600' :
+            module.color === 'yellow' ? 'text-yellow-600' :
+            'text-blue-600'
+          }`} />
         </div>
 
-        {/* Content */}
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-glow transition-all duration-300">
-            {title}
+        {/* Title and Description */}
+        <div className="flex-1">
+          <h3 className={`text-xl font-bold mb-3 transition-colors duration-300 text-slate-800 ${hoveredCard === index ? 
+            (module.color === 'orange' ? 'text-orange-600' :
+             module.color === 'pink' ? 'text-pink-600' :
+             module.color === 'yellow' ? 'text-yellow-600' :
+             'text-blue-600') : ''
+          }`}>
+            {module.title}
           </h3>
-          <p className="text-slate-600 dark:text-white/80 leading-relaxed mb-4 text-base">
-            {description}
+          <p className="text-slate-600 text-sm leading-relaxed mb-4">
+            {module.description}
           </p>
 
-          <ul className="space-y-3">
-            {features.map((feature, index) => (
-              <li
-                key={index}
-                className="flex items-center gap-3 text-sm text-slate-500 dark:text-white/70 group-hover:text-slate-700 dark:group-hover:text-white/90 transition-colors duration-300"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-white/60 flex-shrink-0 group-hover:scale-125 transition-transform duration-300" />
+          {/* Features */}
+          <ul className="space-y-2 mb-6">
+            {module.features.map((feature: string, idx: number) => (
+              <li key={idx} className="flex items-center gap-2 text-xs text-slate-500">
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  module.color === 'orange' ? 'bg-orange-400' :
+                  module.color === 'pink' ? 'bg-pink-400' :
+                  module.color === 'yellow' ? 'bg-yellow-400' :
+                  'bg-blue-400'
+                }`} />
                 {feature}
               </li>
             ))}
@@ -118,131 +178,163 @@ export function ModuleCards() {
 
         {/* Button */}
         {user && (
-          <Link href={href}>
+          <Link href={module.href}>
             <Button
-              variant={variant}
-              className={`w-full py-3 font-bold text-sm transition-all duration-500 group-hover:scale-105 ${
-                variant === "default"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl"
-                  : variant === "secondary"
-                  ? "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-200 hover:border-blue-300"
-                  : "bg-transparent hover:bg-blue-50 text-blue-600 border-2 border-blue-200 hover:border-blue-300"
+              className={`w-full py-2.5 text-sm font-semibold transition-all duration-300 ${
+                module.variant === "default"
+                  ? `bg-gradient-to-r ${module.gradient} hover:shadow-lg text-white border-0`
+                  : module.variant === "secondary"
+                  ? `bg-${module.color}-100 hover:bg-${module.color}-200 text-${module.color}-700 border border-${module.color}-200`
+                  : `bg-transparent hover:bg-${module.color}-50 text-${module.color}-600 border border-${module.color}-200`
               }`}
             >
-              <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-              {buttonText}
-              <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+              <Play className="h-3 w-3 mr-2" />
+              {module.buttonText}
             </Button>
           </Link>
         )}
       </div>
-
-      {/* Shimmer Effect */}
-      <div className="absolute inset-0 -top-10 -left-10 w-20 h-20 bg-gradient-to-r from-transparent via-blue-200/40 dark:via-white/20 to-transparent rotate-45 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-500" />
-
-      {/* Holographic Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 dark:via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     </div>
   );
 
   return (
-    <section className="py-32 px-4 relative overflow-hidden">
-      {/* Eye-Comfort Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-gray-100 to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-100/10 via-transparent to-green-100/10 dark:from-indigo-900/20 dark:to-purple-900/20" />
-
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl floating-element" />
+    <section className="pt-8 pb-24 px-4 relative overflow-hidden bg-white">
+      <style jsx>{`
+        @keyframes gradient {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradient 3s ease-in-out infinite;
+        }
+        .bg-size-200 {
+          background-size: 200% 200%;
+        }
+      `}</style>
+      {/* Subtle Background Elements */}
+      <div className="absolute inset-0 bg-white" />
+      
+      {/* Enhanced Floating Elements */}
+      <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-r from-orange-400/8 to-pink-400/8 rounded-full blur-2xl floating-element animate-pulse" />
+      <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-full blur-xl floating-element" />
       <div
-        className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-cyan-400/10 to-pink-400/10 rounded-full blur-3xl floating-element"
-        style={{ animationDelay: "2s" }}
+        className="absolute bottom-20 left-20 w-40 h-40 bg-gradient-to-r from-pink-400/6 to-orange-400/6 rounded-full blur-3xl floating-element"
+        style={{ animationDelay: "1s" }}
+      />
+      <div
+        className="absolute bottom-32 right-16 w-28 h-28 bg-gradient-to-r from-orange-400/8 to-yellow-400/8 rounded-full blur-2xl floating-element"
+        style={{ animationDelay: "2.5s" }}
       />
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-3 px-8 py-4 rounded-full premium-card mb-8 group hover:scale-105 transition-all duration-500">
-            <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-green-400 rounded-full animate-pulse" />
-            <span className="text-sm font-bold gradient-text">
+        <div className="text-center mb-12">
+          <div className="relative inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white border border-orange-200 mb-6 hover:border-orange-300 transition-all duration-300 shadow-sm hover:shadow-md group overflow-hidden">
+            {/* Animated background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-50/50 via-pink-50/50 to-yellow-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Moving sparkle dots */}
+            <div className="absolute top-1 left-4 w-1 h-1 bg-orange-400 rounded-full animate-ping" style={{ animationDuration: "2s", animationDelay: "0s" }}></div>
+            <div className="absolute bottom-1 right-6 w-1 h-1 bg-pink-400 rounded-full animate-ping" style={{ animationDuration: "1.5s", animationDelay: "0.7s" }}></div>
+            <div className="absolute top-2 right-4 w-0.5 h-0.5 bg-yellow-400 rounded-full animate-pulse" style={{ animationDuration: "1.8s", animationDelay: "1.2s" }}></div>
+            
+            {/* Floating sparkle emoji with gentle movement */}
+            <span className="text-sm animate-bounce relative z-10" style={{ animationDuration: "3s" }}>✨</span>
+            
+            {/* Text with subtle gradient animation */}
+            <span className="text-sm font-medium bg-gradient-to-r from-orange-600 via-pink-600 to-orange-600 bg-clip-text text-transparent bg-size-200 animate-gradient relative z-10">
               Choose Your Learning Path
             </span>
-            <Sparkles className="h-4 w-4 text-blue-500 dark:text-blue-400 animate-spin" />
+            
+            {/* Trailing sparkle with delayed animation */}
+            <span className="text-sm animate-pulse relative z-10" style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}>✨</span>
           </div>
 
-          <h2 className="text-5xl md:text-6xl font-black text-slate-800 dark:text-white mb-8 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-3 leading-tight bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
             Learning Modules
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed font-light">
+          <div className="w-20 h-1 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full mx-auto mb-4"></div>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-snug font-medium">
             {user
               ? "Continue your English learning journey with our AI-powered modules designed to enhance your skills"
               : "Sign in to unlock all learning modules and start your personalized English learning experience"}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <ModuleCard
-            icon={BookOpen}
-            title="Reading Practice"
-            description="Immerse yourself in engaging stories and enhance comprehension"
-            features={[
-              "Interactive Stories",
-              "Comprehension Questions",
-              "Vocabulary building",
-            ]}
-            href="/reading"
-            buttonText="Start Reading"
-            gradient="from-blue-400 to-blue-500"
-            isPopular={true}
-            delay={0}
-            index={0}
-          />
+        {/* Desktop Carousel */}
+        <div className="hidden md:block relative max-w-6xl mx-auto mt-20">
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-20 w-14 h-14 bg-white hover:bg-orange-50 rounded-full shadow-xl border-2 border-orange-200 flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+          >
+            <ChevronLeft className="h-6 w-6 text-orange-600 group-hover:text-orange-700" />
+          </button>
+          
+          <button
+            onClick={nextSlide}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-20 w-14 h-14 bg-white hover:bg-orange-50 rounded-full shadow-xl border-2 border-orange-200 flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+          >
+            <ChevronRight className="h-6 w-6 text-orange-600 group-hover:text-orange-700" />
+          </button>
 
-          <ModuleCard
-            icon={Mic}
-            title="Speaking Practice"
-            description="Enhance your pronunciation and fluency with AI-powered speech exercises"
-            features={[
-              "Pronunciation Training",
-              "Fluency Exercises",
-              "AI Feedback",
-            ]}
-            href="/speaking"
-            buttonText="Start Speaking"
-            variant="secondary"
-            gradient="from-green-400 to-green-500"
-            delay={200}
-            index={1}
-          />
+          {/* Carousel Track - Shows 3 cards at once */}
+          <div className="overflow-hidden px-8 bg-white pb-5">
+            <div 
+              className={`flex gap-6 items-stretch ${isTransitioning ? 'transition-transform duration-700 ease-out' : ''}`}
+              style={{
+                transform: `translateX(-${currentSlide * 33.333}%)`
+              }}
+            >
+              {modules.map((module, index) => {
+                const originalIndex = index % totalOriginalSlides;
+                return (
+                  <div
+                    key={`${originalIndex}-${Math.floor(index / totalOriginalSlides)}`}
+                    className="w-1/3 flex-shrink-0"
+                  >
+                    <ModuleCard
+                      module={module}
+                      index={index}
+                      isCenter={index === currentSlide + 1}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-          <ModuleCard
-            icon={PenTool}
-            title="Writing Practice"
-            description="Develop your writing skills with guided exercises and AI evaluation"
-            features={["Guided Writing", "Grammar Check", "AI Evaluation"]}
-            href="/writing"
-            buttonText="Start Writing"
-            variant="outline"
-            gradient="from-blue-300 to-green-400"
-            delay={400}
-            index={2}
-          />
+          {/* Dots Indicator */}
+          <div className="flex justify-center mt-8 gap-3">
+            {originalModules.map((_, index) => {
+              const isActive = (currentSlide % totalOriginalSlides) === index;
+              return (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(totalOriginalSlides + index)} // Jump to middle set
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "bg-gradient-to-r from-orange-400 to-pink-400 scale-125 shadow-lg"
+                      : "bg-gray-300 hover:bg-orange-300"
+                  }`}
+                />
+              );
+            })}
+          </div>
+        </div>
 
-          <ModuleCard
-            icon={MessageCircle}
-            title="AI Assistant"
-            description="Get instant, intelligent support for all your questions"
-            features={[
-              "24/7 AI support",
-              "Grammar explanations",
-              "Vocabulary help",
-              "Learning tips",
-            ]}
-            href="/chat"
-            buttonText="Chat with AI"
-            variant="outline"
-            gradient="from-green-400 to-blue-400"
-            delay={600}
-            index={3}
-          />
+        {/* Mobile Grid */}
+        <div className="block md:hidden">
+          <div className="grid grid-cols-1 gap-6 max-w-sm mx-auto">
+            {originalModules.map((module, index) => (
+              <ModuleCard
+                key={index}
+                module={module}
+                index={index}
+                isCenter={true}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

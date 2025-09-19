@@ -15,6 +15,7 @@ import {
   Zap,
   BookOpen,
   Heart,
+  ArrowRight,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -103,7 +104,8 @@ export function Hero() {
                         className="w-full max-w-sm bg-gradient-to-r from-orange-500 to-orange-600 
                                   hover:from-orange-600 hover:to-orange-700 text-white font-bold 
                                   rounded-xl shadow-lg hover:shadow-xl 
-                                  transform hover:scale-105 transition-all duration-200 tracking-normal uppercase"
+                                  transform hover:scale-105 transition-all duration-200 tracking-normal uppercase
+                                  flex items-center justify-center gap-2"
                         style={{
                           fontFamily: 'Inter, sans-serif',
                           fontSize: '10px',
@@ -116,6 +118,12 @@ export function Hero() {
                           padding: '16px 24px',
                         }}
                       >
+                        <ArrowRight 
+                          className="w-4 h-4 animate-pulse"
+                          style={{
+                            animation: 'slideLeftRight 2s ease-in-out infinite'
+                          }}
+                        />
                         BOOK A FREE LIVE CLASS 
                       </Button>
 

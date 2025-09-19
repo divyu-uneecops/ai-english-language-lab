@@ -44,11 +44,11 @@ export function Navigation() {
           href="/progress"
           onClick={() => mobile && setMobileMenuOpen(false)}
         >
-          <Button
-            variant="ghost"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-700 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group ${
-              mobile ? "w-full justify-start" : ""
-            }`}
+            <Button
+              variant="ghost"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group ${
+                mobile ? "w-full justify-start" : ""
+              }`}
           >
             <TrendingUp className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="font-medium">Progress</span>
@@ -65,10 +65,10 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 md:gap-4 group flex-shrink-0">
             <div className="relative">
-              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-all duration-300 shadow-lg">
+              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-[#FF7B3A] to-[#FF6B2A] flex items-center justify-center group-hover:scale-105 transition-all duration-300 shadow-lg">
                 <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
               </div>
-              <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-3 h-3 md:w-5 md:h-5 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center">
+              <div className="absolute -top-0.5 -right-0.5 md:-top-1 md:-right-1 w-3 h-3 md:w-5 md:h-5 bg-gradient-to-r from-[#FFB347] to-[#FF7B3A] rounded-full flex items-center justify-center">
                 <Zap className="h-1.5 w-1.5 md:h-2.5 md:w-2.5 text-white" />
               </div>
             </div>
@@ -76,7 +76,7 @@ export function Navigation() {
               <h1 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white group-hover:scale-105 transition-transform duration-300 truncate">
                 English Lab
               </h1>
-              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300 truncate">
+              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-[#FF7B3A] dark:group-hover:text-[#FFB347] transition-colors duration-300 truncate">
                 AI-Powered Learning
               </span>
             </div>
@@ -91,7 +91,7 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group"
+              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group"
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
@@ -105,9 +105,9 @@ export function Navigation() {
                 <DropdownMenuTrigger>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-3 ml-4 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group"
+                    className="flex items-center gap-3 ml-4 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#FF7B3A] to-[#FF6B2A] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                       <User className="h-5 w-5 text-white" />
                     </div>
                     <span className="hidden xl:inline font-semibold">
@@ -130,7 +130,7 @@ export function Navigation() {
               </DropdownMenu>
             ) : (
               <Link href="/auth/login" className="ml-4">
-                <Button className="px-8 py-3 font-bold bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">
+                <Button className="px-8 py-3 font-bold bg-gradient-to-r from-[#FF7B3A] to-[#FF6B2A] hover:from-[#FF6B2A] hover:to-[#FF5B1A] text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-105">
                   Sign In
                 </Button>
               </Link>
@@ -144,7 +144,7 @@ export function Navigation() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="px-3 md:px-4 py-2 rounded-lg md:rounded-xl font-semibold text-sm hover:bg-green-50 hover:text-green-600 transition-all duration-300"
+                  className="px-3 md:px-4 py-2 rounded-lg md:rounded-xl font-semibold text-sm hover:bg-orange-50 hover:text-[#FF7B3A] transition-all duration-300"
                 >
                   Sign In
                 </Button>
@@ -154,7 +154,7 @@ export function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 md:p-3 rounded-lg md:rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-2 md:p-3 rounded-lg md:rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
@@ -189,7 +189,7 @@ export function Navigation() {
               <Button
                 variant="ghost"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-300 group min-h-[48px]"
+                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group min-h-[48px]"
               >
                 {theme === "dark" ? (
                   <Sun className="h-4 w-4 mr-3 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
@@ -203,8 +203,8 @@ export function Navigation() {
 
               {user && (
                 <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
-                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-green-50 dark:bg-slate-800 mb-3">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-orange-50 dark:bg-slate-800 mb-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-r from-[#FF7B3A] to-[#FF6B2A] flex items-center justify-center flex-shrink-0">
                       <User className="h-5 w-5 md:h-6 md:w-6 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
