@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  ArrowRight,
   XCircle,
   Clock,
   Volume2,
@@ -18,6 +17,7 @@ import {
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
 import LiveSpeechToText from "@/components/reading/LiveSpeechToText";
+import { getDifficultyColor } from "@/lib/utils";
 
 interface Question {
   question_id: string;
@@ -73,12 +73,9 @@ class TTSService {
 export default function StoryPage() {
   const params = useParams();
   const storyId = params.storyId as string;
-
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [showSpeechToText, setShowSpeechToText] = useState(false);
 
   // Text-to-speech state
   const [ttsService] = useState(new TTSService());
@@ -118,6 +115,13 @@ export default function StoryPage() {
       fetchStory();
     }
   }, [storyId]);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+    };
+  }, []);
 
   // TTS functions
   const splitTextIntoWords = (text: string) => {
@@ -187,8 +191,6 @@ export default function StoryPage() {
         setIsPaused(false);
         setCurrentWordIndex(-1);
         setIsGenerating(false);
-        // Fallback to browser TTS
-        fallbackToBrowserTTS(text);
       };
 
       // Start playing
@@ -263,72 +265,6 @@ export default function StoryPage() {
     stopSpeech();
   };
 
-  // Cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      stopSpeech();
-    };
-  }, []);
-
-  // const handleNextQuestion = async () => {
-  //   if (!story) return;
-
-  //   const question = story.questions[currentQuestion];
-  //   const hasOptions = question?.options && question?.options?.length > 0;
-  //   const hasAnswer = hasOptions ? selectedAnswer : textAnswer?.trim();
-
-  //   if (hasAnswer) {
-  //     const answerValue = hasOptions ? selectedAnswer : textAnswer?.trim();
-  //     const updatedAnswers = [
-  //       ...answers,
-  //       {
-  //         question_id: question.question_id,
-  //         answer: answerValue,
-  //       },
-  //     ];
-  //     setAnswers(updatedAnswers);
-
-  //     if (currentQuestion < story.questions.length - 1) {
-  //       setCurrentQuestion((prev) => prev + 1);
-  //       setSelectedAnswer("");
-  //       setTextAnswer("");
-  //     } else {
-  //       // Finish quiz - call verify API
-  //       try {
-  //         setVerifyingAnswers(true);
-  //         const verificationResponse = await readingService.verifyAnswers(
-  //           storyId,
-  //           updatedAnswers
-  //         );
-  //         setVerificationResults(verificationResponse);
-  //         setShowResults(true);
-  //       } catch (error) {
-  //         console.error("Error verifying answers:", error);
-  //         // Still show results even if verification fails
-  //         setShowResults(true);
-  //       } finally {
-  //         setVerifyingAnswers(false);
-  //       }
-  //     }
-  //   }
-  // };
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case "beginner":
-      case "easy":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
-      case "intermediate":
-      case "medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800";
-      case "advanced":
-      case "hard":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
-      default:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
-    }
-  };
-
   const renderStoryWithHighlighting = (text: string) => {
     if (!text) return null;
 
@@ -350,9 +286,9 @@ export default function StoryPage() {
           return (
             <span
               key={index}
-              className={`transition-all duration-300 ${
+              className={`${
                 isHighlighted
-                  ? "bg-gradient-to-r from-yellow-300 to-amber-300 text-amber-900 rounded-lg px-1 py-0.5 shadow-lg transform scale-105"
+                  ? "bg-gradient-to-r from-yellow-300 to-amber-300 text-amber-900"
                   : ""
               }`}
             >
@@ -439,9 +375,6 @@ export default function StoryPage() {
                   <Clock className="h-4 w-4" />
                   <span>5 Min</span>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {story?.questions?.length} questions
-                </div>
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
                 {story?.title}
@@ -450,14 +383,20 @@ export default function StoryPage() {
           </div>
         </div>
 
-        {/* Professional Layout System */}
-        {showSpeechToText ? (
-          /* Speech Practice Mode - Task-Focused Design */
-          <div className="space-y-6">
-            {/* Functional Control Bar */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
+        <div className="space-y-6">
+          {/* Two-Column Layout */}
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            style={{ height: "calc(100vh - 300px)" }}
+          >
+            {/* Story Text Panel */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-gray-50 border-b border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Volume2 className="h-5 w-5 text-gray-600" />
+                    <h3 className="font-semibold text-gray-900">Story Text</h3>
+                  </div>
                   {/* Audio Controls */}
                   <div className="flex items-center space-x-3">
                     <Button
@@ -505,141 +444,30 @@ export default function StoryPage() {
                     )}
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-3">
-                  <Button
-                    onClick={() => setShowSpeechToText(false)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Exit Practice
-                  </Button>
+              </div>
+              <div className="p-6 h-full overflow-y-auto">
+                <div className="prose prose-lg max-w-none">
+                  {renderStoryWithHighlighting(story?.passage || "")}
                 </div>
               </div>
             </div>
 
-            {/* Two-Column Layout */}
-            <div
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-              style={{ height: "calc(100vh - 300px)" }}
-            >
-              {/* Story Text Panel */}
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Volume2 className="h-5 w-5 text-gray-600" />
-                      <h3 className="font-semibold text-gray-900">
-                        Story Text
-                      </h3>
-                    </div>
-                    {isPlaying && (
-                      <div className="flex items-center space-x-2 text-sm text-green-700">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Audio Playing</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="p-6 h-full overflow-y-auto">
-                  <div className="prose prose-lg max-w-none">
-                    {renderStoryWithHighlighting(story?.passage || "")}
-                  </div>
+            {/* Speech Practice Panel */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-gray-50 border-b border-gray-200 p-4">
+                <div className="flex items-center space-x-2">
+                  <Mic className="h-5 w-5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">
+                    Speech Practice
+                  </h3>
                 </div>
               </div>
-
-              {/* Speech Practice Panel */}
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div className="flex items-center space-x-2">
-                    <Mic className="h-5 w-5 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900">
-                      Speech Practice
-                    </h3>
-                  </div>
-                </div>
-                <div className="p-6 h-full overflow-hidden">
-                  <LiveSpeechToText className="h-full" />
-                </div>
+              <div className="p-6 h-full overflow-hidden">
+                <LiveSpeechToText className="h-full" />
               </div>
             </div>
           </div>
-        ) : (
-          /* Reading Mode - Content-First Design */
-          <div className="space-y-8">
-            {/* Story Content */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-              <div className="p-8 lg:p-12">
-                {/* Audio Controls */}
-                <div className="flex justify-center mb-8">
-                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <Button
-                      onClick={handleSpeakerClick}
-                      disabled={isGenerating}
-                      variant={isPlaying ? "secondary" : "default"}
-                      className="font-medium"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent mr-2"></div>
-                          Generating Audio
-                        </>
-                      ) : isPlaying ? (
-                        isPaused ? (
-                          <>
-                            <Play className="h-5 w-5 mr-2" />
-                            Resume Story
-                          </>
-                        ) : (
-                          <>
-                            <Pause className="h-5 w-5 mr-2" />
-                            Pause Story
-                          </>
-                        )
-                      ) : (
-                        <>
-                          <Volume2 className="h-5 w-5 mr-2" />
-                          Listen to Story
-                        </>
-                      )}
-                    </Button>
-
-                    {(isPlaying || isGenerating) && (
-                      <Button
-                        onClick={handleStopClick}
-                        disabled={isGenerating}
-                        variant="outline"
-                      >
-                        <Square className="h-5 w-5 mr-2" />
-                        Stop
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Story Text */}
-                <div className="max-w-4xl mx-auto">
-                  <div className="prose prose-xl prose-gray max-w-none">
-                    {renderStoryWithHighlighting(story?.passage || "")}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-between items-center">
-              <Button
-                onClick={() => setShowSpeechToText(true)}
-                variant="outline"
-                size="lg"
-                className="font-medium"
-              >
-                <Mic className="h-5 w-5 mr-2" />
-                Practice Reading Aloud
-              </Button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

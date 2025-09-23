@@ -29,13 +29,7 @@ export default function LiveSpeechToText({
 }: LiveSpeechToTextProps) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [metrics, setMetrics] = useState<{
-    audio_duration: number;
-    processing_latency: number;
-  } | null>(null);
-  const [requestId, setRequestId] = useState<string | null>(null);
-  const [language, setLanguage] = useState<string | null>(null);
+
   const wsRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -46,9 +40,6 @@ export default function LiveSpeechToText({
 
     setTranscript("");
     setListening(true);
-    setMetrics(null);
-    setRequestId(null);
-    setLanguage(null);
 
     try {
       const client = new SarvamAIClient({
@@ -61,7 +52,6 @@ export default function LiveSpeechToText({
       });
 
       wsRef.current = socket;
-      setIsConnected(true);
 
       socket.on("open", async () => {
         try {
@@ -126,11 +116,6 @@ export default function LiveSpeechToText({
           if (response.transcript) {
             setTranscript((prev) => prev + " " + response.transcript);
           }
-
-          // Update metadata
-          setRequestId(response.request_id);
-          setLanguage(response.language_code);
-          setMetrics(response.metrics);
         }
         // Fallback handling for different message formats
         else if (message.text) {
@@ -142,12 +127,10 @@ export default function LiveSpeechToText({
 
       socket.on("error", (err: any) => {
         console.error("WebSocket Error:", err);
-        setIsConnected(false);
       });
 
       socket.on("close", () => {
         console.log("WebSocket closed");
-        setIsConnected(false);
         setListening(false);
       });
     } catch (error) {
@@ -180,7 +163,6 @@ export default function LiveSpeechToText({
     }
 
     setListening(false);
-    setIsConnected(false);
   };
 
   // Cleanup on component unmount
