@@ -637,18 +637,6 @@ export default function StoryPage() {
                 <Mic className="h-5 w-5 mr-2" />
                 Practice Reading Aloud
               </Button>
-
-              <Button
-                onClick={() => {
-                  handleStopClick();
-                  setShowQuestions(true);
-                }}
-                size="lg"
-                className="font-medium"
-              >
-                Start Questions
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
             </div>
           </div>
         )}
