@@ -4,27 +4,20 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle,
   XCircle,
-  Trophy,
-  RotateCcw,
   Clock,
   Volume2,
-  VolumeX,
   Play,
   Pause,
   Square,
+  Mic,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
+import LiveSpeechToText from "@/components/reading/LiveSpeechToText";
 
 interface Question {
   question_id: string;
@@ -84,14 +77,8 @@ export default function StoryPage() {
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showQuestions, setShowQuestions] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<any[]>([]);
-  const [showResults, setShowResults] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState<string>("");
-  const [textAnswer, setTextAnswer] = useState<string>("");
-  const [verificationResults, setVerificationResults] = useState<any[]>([]);
-  const [verifyingAnswers, setVerifyingAnswers] = useState(false);
+
+  const [showSpeechToText, setShowSpeechToText] = useState(false);
 
   // Text-to-speech state
   const [ttsService] = useState(new TTSService());
@@ -214,44 +201,6 @@ export default function StoryPage() {
       setIsGenerating(false);
       setIsPlaying(false);
       setIsPaused(false);
-      // Fallback to browser TTS
-      fallbackToBrowserTTS(text);
-    }
-  };
-
-  // Fallback to browser TTS if our API fails
-  const fallbackToBrowserTTS = (text: string) => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.8;
-
-      const words = splitTextIntoWords(text);
-      let currentIndex = 0;
-
-      utterance.onboundary = (event) => {
-        if (event.name === "word") {
-          setCurrentWordIndex(currentIndex);
-          currentIndex++;
-        }
-      };
-
-      utterance.onend = () => {
-        setIsPlaying(false);
-        setIsPaused(false);
-        setCurrentWordIndex(-1);
-      };
-
-      utterance.onerror = () => {
-        setIsPlaying(false);
-        setIsPaused(false);
-        setCurrentWordIndex(-1);
-      };
-
-      speechSynthesis.speak(utterance);
-      setIsPlaying(true);
-      setIsPaused(false);
-    } else {
-      console.error("Text-to-speech is not supported in your browser");
     }
   };
 
@@ -321,52 +270,48 @@ export default function StoryPage() {
     };
   }, []);
 
-  const handleAnswerSelect = (value: string) => {
-    setSelectedAnswer(value);
-  };
+  // const handleNextQuestion = async () => {
+  //   if (!story) return;
 
-  const handleNextQuestion = async () => {
-    if (!story) return;
+  //   const question = story.questions[currentQuestion];
+  //   const hasOptions = question?.options && question?.options?.length > 0;
+  //   const hasAnswer = hasOptions ? selectedAnswer : textAnswer?.trim();
 
-    const question = story.questions[currentQuestion];
-    const hasOptions = question?.options && question?.options?.length > 0;
-    const hasAnswer = hasOptions ? selectedAnswer : textAnswer?.trim();
+  //   if (hasAnswer) {
+  //     const answerValue = hasOptions ? selectedAnswer : textAnswer?.trim();
+  //     const updatedAnswers = [
+  //       ...answers,
+  //       {
+  //         question_id: question.question_id,
+  //         answer: answerValue,
+  //       },
+  //     ];
+  //     setAnswers(updatedAnswers);
 
-    if (hasAnswer) {
-      const answerValue = hasOptions ? selectedAnswer : textAnswer?.trim();
-      const updatedAnswers = [
-        ...answers,
-        {
-          question_id: question.question_id,
-          answer: answerValue,
-        },
-      ];
-      setAnswers(updatedAnswers);
-
-      if (currentQuestion < story.questions.length - 1) {
-        setCurrentQuestion((prev) => prev + 1);
-        setSelectedAnswer("");
-        setTextAnswer("");
-      } else {
-        // Finish quiz - call verify API
-        try {
-          setVerifyingAnswers(true);
-          const verificationResponse = await readingService.verifyAnswers(
-            storyId,
-            updatedAnswers
-          );
-          setVerificationResults(verificationResponse);
-          setShowResults(true);
-        } catch (error) {
-          console.error("Error verifying answers:", error);
-          // Still show results even if verification fails
-          setShowResults(true);
-        } finally {
-          setVerifyingAnswers(false);
-        }
-      }
-    }
-  };
+  //     if (currentQuestion < story.questions.length - 1) {
+  //       setCurrentQuestion((prev) => prev + 1);
+  //       setSelectedAnswer("");
+  //       setTextAnswer("");
+  //     } else {
+  //       // Finish quiz - call verify API
+  //       try {
+  //         setVerifyingAnswers(true);
+  //         const verificationResponse = await readingService.verifyAnswers(
+  //           storyId,
+  //           updatedAnswers
+  //         );
+  //         setVerificationResults(verificationResponse);
+  //         setShowResults(true);
+  //       } catch (error) {
+  //         console.error("Error verifying answers:", error);
+  //         // Still show results even if verification fails
+  //         setShowResults(true);
+  //       } finally {
+  //         setVerifyingAnswers(false);
+  //       }
+  //     }
+  //   }
+  // };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -392,7 +337,7 @@ export default function StoryPage() {
     let wordCount = 0;
 
     return (
-      <div className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+      <div className="text-xl leading-relaxed text-slate-700 font-medium">
         {parts.map((part, index) => {
           const isWord = part.trim().length > 0 && !/^\s+$/.test(part);
           const isHighlighted =
@@ -405,9 +350,9 @@ export default function StoryPage() {
           return (
             <span
               key={index}
-              className={`transition-all duration-200 ${
+              className={`transition-all duration-300 ${
                 isHighlighted
-                  ? "bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100 rounded"
+                  ? "bg-gradient-to-r from-yellow-300 to-amber-300 text-amber-900 rounded-lg px-1 py-0.5 shadow-lg transform scale-105"
                   : ""
               }`}
             >
@@ -421,10 +366,17 @@ export default function StoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading story...</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+          <div className="p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Loading story...
+          </h3>
+          <p className="text-gray-600">
+            Please wait while we fetch the content
+          </p>
         </div>
       </div>
     );
@@ -432,13 +384,21 @@ export default function StoryPage() {
 
   if (error || !story) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+          <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <XCircle className="h-8 w-8 text-red-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {error || "Story not found"}
-          </h1>
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {error
+              ? "Please try again later"
+              : "The story you're looking for doesn't exist"}
+          </p>
           <Link href="/reading">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Reading
             </Button>
@@ -448,332 +408,20 @@ export default function StoryPage() {
     );
   }
 
-  // Verification loading view
-  if (verifyingAnswers) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Verifying Your Answers
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-2">
-            Please wait while we check your responses...
-          </p>
-          <div className="flex justify-center space-x-1 mt-4">
-            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-            <div
-              className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
-              style={{ animationDelay: "0.1s" }}
-            ></div>
-            <div
-              className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"
-              style={{ animationDelay: "0.2s" }}
-            ></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Results view
-  if (showResults) {
-    // Calculate score from verification results if available, otherwise fallback to local calculation
-    const correctAnswers =
-      verificationResults?.filter((result) => result.correct).length || 0;
-
-    const scorePercentage = story
-      ? Math.round((correctAnswers / story.questions.length) * 100)
-      : 0;
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Results Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-              <Trophy className="h-10 w-10 text-gray-600 dark:text-gray-400" />
-            </div>
-            <h2 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              Quiz Complete!
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Review your performance for "{story?.title}"
-            </p>
-          </div>
-
-          {/* Score */}
-          <div className="text-center mb-8">
-            <div className="text-6xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              {scorePercentage}%
-            </div>
-            <p className="text-lg text-gray-500 dark:text-gray-400">
-              {correctAnswers} of {story?.questions?.length} questions answered
-              correctly
-            </p>
-          </div>
-
-          {/* Question Review */}
-          <div className="space-y-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-              Question Review
-            </h3>
-            {verificationResults.map((result: any, index) => {
-              const isCorrect = result.correct;
-
-              return (
-                <Card
-                  key={result?.question_id}
-                  className="border border-gray-200 dark:border-gray-700"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center mt-1 ${
-                          isCorrect
-                            ? "bg-green-100 dark:bg-green-900/30"
-                            : "bg-red-100 dark:bg-red-900/30"
-                        }`}
-                      >
-                        {isCorrect ? (
-                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                          {result?.question}
-                        </p>
-                        <div className="space-y-3 text-sm">
-                          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
-                            <span className="text-gray-500 dark:text-gray-400 font-medium">
-                              Your answer:{" "}
-                            </span>
-                            <span className="text-gray-900 dark:text-gray-100">
-                              {result?.your_answer}
-                            </span>
-                          </div>
-                          {!isCorrect && (
-                            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
-                              <span className="text-green-700 dark:text-green-400 font-medium">
-                                Correct answer:{" "}
-                              </span>
-                              <span className="text-green-800 dark:text-green-300">
-                                {result?.correct_answer}
-                              </span>
-                            </div>
-                          )}
-                          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                            <span className="text-blue-700 dark:text-blue-400 font-medium">
-                              Explanation:{" "}
-                            </span>
-                            <p className="mt-2 text-blue-800 dark:text-blue-300">
-                              {result?.explanation}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              className="border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 px-6 py-2"
-              onClick={() => {
-                setShowResults(false);
-                setShowQuestions(false);
-                setCurrentQuestion(0);
-                setAnswers([]);
-                setSelectedAnswer("");
-                setTextAnswer("");
-                setVerificationResults([]);
-                setVerifyingAnswers(false);
-              }}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Story
-            </Button>
-            <Link href="/reading">
-              <Button className="bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 px-6 py-2 font-medium tracking-wide border border-violet-500 hover:border-violet-600">
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Continue Learning
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Questions view
-  if (showQuestions && story) {
-    const question = story.questions[currentQuestion];
-    const progress = (currentQuestion / story?.questions?.length) * 100;
-
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
-              <Link
-                href="/reading"
-                className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              >
-                Reading
-              </Link>
-              <span>/</span>
-              <span className="text-gray-900 dark:text-gray-100 font-medium">
-                {story?.title}
-              </span>
-            </nav>
-
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  Questions for "{story?.title}"
-                </h1>
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant="secondary"
-                    className={`text-xs font-medium border ${getDifficultyColor(
-                      story?.difficulty
-                    )}`}
-                  >
-                    {story?.difficulty}
-                  </Badge>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {story?.questions?.length} questions
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Progress */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Question {currentQuestion + 1} of {story?.questions?.length}
-                </span>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {Math.round(progress)}% Complete
-                </span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-          </div>
-
-          {/* Question */}
-          <Card className="border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-8">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-                {question?.question}
-              </h3>
-
-              {/* Multiple Choice Questions */}
-              {question?.options && question?.options?.length > 0 ? (
-                <RadioGroup
-                  value={selectedAnswer}
-                  onValueChange={handleAnswerSelect}
-                >
-                  <div className="space-y-3">
-                    {question?.options.map((option, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-3 p-4 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer bg-white dark:bg-gray-800 rounded-lg"
-                      >
-                        <RadioGroupItem
-                          value={option}
-                          id={`option-${index}`}
-                          className="border-gray-300 dark:border-gray-600"
-                        />
-                        <Label
-                          htmlFor={`option-${index}`}
-                          className="flex-1 cursor-pointer text-gray-900 dark:text-gray-100"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              ) : (
-                /* Text Input Questions */
-                <div className="space-y-4">
-                  <Label
-                    htmlFor="text-answer"
-                    className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                  >
-                    Your Answer
-                  </Label>
-                  <Textarea
-                    id="text-answer"
-                    placeholder="Enter your answer here..."
-                    value={textAnswer}
-                    onChange={(e) => setTextAnswer(e?.target?.value)}
-                    className="min-h-[120px] resize-none border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
-                  />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Provide your response based on your understanding of the
-                    passage.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Action Button */}
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              className="border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 px-6 py-2"
-              onClick={() => setShowQuestions(false)}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Story
-            </Button>
-            <Button
-              onClick={handleNextQuestion}
-              disabled={
-                question?.options && question?.options?.length > 0
-                  ? !selectedAnswer
-                  : !textAnswer.trim()
-              }
-              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg px-6 py-2 font-medium tracking-wide border border-emerald-500 hover:border-emerald-600"
-            >
-              {currentQuestion < story.questions.length - 1
-                ? "Next Question"
-                : "Finish Quiz"}
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
             <Link
               href="/reading"
-              className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              className="hover:text-blue-600 transition-colors font-medium"
             >
               Reading
             </Link>
             <span>/</span>
-            <span className="text-gray-900 dark:text-gray-100 font-medium">
-              {story?.title}
-            </span>
+            <span className="text-gray-900 font-semibold">{story?.title}</span>
           </nav>
 
           <div className="flex items-start justify-between">
@@ -787,99 +435,223 @@ export default function StoryPage() {
                 >
                   {story?.difficulty}
                 </Badge>
-                <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-1 text-sm text-gray-500">
                   <Clock className="h-4 w-4" />
                   <span>5 Min</span>
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-gray-500">
                   {story?.questions?.length} questions
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3 leading-tight">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
                 {story?.title}
               </h1>
             </div>
           </div>
         </div>
 
-        {/* Story Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="p-8">
-            <div className="max-w-3xl mx-auto">
-              <div className="space-y-6">
-                {/* Simplified Speaker Controls */}
-                <div className="flex items-center gap-3 mb-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSpeakerClick}
-                    disabled={isGenerating}
-                    className={`flex items-center gap-2 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 ${
-                      isPlaying
-                        ? "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/25 dark:to-indigo-900/25 border-blue-200 dark:border-blue-600 text-blue-700 dark:text-blue-300 shadow-sm"
-                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
-                    } hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                        Generating...
-                      </>
-                    ) : isPlaying ? (
-                      isPaused ? (
+        {/* Professional Layout System */}
+        {showSpeechToText ? (
+          /* Speech Practice Mode - Task-Focused Design */
+          <div className="space-y-6">
+            {/* Functional Control Bar */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  {/* Audio Controls */}
+                  <div className="flex items-center space-x-3">
+                    <Button
+                      onClick={handleSpeakerClick}
+                      disabled={isGenerating}
+                      variant={isPlaying ? "secondary" : "outline"}
+                      size="sm"
+                      className="font-medium"
+                    >
+                      {isGenerating ? (
                         <>
-                          <Play className="h-4 w-4" />
-                          Resume
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                          Generating
                         </>
+                      ) : isPlaying ? (
+                        isPaused ? (
+                          <>
+                            <Play className="h-4 w-4 mr-2" />
+                            Resume Audio
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="h-4 w-4 mr-2" />
+                            Pause Audio
+                          </>
+                        )
                       ) : (
                         <>
-                          <Pause className="h-4 w-4" />
-                          Pause
+                          <Volume2 className="h-4 w-4 mr-2" />
+                          Play Audio
                         </>
-                      )
-                    ) : (
-                      <>
-                        <Volume2 className="h-4 w-4" />
-                        Listen
-                      </>
-                    )}
-                  </Button>
-
-                  {(isPlaying || isGenerating) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleStopClick}
-                      disabled={isGenerating}
-                      className="flex items-center gap-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Square className="h-4 w-4" />
-                      Stop
+                      )}
                     </Button>
-                  )}
+
+                    {(isPlaying || isGenerating) && (
+                      <Button
+                        onClick={handleStopClick}
+                        disabled={isGenerating}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Square className="h-4 w-4 mr-2" />
+                        Stop
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Story Text with Highlighting */}
-                <div className="whitespace-pre-wrap break-words overflow-hidden">
-                  {renderStoryWithHighlighting(story?.passage || "")}
+                <div className="flex items-center space-x-3">
+                  <Button
+                    onClick={() => setShowSpeechToText(false)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Exit Practice
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Two-Column Layout */}
+            <div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              style={{ height: "calc(100vh - 300px)" }}
+            >
+              {/* Story Text Panel */}
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Volume2 className="h-5 w-5 text-gray-600" />
+                      <h3 className="font-semibold text-gray-900">
+                        Story Text
+                      </h3>
+                    </div>
+                    {isPlaying && (
+                      <div className="flex items-center space-x-2 text-sm text-green-700">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Audio Playing</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="p-6 h-full overflow-y-auto">
+                  <div className="prose prose-lg max-w-none">
+                    {renderStoryWithHighlighting(story?.passage || "")}
+                  </div>
+                </div>
+              </div>
+
+              {/* Speech Practice Panel */}
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200 p-4">
+                  <div className="flex items-center space-x-2">
+                    <Mic className="h-5 w-5 text-gray-600" />
+                    <h3 className="font-semibold text-gray-900">
+                      Speech Practice
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-6 h-full overflow-hidden">
+                  <LiveSpeechToText className="h-full" />
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Reading Mode - Content-First Design */
+          <div className="space-y-8">
+            {/* Story Content */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+              <div className="p-8 lg:p-12">
+                {/* Audio Controls */}
+                <div className="flex justify-center mb-8">
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <Button
+                      onClick={handleSpeakerClick}
+                      disabled={isGenerating}
+                      variant={isPlaying ? "secondary" : "default"}
+                      className="font-medium"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent mr-2"></div>
+                          Generating Audio
+                        </>
+                      ) : isPlaying ? (
+                        isPaused ? (
+                          <>
+                            <Play className="h-5 w-5 mr-2" />
+                            Resume Story
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="h-5 w-5 mr-2" />
+                            Pause Story
+                          </>
+                        )
+                      ) : (
+                        <>
+                          <Volume2 className="h-5 w-5 mr-2" />
+                          Listen to Story
+                        </>
+                      )}
+                    </Button>
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-end">
-          <Button
-            onClick={() => {
-              handleStopClick();
-              setShowQuestions(true);
-            }}
-            className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 px-8 py-3 font-medium tracking-wide border border-slate-600 hover:border-slate-700"
-          >
-            Start Questions
-          </Button>
-        </div>
+                    {(isPlaying || isGenerating) && (
+                      <Button
+                        onClick={handleStopClick}
+                        disabled={isGenerating}
+                        variant="outline"
+                      >
+                        <Square className="h-5 w-5 mr-2" />
+                        Stop
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Story Text */}
+                <div className="max-w-4xl mx-auto">
+                  <div className="prose prose-xl prose-gray max-w-none">
+                    {renderStoryWithHighlighting(story?.passage || "")}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center">
+              <Button
+                onClick={() => setShowSpeechToText(true)}
+                variant="outline"
+                size="lg"
+                className="font-medium"
+              >
+                <Mic className="h-5 w-5 mr-2" />
+                Practice Reading Aloud
+              </Button>
+
+              <Button
+                onClick={() => {
+                  handleStopClick();
+                  setShowQuestions(true);
+                }}
+                size="lg"
+                className="font-medium"
+              >
+                Start Questions
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

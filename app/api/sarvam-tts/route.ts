@@ -105,12 +105,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-export async function GET() {
-  return NextResponse.json({
-    status: "OK",
-    service: "Sarvam TTS English API",
-    language: "en-IN",
-    voice: "default",
-  });
-}
