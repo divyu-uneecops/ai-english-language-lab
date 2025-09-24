@@ -653,21 +653,29 @@
     }
   }
 
-  /* Modern Scrollbar */
+  /* Modern Scrollbar - Ultra Subtle and Eye-Friendly */
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 3px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted/30;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/30 rounded-full;
+    background: rgba(156, 163, 175, 0.15);
+    border-radius: 1.5px;
+    transition: background 0.3s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary/50;
+    background: rgba(156, 163, 175, 0.25);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.15) transparent;
   }
 
   /* Selection Styling */
