@@ -13,6 +13,7 @@ import {
   Pause,
   Square,
   Mic,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
@@ -87,6 +88,11 @@ export default function StoryPage() {
   );
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Speech analysis state
+  const [speechChunks, setSpeechChunks] = useState<
+    { text: string; startTime: number; endTime: number }[]
+  >([]);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -263,6 +269,14 @@ export default function StoryPage() {
 
   const handleStopClick = () => {
     stopSpeech();
+  };
+
+  const handleSubmitAnalysis = () => {
+    if (speechChunks.length === 0) {
+      console.log("No speech chunks available to submit");
+      return;
+    }
+    console.log(speechChunks);
   };
 
   const renderStoryWithHighlighting = (text: string) => {
@@ -463,15 +477,26 @@ export default function StoryPage() {
             {/* Speech Practice Panel */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="flex items-center space-x-2">
-                  <Mic className="h-5 w-5 text-gray-600" />
-                  <h3 className="font-semibold text-gray-900">
-                    Speech Practice
-                  </h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Mic className="h-5 w-5 text-gray-600" />
+                    <h3 className="font-semibold text-gray-900">
+                      Speech Practice
+                    </h3>
+                  </div>
+                  <Button
+                    onClick={handleSubmitAnalysis}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                    disabled={speechChunks.length === 0}
+                  >
+                    <Send className="h-4 w-4 mr-1.5" />
+                    Submit Analysis
+                  </Button>
                 </div>
               </div>
               <div className="p-6 h-full overflow-hidden">
-                <LiveSpeechToText className="h-full" />
+                <LiveSpeechToText onChunksUpdate={setSpeechChunks} />
               </div>
             </div>
           </div>

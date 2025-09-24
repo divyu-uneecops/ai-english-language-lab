@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { SarvamAIClient } from "sarvamai";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Mic,
+  MicOff,
+  CheckCircle2,
+  AlertCircle,
+  RotateCcw,
+} from "lucide-react";
 
 interface SarvamResponse {
   request_id: string;
@@ -18,14 +24,13 @@ interface SarvamResponse {
 }
 
 interface LiveSpeechToTextProps {
-  targetText?: string;
-  onTranscriptUpdate?: (transcript: string) => void;
-  onAccuracyUpdate?: (accuracy: number) => void;
-  className?: string;
+  onChunksUpdate?: (
+    chunks: { text: string; startTime: number; endTime: number }[]
+  ) => void;
 }
 
 export default function LiveSpeechToText({
-  className = "",
+  onChunksUpdate,
 }: LiveSpeechToTextProps) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
@@ -43,6 +48,8 @@ export default function LiveSpeechToText({
     if (listening) return;
 
     setTranscript("");
+    setChunks([]);
+    lastEndTime.current = 0;
     setListening(true);
 
     try {
@@ -128,8 +135,11 @@ export default function LiveSpeechToText({
               startTime,
               endTime,
             };
-            setChunks((prev) => [...prev, newChunk]);
+            const updatedChunks = [...chunks, newChunk];
+            setChunks(updatedChunks);
             setTranscript((prev) => prev + " " + response.transcript);
+
+            onChunksUpdate?.(updatedChunks);
           }
         }
       });
@@ -174,6 +184,13 @@ export default function LiveSpeechToText({
     setListening(false);
   };
 
+  const handleRestart = () => {
+    stopListening();
+    setTranscript("");
+    setChunks([]);
+    lastEndTime.current = 0;
+  };
+
   // Cleanup on component unmount
   useEffect(() => {
     return () => {
@@ -182,33 +199,45 @@ export default function LiveSpeechToText({
   }, []);
 
   return (
-    <div className={`h-full flex flex-col ${className}`}>
+    <div className={`h-full flex flex-col`}>
       {/* Main Content: Transcript Area */}
       <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden relative">
-        {/* Floating Stop Button - Only visible when listening */}
-        {listening && (
-          <div className="absolute top-4 right-4 z-10">
-            <Button
-              onClick={stopListening}
-              variant="destructive"
-              size="sm"
-              className="rounded-full shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
-            >
-              <MicOff className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-
         <div className="h-full p-6 overflow-y-auto">
           {transcript ? (
             <div className="space-y-4">
-              <div className="flex items-center space-x-2 pb-3 border-b border-gray-100">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <CheckCircle2 className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-700">
-                    Live Transcript
-                  </span>
+              <div className="space-y-4 pb-4 border-b border-gray-100">
+                {/* Header Section */}
+                <div className="flex justify-between">
+                  <div className="flex items-center justify-baseline space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-700">
+                      Live Transcript
+                    </span>
+                  </div>
+
+                  {/* Action Buttons Section */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      onClick={handleRestart}
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1.5" />
+                      Restart
+                    </Button>
+                    {listening && (
+                      <Button
+                        onClick={stopListening}
+                        variant="destructive"
+                        size="sm"
+                        className="rounded-full shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
+                      >
+                        <MicOff className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="prose prose-gray max-w-none">
