@@ -173,61 +173,81 @@ export default function LiveSpeechToText({
   }, []);
 
   return (
-    <div className={`h-full flex flex-col space-y-6 ${className}`}>
-      {/* Professional Header - Clean & Functional */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <Button
-          onClick={stopListening}
-          variant={"destructive"}
-          className="font-medium"
-        >
-          <MicOff className="h-4 w-4 mr-2" />
-          Stop Recording
-        </Button>
-      </div>
-
+    <div className={`h-full flex flex-col ${className}`}>
       {/* Main Content: Transcript Area */}
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden relative">
+        {/* Floating Stop Button - Only visible when listening */}
+        {listening && (
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              onClick={stopListening}
+              variant="destructive"
+              size="sm"
+              className="rounded-full shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
+            >
+              <MicOff className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
         <div className="h-full p-6 overflow-y-auto">
           {transcript ? (
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 pb-2 border-b border-gray-100">
-                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">
-                  Live Transcript
-                </span>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 pb-3 border-b border-gray-100">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-700">
+                    Live Transcript
+                  </span>
+                </div>
               </div>
               <div className="prose prose-gray max-w-none">
-                <p className="text-gray-900 leading-relaxed">{transcript}</p>
+                <p className="text-gray-900 leading-relaxed text-base">
+                  {transcript}
+                </p>
               </div>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center">
               {listening ? (
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                    <Mic className="h-8 w-8 text-blue-600" />
+                <div className="text-center space-y-6">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                      <Mic className="h-10 w-10 text-blue-600" />
+                    </div>
+                    {/* Animated rings */}
+                    <div className="absolute inset-0 w-20 h-20 mx-auto">
+                      <div className="absolute inset-0 border-2 border-blue-300 rounded-full animate-ping opacity-75"></div>
+                      <div className="absolute inset-2 border-2 border-blue-400 rounded-full animate-ping opacity-50 animation-delay-100"></div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-900 font-medium">Listening...</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Start reading aloud
+                  <div className="space-y-2">
+                    <p className="text-gray-900 font-semibold text-lg">
+                      Listening...
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Start reading the story aloud
                     </p>
                   </div>
                 </div>
               ) : (
                 <div
-                  className="text-center space-y-4 cursor-pointer"
+                  className="text-center space-y-6 cursor-pointer group"
                   onClick={startListening}
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                    <Mic className="h-8 w-8 text-gray-400" />
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105">
+                      <Mic className="h-10 w-10 text-gray-500 group-hover:text-gray-600 transition-colors" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-gray-900 font-medium">
+                  <div className="space-y-2">
+                    <p className="text-gray-900 font-semibold text-lg group-hover:text-blue-600 transition-colors">
                       Ready to practice
                     </p>
-                    <p className="text-gray-500 text-sm mt-1">Click to begin</p>
+                    <p className="text-gray-500 text-sm group-hover:text-blue-500 transition-colors">
+                      Click the microphone to begin
+                    </p>
                   </div>
                 </div>
               )}
