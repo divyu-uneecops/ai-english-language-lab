@@ -29,6 +29,10 @@ export default function LiveSpeechToText({
 }: LiveSpeechToTextProps) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
+  const lastEndTime = useRef(0);
+  const [chunks, setChunks] = useState<
+    { text: string; startTime: number; endTime: number }[]
+  >([]);
 
   const wsRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -112,16 +116,21 @@ export default function LiveSpeechToText({
         if (message.data && typeof message.data === "object") {
           const response: SarvamResponse = message.data;
 
+          const duration = response?.metrics?.audio_duration || 0;
+
+          const startTime = lastEndTime?.current;
+          const endTime = lastEndTime?.current + duration;
+          lastEndTime.current = endTime;
           // Update transcript
           if (response.transcript) {
+            const newChunk = {
+              text: response?.transcript,
+              startTime,
+              endTime,
+            };
+            setChunks((prev) => [...prev, newChunk]);
             setTranscript((prev) => prev + " " + response.transcript);
           }
-        }
-        // Fallback handling for different message formats
-        else if (message.text) {
-          setTranscript((prev) => prev + " " + message.text);
-        } else if (message.transcript) {
-          setTranscript((prev) => prev + " " + message.transcript);
         }
       });
 
