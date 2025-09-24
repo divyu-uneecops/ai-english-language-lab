@@ -61,6 +61,11 @@ export function ReadingInterface() {
       solved: false,
       unsolved: false,
     },
+    level: {
+      beginner: false,
+      intermediate: false,
+      advanced: false,
+    },
     difficulty: {
       easy: false,
       medium: false,
@@ -375,6 +380,82 @@ export function ReadingInterface() {
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">
                         Unsolved
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Level Filter */}
+              <div className="mb-8">
+                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-blue-500" />
+                  LEVEL
+                </h4>
+                <div className="space-y-3">
+                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                    <input
+                      type="checkbox"
+                      checked={filters.level.beginner}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          level: {
+                            ...filters.level,
+                            beginner: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                        Beginner
+                      </span>
+                    </div>
+                  </label>
+                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+                    <input
+                      type="checkbox"
+                      checked={filters.level.intermediate}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          level: {
+                            ...filters.level,
+                            intermediate: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
+                        Intermediate
+                      </span>
+                    </div>
+                  </label>
+                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
+                    <input
+                      type="checkbox"
+                      checked={filters.level.advanced}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          level: {
+                            ...filters.level,
+                            advanced: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                    />
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
+                        Advanced
                       </span>
                     </div>
                   </label>
