@@ -117,6 +117,7 @@ export function ReadingInterface() {
   ) => {
     setSelectedLevel(level);
     setShowLevelDialog(false);
+    router.push(`/reading/d11f52d3-85c6-4a86-93d3-88304ebfb6ca`);
   };
 
   return (

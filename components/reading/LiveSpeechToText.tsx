@@ -177,21 +177,12 @@ export default function LiveSpeechToText({
       {/* Professional Header - Clean & Functional */}
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
         <Button
-          onClick={listening ? stopListening : startListening}
-          variant={listening ? "destructive" : "default"}
+          onClick={stopListening}
+          variant={"destructive"}
           className="font-medium"
         >
-          {listening ? (
-            <>
-              <MicOff className="h-4 w-4 mr-2" />
-              Stop Recording
-            </>
-          ) : (
-            <>
-              <Mic className="h-4 w-4 mr-2" />
-              Start Recording
-            </>
-          )}
+          <MicOff className="h-4 w-4 mr-2" />
+          Stop Recording
         </Button>
       </div>
 
@@ -225,7 +216,10 @@ export default function LiveSpeechToText({
                   </div>
                 </div>
               ) : (
-                <div className="text-center space-y-4">
+                <div
+                  className="text-center space-y-4 cursor-pointer"
+                  onClick={startListening}
+                >
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
                     <Mic className="h-8 w-8 text-gray-400" />
                   </div>
@@ -233,9 +227,7 @@ export default function LiveSpeechToText({
                     <p className="text-gray-900 font-medium">
                       Ready to practice
                     </p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Click "Start Recording" to begin
-                    </p>
+                    <p className="text-gray-500 text-sm mt-1">Click to begin</p>
                   </div>
                 </div>
               )}

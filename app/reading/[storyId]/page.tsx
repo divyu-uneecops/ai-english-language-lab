@@ -376,9 +376,6 @@ export default function StoryPage() {
                   <span>5 Min</span>
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
-                {story?.title}
-              </h1>
             </div>
           </div>
         </div>
@@ -387,14 +384,14 @@ export default function StoryPage() {
           {/* Two-Column Layout */}
           <div
             className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            style={{ height: "calc(100vh - 300px)" }}
+            style={{ height: "calc(100vh - 250px)" }}
           >
             {/* Story Text Panel */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
               <div className="bg-gray-50 border-b border-gray-200 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Volume2 className="h-5 w-5 text-gray-600" />
+                    {/* <Volume2 className="h-5 w-5 text-gray-600" /> */}
                     <h3 className="font-semibold text-gray-900">Story Text</h3>
                   </div>
                   {/* Audio Controls */}
