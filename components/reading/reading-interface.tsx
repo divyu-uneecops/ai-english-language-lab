@@ -121,7 +121,7 @@ export function ReadingInterface() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">
           {/* Left Section - Header and Story Cards */}
@@ -133,7 +133,7 @@ export function ReadingInterface() {
                 <nav className="flex items-center space-x-2 text-sm text-gray-500">
                   <Link
                     href="/dashboard"
-                    className="hover:text-blue-600 transition-colors font-medium"
+                    className="hover:text-orange-600 transition-colors font-medium"
                   >
                     Prepare
                   </Link>
@@ -153,8 +153,8 @@ export function ReadingInterface() {
             {loading && (
               <div className="flex items-center justify-center py-16">
                 <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-                  <div className="p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                  <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Loading stories...
@@ -179,7 +179,7 @@ export function ReadingInterface() {
                   <p className="text-gray-600 mb-6">{error}</p>
                   <button
                     onClick={() => window.location.reload()}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Try Again
                   </button>
@@ -208,11 +208,11 @@ export function ReadingInterface() {
                   stories.map((story, index) => (
                     <Card
                       key={story?.id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-blue-200/50 hover:scale-[1.02]"
+                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
                       onClick={() => router.push(`/reading/${story?.id}`)}
                     >
                       {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                       <div className="relative p-6">
                         {/* Header with star and badges */}
@@ -235,7 +235,7 @@ export function ReadingInterface() {
                         </div>
 
                         {/* Story title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 line-clamp-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
                           {story?.title}
                         </h3>
 
@@ -253,7 +253,7 @@ export function ReadingInterface() {
                             </div>
 
                             <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Clock className="h-3 w-3 text-blue-500" />
+                              <Clock className="h-3 w-3 text-orange-500" />
                               <span className="font-medium">
                                 {story?.readTime}
                               </span>
@@ -265,7 +265,7 @@ export function ReadingInterface() {
                         <div className="flex justify-end">
                           <Button
                             size="sm"
-                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                           >
                             Start Reading
                             <ChevronRight className="h-4 w-4 ml-1" />
@@ -285,8 +285,8 @@ export function ReadingInterface() {
             <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-green-100 to-blue-100 rounded-full">
-                    <Trophy className="h-6 w-6 text-green-600" />
+                  <div className="p-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full">
+                    <Trophy className="h-6 w-6 text-orange-600" />
                   </div>
                 </div>
                 <div className="text-sm text-gray-600 mb-2 font-medium">
@@ -321,7 +321,7 @@ export function ReadingInterface() {
             {/* Enhanced Filters */}
             <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
+                <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
                   <Filter className="h-5 w-5 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">Filters</h3>
@@ -470,7 +470,7 @@ export function ReadingInterface() {
           ></div>
           <div className="relative z-10 w-full max-w-lg mx-auto px-4">
             <Card className="p-0 overflow-hidden rounded-2xl shadow-2xl">
-              <div className="relative p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
                 <div className="relative z-10 text-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">

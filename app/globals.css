@@ -8,47 +8,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Research-Based Eye-Comfort Design System */
-  --background: #f5f5f5; /* Soft off-white - reduces glare and eye strain */
-  --foreground: #333333; /* Dark gray - easier on eyes than pure black */
+  /* Orange-Centric Design System - Matching HomePageContent Theme */
+  --background: #ffffff; /* Clean white background */
+  --foreground: #1f2937; /* Dark gray for text */
   --card: #ffffff;
-  --card-foreground: #333333;
+  --card-foreground: #1f2937;
   --popover: #ffffff;
-  --popover-foreground: #333333;
-  --primary: #4a90e2; /* Desaturated blue - calming and less harsh */
+  --popover-foreground: #1f2937;
+  --primary: #FF7B3A; /* Primary orange brand color */
   --primary-foreground: #ffffff;
-  --secondary: #f0f4f8; /* Very light blue-gray - gentle background */
-  --secondary-foreground: #4a5568;
-  --muted: #e8ecf0; /* Soft gray - comfortable for secondary elements */
-  --muted-foreground: #6b7280; /* Medium gray - good readability without strain */
-  --accent: #7baf7b; /* Muted green - calming accent color */
+  --secondary: #fff7ed; /* Orange-50 background */
+  --secondary-foreground: #ea580c;
+  --muted: #f3f4f6; /* Light gray for muted elements */
+  --muted-foreground: #6b7280;
+  --accent: #FFB347; /* Accent orange */
   --accent-foreground: #ffffff;
-  --destructive: #c53030; /* Softer red - less aggressive than bright red */
+  --destructive: #ef4444; /* Red for destructive actions */
   --destructive-foreground: #ffffff;
-  --border: #d1d5db; /* Light gray border - subtle separation */
-  --input: #f0f4f8;
-  --ring: rgba(74, 144, 226, 0.15); /* Subtle focus ring */
-  --chart-1: #4a90e2;
-  --chart-2: #7baf7b;
-  --chart-3: #059669;
-  --chart-4: #0891b2;
-  --chart-5: #d97706;
+  --border: #e5e7eb; /* Light border */
+  --input: #f9fafb;
+  --ring: rgba(255, 123, 58, 0.15); /* Orange focus ring */
+  --chart-1: #FF7B3A;
+  --chart-2: #FFB347;
+  --chart-3: #f97316;
+  --chart-4: #ea580c;
+  --chart-5: #dc2626;
   --radius: 0.875rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #333333;
-  --sidebar-primary: #4a90e2;
+  --sidebar-foreground: #1f2937;
+  --sidebar-primary: #FF7B3A;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #7baf7b;
+  --sidebar-accent: #FFB347;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #d1d5db;
-  --sidebar-ring: rgba(74, 144, 226, 0.15);
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: rgba(255, 123, 58, 0.15);
   
-  /* Eye-Comfort Design Properties */
-  --gradient-primary: linear-gradient(135deg, #4a90e2 0%, #7baf7b 100%);
-  --gradient-secondary: linear-gradient(135deg, #7baf7b 0%, #a8d5a8 100%);
-  --gradient-accent: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+  /* Orange-Centric Design Properties */
+  --gradient-primary: linear-gradient(135deg, #FF7B3A 0%, #FF6B2A 100%);
+  --gradient-secondary: linear-gradient(135deg, #FFB347 0%, #FF7B3A 100%);
+  --gradient-accent: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(74, 144, 226, 0.08);
+  --glass-border: rgba(255, 123, 58, 0.08);
   --shadow-soft: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
   --shadow-medium: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
   --shadow-large: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
@@ -62,39 +62,39 @@
   --card-foreground: #f1f5f9;
   --popover: #1e293b;
   --popover-foreground: #f1f5f9;
-  --primary: #6366f1;
+  --primary: #FF7B3A; /* Keep orange in dark mode */
   --primary-foreground: #ffffff;
   --secondary: #334155;
   --secondary-foreground: #f1f5f9;
   --muted: #475569;
   --muted-foreground: #94a3b8;
-  --accent: #8b5cf6;
+  --accent: #FFB347; /* Keep accent orange in dark mode */
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #334155;
   --input: #334155;
-  --ring: rgba(99, 102, 241, 0.2);
-  --chart-1: #6366f1;
-  --chart-2: #8b5cf6;
-  --chart-3: #06b6d4;
-  --chart-4: #10b981;
-  --chart-5: #d97706;
+  --ring: rgba(255, 123, 58, 0.2); /* Orange focus ring in dark mode */
+  --chart-1: #FF7B3A;
+  --chart-2: #FFB347;
+  --chart-3: #f97316;
+  --chart-4: #ea580c;
+  --chart-5: #dc2626;
   --sidebar: #0f172a;
   --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #6366f1;
+  --sidebar-primary: #FF7B3A;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #8b5cf6;
+  --sidebar-accent: #FFB347;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #334155;
-  --sidebar-ring: rgba(99, 102, 241, 0.2);
+  --sidebar-ring: rgba(255, 123, 58, 0.2);
   
-  /* Dark mode eye-comfort properties */
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  --gradient-accent: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  /* Dark mode orange-centric properties */
+  --gradient-primary: linear-gradient(135deg, #FF7B3A 0%, #FF6B2A 100%);
+  --gradient-secondary: linear-gradient(135deg, #FFB347 0%, #FF7B3A 100%);
+  --gradient-accent: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   --glass-bg: rgba(30, 41, 59, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 123, 58, 0.1);
   --shadow-soft: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
   --shadow-large: 0 8px 10px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
@@ -225,23 +225,23 @@
     background-clip: text;
   }
 
-  /* Eye-comfort gradient adjustments */
+  /* Orange-centric gradient adjustments */
   .light .gradient-text {
-    background: linear-gradient(135deg, #4a90e2 0%, #7baf7b 100%);
+    background: linear-gradient(135deg, #FF7B3A 0%, #FF6B2A 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .light .gradient-text-secondary {
-    background: linear-gradient(135deg, #7baf7b 0%, #a8d5a8 100%);
+    background: linear-gradient(135deg, #FFB347 0%, #FF7B3A 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .light .gradient-text-accent {
-    background: linear-gradient(135deg, #059669 0%, #0891b2 100%);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -263,7 +263,7 @@
   /* Light theme glass card adjustments */
   .light .glass-card {
     background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(255, 123, 58, 0.2);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
@@ -370,7 +370,7 @@
 
   .cyber-border {
     position: relative;
-    background: linear-gradient(45deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
+    background: linear-gradient(45deg, #FF7B3A, #FFB347, #f97316, #ea580c);
     background-size: 400% 400%;
     animation: gradient-shift 3s ease infinite;
   }
@@ -390,23 +390,23 @@
 
   /* Light theme specific glow effects */
   .light .text-glow {
-    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    text-shadow: 0 0 20px rgba(255, 123, 58, 0.3);
   }
 
   .light .border-glow {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 20px rgba(255, 123, 58, 0.2);
   }
 
   .light .premium-card {
     background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(74, 144, 226, 0.08);
+    border: 1px solid rgba(255, 123, 58, 0.08);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .light .premium-card:hover {
     background: rgba(255, 255, 255, 1);
-    border-color: rgba(74, 144, 226, 0.15);
+    border-color: rgba(255, 123, 58, 0.15);
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
     transform: translateY(-1px);
   }
@@ -456,13 +456,13 @@
 
   .neon-glow {
     box-shadow:
-      0 0 20px rgba(99, 102, 241, 0.35),
-      0 0 40px rgba(99, 102, 241, 0.25),
-      0 0 60px rgba(99, 102, 241, 0.15);
+      0 0 20px rgba(255, 123, 58, 0.35),
+      0 0 40px rgba(255, 123, 58, 0.25),
+      0 0 60px rgba(255, 123, 58, 0.15);
   }
 
   .text-shadow-glow {
-    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    text-shadow: 0 0 20px rgba(255, 123, 58, 0.5);
   }
 
   /* 2025 Advanced Animations */
@@ -477,11 +477,11 @@
 
   @keyframes pulse-glow {
     0%, 100% { 
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 0 20px rgba(255, 123, 58, 0.3);
       transform: scale(1);
     }
     50% { 
-      box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+      box-shadow: 0 0 40px rgba(255, 123, 58, 0.6);
       transform: scale(1.02);
     }
   }
@@ -534,15 +534,15 @@
   @keyframes neon-pulse {
     0%, 100% { 
       box-shadow: 
-        0 0 5px rgba(99, 102, 241, 0.5),
-        0 0 10px rgba(99, 102, 241, 0.3),
-        0 0 15px rgba(99, 102, 241, 0.2);
+        0 0 5px rgba(255, 123, 58, 0.5),
+        0 0 10px rgba(255, 123, 58, 0.3),
+        0 0 15px rgba(255, 123, 58, 0.2);
     }
     50% { 
       box-shadow: 
-        0 0 10px rgba(99, 102, 241, 0.8),
-        0 0 20px rgba(99, 102, 241, 0.6),
-        0 0 30px rgba(99, 102, 241, 0.4);
+        0 0 10px rgba(255, 123, 58, 0.8),
+        0 0 20px rgba(255, 123, 58, 0.6),
+        0 0 30px rgba(255, 123, 58, 0.4);
     }
   }
 
@@ -574,11 +574,11 @@
 
   @keyframes pulse-glow {
     0% { 
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 20px rgba(255, 123, 58, 0.3);
       transform: scale(1);
     }
     100% { 
-      box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+      box-shadow: 0 0 40px rgba(255, 123, 58, 0.6);
       transform: scale(1.02);
     }
   }

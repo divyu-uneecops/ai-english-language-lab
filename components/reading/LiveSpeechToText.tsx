@@ -213,13 +213,13 @@ export default function LiveSpeechToText({
               {listening ? (
                 <div className="text-center space-y-6">
                   <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                      <Mic className="h-10 w-10 text-blue-600" />
+                    <div className="w-20 h-20 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                      <Mic className="h-10 w-10 text-orange-600" />
                     </div>
                     {/* Animated rings */}
                     <div className="absolute inset-0 w-20 h-20 mx-auto">
-                      <div className="absolute inset-0 border-2 border-blue-300 rounded-full animate-ping opacity-75"></div>
-                      <div className="absolute inset-2 border-2 border-blue-400 rounded-full animate-ping opacity-50 animation-delay-100"></div>
+                      <div className="absolute inset-0 border-2 border-orange-300 rounded-full animate-ping opacity-75"></div>
+                      <div className="absolute inset-2 border-2 border-orange-400 rounded-full animate-ping opacity-50 animation-delay-100"></div>
                     </div>
                   </div>
                   <div className="space-y-2">

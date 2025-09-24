@@ -99,7 +99,7 @@ export function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
         {/* Professional Header */}
         <div className="mb-8">
@@ -135,13 +135,13 @@ export function Dashboard() {
                       {overallProgress}%
                     </p>
                   </div>
-                  <div className="p-2 rounded-md bg-blue-50 dark:bg-blue-950/30">
-                    <Target className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 rounded-md bg-orange-50 dark:bg-orange-950/30">
+                    <Target className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
                 <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${overallProgress}%` }}
                   ></div>
                 </div>
@@ -159,8 +159,8 @@ export function Dashboard() {
                       {overallStats.timeSpent}
                     </p>
                   </div>
-                  <div className="p-2 rounded-md bg-green-50 dark:bg-green-950/30">
-                    <Clock className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <div className="p-2 rounded-md bg-orange-50 dark:bg-orange-950/30">
+                    <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
@@ -180,8 +180,8 @@ export function Dashboard() {
                       {overallStats.currentStreak} days
                     </p>
                   </div>
-                  <div className="p-2 rounded-md bg-purple-50 dark:bg-purple-950/30">
-                    <Star className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <div className="p-2 rounded-md bg-orange-50 dark:bg-orange-950/30">
+                    <Star className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
@@ -236,8 +236,8 @@ export function Dashboard() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-gray-100 dark:bg-gray-800">
-                          <IconComponent className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <div className="p-2 rounded-md bg-gradient-to-br from-orange-100 to-orange-200 dark:bg-gray-800">
+                          <IconComponent className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
@@ -264,7 +264,7 @@ export function Dashboard() {
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div
-                            className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+                            className="h-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -292,7 +292,10 @@ export function Dashboard() {
 
                       {/* Action Button */}
                       <Link href={module.href} className="block">
-                        <Button className="w-full" size="sm">
+                        <Button
+                          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                          size="sm"
+                        >
                           {module.stats.completed > 0 ? "Continue" : "Start"}{" "}
                           Module
                           <ArrowRight className="ml-2 h-4 w-4" />
