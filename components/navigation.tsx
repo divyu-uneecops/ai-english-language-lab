@@ -44,11 +44,11 @@ export function Navigation() {
           href="/progress"
           onClick={() => mobile && setMobileMenuOpen(false)}
         >
-            <Button
-              variant="ghost"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group ${
-                mobile ? "w-full justify-start" : ""
-              }`}
+          <Button
+            variant="ghost"
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group ${
+              mobile ? "w-full justify-start" : ""
+            }`}
           >
             <TrendingUp className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
             <span className="font-medium">Progress</span>
@@ -63,7 +63,10 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-3 md:px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 md:gap-4 group flex-shrink-0">
+          <Link
+            href="/"
+            className="flex items-center gap-2 md:gap-4 group flex-shrink-0"
+          >
             <div className="relative">
               <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-br from-[#FF7B3A] to-[#FF6B2A] flex items-center justify-center group-hover:scale-105 transition-all duration-300 shadow-lg">
                 <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
@@ -87,7 +90,7 @@ export function Navigation() {
             {/* <NavLinks /> */}
 
             {/* Theme Toggle */}
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -98,7 +101,7 @@ export function Navigation() {
               ) : (
                 <Moon className="h-5 w-5 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
               )}
-            </Button>
+            </Button> */}
 
             {user ? (
               <DropdownMenu>
