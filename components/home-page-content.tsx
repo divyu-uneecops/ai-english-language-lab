@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Hero } from "@/components/hero";
+import { CultivateThink } from "@/components/writing/CultivateThink";
 import { ModuleCards } from "@/components/module-cards";
 
 export function HomePageContent() {
@@ -39,8 +40,9 @@ export function HomePageContent() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="relative z-10">
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto">
           <Hero />
+          <CultivateThink />
           <ModuleCards />
         </main>
       </div>
