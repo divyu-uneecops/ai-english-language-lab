@@ -401,29 +401,37 @@ export default function StoryPage() {
                       disabled={isGenerating}
                       variant={isPlaying ? "secondary" : "outline"}
                       size="sm"
-                      className="font-medium"
+                      className="group font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 hover:border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                     >
                       {isGenerating ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                          Generating
+                          <span className="group-hover:text-blue-600 transition-colors">
+                            Generating
+                          </span>
                         </>
                       ) : isPlaying ? (
                         isPaused ? (
                           <>
-                            <Play className="h-4 w-4 mr-2" />
-                            Resume Audio
+                            <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            <span className="group-hover:text-green-600 transition-colors">
+                              Resume Audio
+                            </span>
                           </>
                         ) : (
                           <>
-                            <Pause className="h-4 w-4 mr-2" />
-                            Pause Audio
+                            <Pause className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            <span className="group-hover:text-orange-600 transition-colors">
+                              Pause Audio
+                            </span>
                           </>
                         )
                       ) : (
                         <>
-                          <Volume2 className="h-4 w-4 mr-2" />
-                          Play Audio
+                          <Volume2 className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-blue-600 transition-all duration-200" />
+                          <span className="group-hover:text-blue-600 transition-colors">
+                            Play Audio
+                          </span>
                         </>
                       )}
                     </Button>
@@ -434,9 +442,12 @@ export default function StoryPage() {
                         disabled={isGenerating}
                         variant="outline"
                         size="sm"
+                        className="group transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/25 hover:border-red-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                       >
-                        <Square className="h-4 w-4 mr-2" />
-                        Stop
+                        <Square className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-red-600 transition-all duration-200" />
+                        <span className="group-hover:text-red-600 transition-colors">
+                          Stop
+                        </span>
                       </Button>
                     )}
                   </div>
