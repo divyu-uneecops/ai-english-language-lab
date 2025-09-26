@@ -240,7 +240,7 @@ export function ReadingInterface() {
 
     // If level is "ai", skip difficulty selection
     if (level === "ai") {
-      router.push(`/reading/d11f52d3-85c6-4a86-93d3-88304ebfb6ca`);
+      router.push(`/reading/77d9d2b4-0037-4821-ac61-6c96457615b9`);
     } else {
       // Show difficulty selection for other levels
       setShowDifficultyDialog(true);
@@ -250,7 +250,7 @@ export function ReadingInterface() {
   const applyDifficulty = (difficulty: "easy" | "medium" | "hard") => {
     setSelectedDifficulty(difficulty);
     setShowDifficultyDialog(false);
-    router.push(`/reading/d11f52d3-85c6-4a86-93d3-88304ebfb6ca`);
+    router.push(`/reading/77d9d2b4-0037-4821-ac61-6c96457615b9`);
   };
 
   return (
