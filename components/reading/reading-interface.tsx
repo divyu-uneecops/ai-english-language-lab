@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -79,6 +79,15 @@ export function ReadingInterface() {
     points: 0,
     nextStar: 35,
   });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0,
+  });
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
@@ -98,16 +107,20 @@ export function ReadingInterface() {
 
   // Fetch stories from API
   useEffect(() => {
-    const fetchStories = async () => {
+    const fetchStories = async (isLoadMore = false) => {
       try {
-        setLoading(true);
-        setError(null);
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+          setError(null);
+        }
 
         const { level, difficulty } = getSelectedFilters();
 
         const params = {
-          page: 1,
-          page_size: 10,
+          page: isLoadMore ? pagination.currentPage + 1 : 1,
+          page_size: pagination.pageSize,
           level: level,
           difficulty: difficulty,
         };
@@ -117,7 +130,31 @@ export function ReadingInterface() {
         // Transform the API data to match our interface
         const transformedStories: Story[] = paginatedData?.results;
 
-        setStories(transformedStories);
+        if (isLoadMore) {
+          // Append new stories to existing ones
+          setStories((prev) => [...prev, ...transformedStories]);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: prev.currentPage + 1,
+          }));
+        } else {
+          // Replace stories for initial load or filter change
+          setStories(transformedStories);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 1,
+            total: paginatedData?.total || 0,
+            totalPages: Math.ceil(
+              (paginatedData?.total || 0) / pagination.pageSize
+            ),
+          }));
+        }
+
+        // Check if there are more stories to load
+        const totalLoaded = isLoadMore
+          ? stories.length + transformedStories.length
+          : transformedStories.length;
+        setHasMore(totalLoaded < (paginatedData?.total || 0));
       } catch (err) {
         console.error("Error fetching stories:", err);
         setError(
@@ -125,11 +162,70 @@ export function ReadingInterface() {
         );
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     };
 
     fetchStories();
   }, [filters]);
+
+  // Load more stories function
+  const loadMoreStories = async () => {
+    if (!hasMore || loadingMore) return;
+
+    try {
+      setLoadingMore(true);
+      const { level, difficulty } = getSelectedFilters();
+
+      const params = {
+        page: pagination.currentPage + 1,
+        page_size: pagination.pageSize,
+        level: level,
+        difficulty: difficulty,
+      };
+      const paginatedData: PaginatedResponse =
+        await readingService.fetchStories(params);
+
+      const transformedStories: Story[] = paginatedData?.results;
+
+      // Append new stories to existing ones
+      setStories((prev) => [...prev, ...transformedStories]);
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: prev.currentPage + 1,
+      }));
+
+      // Check if there are more stories to load
+      const totalLoaded = stories.length + transformedStories.length;
+      setHasMore(totalLoaded < (paginatedData?.total || 0));
+    } catch (err) {
+      console.error("Error loading more stories:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Scroll detection for infinite scroll within container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Load more when scrolled to within 100px of bottom
+      if (
+        scrollTop + clientHeight >= scrollHeight - 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
+        loadMoreStories();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingMore, stories.length]);
 
   // Open level selection dialog on first mount
   useEffect(() => {
@@ -226,104 +322,137 @@ export function ReadingInterface() {
 
             {/* Stories List - Similar to coding challenges */}
             {!loading && !error && (
-              <div className="space-y-4">
-                {stories?.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
-                      <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                        <BookOpen className="h-8 w-8 text-gray-500" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        No stories available
-                      </h3>
-                      <p className="text-gray-600">
-                        Check back later for new reading materials
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  stories.map((story) => (
-                    <Card
-                      key={story?.passage_id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
-                      onClick={() =>
-                        router.push(`/reading/${story?.passage_id}`)
-                      }
-                    >
-                      {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                      <div className="relative p-6">
-                        {/* Header with star and badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                              <Star className="h-4 w-4 text-yellow-600" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                  story?.level
-                                )} shadow-sm`}
-                              >
-                                {story?.level}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                  story?.difficulty
-                                )} shadow-sm`}
-                              >
-                                {story?.difficulty}
-                              </Badge>
-                            </div>
-                          </div>
+              <div
+                ref={scrollContainerRef}
+                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2"
+              >
+                <div className="space-y-4">
+                  {stories?.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+                        <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <BookOpen className="h-8 w-8 text-gray-500" />
                         </div>
-
-                        {/* Story title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                          {story?.title}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          No stories available
                         </h3>
-
-                        {/* Story description */}
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                          {story?.passage}
+                        <p className="text-gray-600">
+                          Check back later for new reading materials
                         </p>
+                      </div>
+                    </div>
+                  ) : (
+                    stories.map((story) => (
+                      <Card
+                        key={story?.passage_id}
+                        className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
+                        onClick={() =>
+                          router.push(`/reading/${story?.passage_id}`)
+                        }
+                      >
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                        {/* Stats and metadata */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Trophy className="h-3 w-3 text-yellow-500" />
-                              <span className="font-medium">Max Score: 10</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Clock className="h-3 w-3 text-orange-500" />
-                              <span className="font-medium">
-                                {story?.readTime || "5 Min"}
-                              </span>
+                        <div className="relative p-6">
+                          {/* Header with star and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <Star className="h-4 w-4 text-yellow-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    story?.level
+                                  )} shadow-sm`}
+                                >
+                                  {story?.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    story?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {story?.difficulty}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Action button */}
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                          >
-                            Start Reading
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Button>
+                          {/* Story title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {story?.title}
+                          </h3>
+
+                          {/* Story description */}
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {story?.passage}
+                          </p>
+
+                          {/* Stats and metadata */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Trophy className="h-3 w-3 text-yellow-500" />
+                                <span className="font-medium">
+                                  Max Score: 10
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Clock className="h-3 w-3 text-orange-500" />
+                                <span className="font-medium">
+                                  {story?.readTime || "5 Min"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                            >
+                              Start Reading
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  )}
+
+                  {/* Infinite Scroll Loading Indicator */}
+                  {loadingMore && (
+                    <div className="mt-4 flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Loading more stories...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* End of results indicator */}
+                  {!loading && !error && !hasMore && stories.length > 0 && (
+                    <div className="mt-4 flex items-center justify-center">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-gray-700">
+                            You've reached the end! No more stories to load.
+                          </span>
                         </div>
                       </div>
-                    </Card>
-                  ))
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
