@@ -82,16 +82,17 @@ export function ReadingInterface() {
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
-    const selectedLevel = Object.entries(filters.level).find(
-      ([_, isSelected]) => isSelected
-    )?.[0];
-    const selectedDifficulty = Object.entries(filters.difficulty).find(
-      ([_, isSelected]) => isSelected
-    )?.[0];
+    const selectedLevels = Object.entries(filters.level)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([level, _]) => level);
+    const selectedDifficulties = Object.entries(filters.difficulty)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([difficulty, _]) => difficulty);
 
     return {
-      level: selectedLevel || undefined,
-      difficulty: selectedDifficulty || undefined,
+      level: selectedLevels.length > 0 ? selectedLevels : undefined,
+      difficulty:
+        selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
     };
   };
 
