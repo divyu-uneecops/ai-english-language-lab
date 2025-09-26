@@ -8,7 +8,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -27,31 +26,23 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { readingService } from "@/services/readingService";
-import { getDifficultyColor } from "@/lib/utils";
-
-// API Story interface
-interface ApiStory {
-  passage_id: string;
-  title: string;
-  passage: string;
-  difficulty: string;
-  standard: number;
-}
+import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 
 // Internal Story interface
 interface Story {
-  id: string;
+  passage_id: string;
   title: string;
+  level: string;
   difficulty: string;
-  readTime: string;
-  description: string;
+  readTime?: string;
+  passage: string;
 }
 
 interface PaginatedResponse {
   page: number;
   page_size: number;
   total: number;
-  results: ApiStory[];
+  results: Story[];
 }
 
 export function ReadingInterface() {
@@ -89,6 +80,21 @@ export function ReadingInterface() {
     nextStar: 35,
   });
 
+  // Helper function to extract selected filter values
+  const getSelectedFilters = () => {
+    const selectedLevel = Object.entries(filters.level).find(
+      ([_, isSelected]) => isSelected
+    )?.[0];
+    const selectedDifficulty = Object.entries(filters.difficulty).find(
+      ([_, isSelected]) => isSelected
+    )?.[0];
+
+    return {
+      level: selectedLevel || undefined,
+      difficulty: selectedDifficulty || undefined,
+    };
+  };
+
   // Fetch stories from API
   useEffect(() => {
     const fetchStories = async () => {
@@ -96,19 +102,19 @@ export function ReadingInterface() {
         setLoading(true);
         setError(null);
 
-        const response = await readingService.fetchStories(1, 10);
-        const paginatedData: PaginatedResponse = response;
+        const { level, difficulty } = getSelectedFilters();
+
+        const params = {
+          page: 1,
+          page_size: 10,
+          level: level,
+          difficulty: difficulty,
+        };
+        const paginatedData: PaginatedResponse =
+          await readingService.fetchStories(params);
 
         // Transform the API data to match our interface
-        const transformedStories: Story[] = paginatedData.results.map(
-          (story) => ({
-            id: story.passage_id,
-            title: story.title,
-            difficulty: story.difficulty,
-            readTime: "5 Min", // Default read time since API doesn't provide it
-            description: story.passage,
-          })
-        );
+        const transformedStories: Story[] = paginatedData?.results;
 
         setStories(transformedStories);
       } catch (err) {
@@ -122,7 +128,7 @@ export function ReadingInterface() {
     };
 
     fetchStories();
-  }, []);
+  }, [filters]);
 
   // Open level selection dialog on first mount
   useEffect(() => {
@@ -208,7 +214,7 @@ export function ReadingInterface() {
                   </h3>
                   <p className="text-gray-600 mb-6">{error}</p>
                   <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => window?.location?.reload()}
                     className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Try Again
@@ -220,7 +226,7 @@ export function ReadingInterface() {
             {/* Stories List - Similar to coding challenges */}
             {!loading && !error && (
               <div className="space-y-4">
-                {stories.length === 0 ? (
+                {stories?.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
                       <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
@@ -235,11 +241,13 @@ export function ReadingInterface() {
                     </div>
                   </div>
                 ) : (
-                  stories.map((story, index) => (
+                  stories.map((story) => (
                     <Card
-                      key={story?.id}
+                      key={story?.passage_id}
                       className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
-                      onClick={() => router.push(`/reading/${story?.id}`)}
+                      onClick={() =>
+                        router.push(`/reading/${story?.passage_id}`)
+                      }
                     >
                       {/* Gradient overlay for visual appeal */}
                       <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -254,7 +262,17 @@ export function ReadingInterface() {
                             <div className="flex items-center gap-2">
                               <Badge
                                 variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full ${getDifficultyColor(
+                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                  story?.level
+                                )} shadow-sm`}
+                              >
+                                {story?.level}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
                                   story?.difficulty
                                 )} shadow-sm`}
                               >
@@ -271,7 +289,7 @@ export function ReadingInterface() {
 
                         {/* Story description */}
                         <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                          {story?.description}
+                          {story?.passage}
                         </p>
 
                         {/* Stats and metadata */}
@@ -285,7 +303,7 @@ export function ReadingInterface() {
                             <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
                               <Clock className="h-3 w-3 text-orange-500" />
                               <span className="font-medium">
-                                {story?.readTime}
+                                {story?.readTime || "5 Min"}
                               </span>
                             </div>
                           </div>
@@ -367,13 +385,13 @@ export function ReadingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                     <input
                       type="checkbox"
-                      checked={filters.status.solved}
+                      checked={filters?.status?.solved}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           status: {
-                            ...filters.status,
-                            solved: e.target.checked,
+                            ...filters?.status,
+                            solved: e?.target?.checked,
                           },
                         })
                       }
@@ -389,13 +407,13 @@ export function ReadingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
                     <input
                       type="checkbox"
-                      checked={filters.status.unsolved}
+                      checked={filters?.status?.unsolved}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           status: {
-                            ...filters.status,
-                            unsolved: e.target.checked,
+                            ...filters?.status,
+                            unsolved: e?.target?.checked,
                           },
                         })
                       }
@@ -421,13 +439,13 @@ export function ReadingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                     <input
                       type="checkbox"
-                      checked={filters.level.beginner}
+                      checked={filters?.level?.beginner}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           level: {
-                            ...filters.level,
-                            beginner: e.target.checked,
+                            ...filters?.level,
+                            beginner: e?.target?.checked,
                           },
                         })
                       }
@@ -448,8 +466,8 @@ export function ReadingInterface() {
                         setFilters({
                           ...filters,
                           level: {
-                            ...filters.level,
-                            intermediate: e.target.checked,
+                            ...filters?.level,
+                            intermediate: e?.target?.checked,
                           },
                         })
                       }
@@ -465,13 +483,13 @@ export function ReadingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
                     <input
                       type="checkbox"
-                      checked={filters.level.advanced}
+                      checked={filters?.level?.advanced}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           level: {
-                            ...filters.level,
-                            advanced: e.target.checked,
+                            ...filters?.level,
+                            advanced: e?.target?.checked,
                           },
                         })
                       }
@@ -502,8 +520,8 @@ export function ReadingInterface() {
                         setFilters({
                           ...filters,
                           difficulty: {
-                            ...filters.difficulty,
-                            easy: e.target.checked,
+                            ...filters?.difficulty,
+                            easy: e?.target?.checked,
                           },
                         })
                       }
@@ -524,8 +542,8 @@ export function ReadingInterface() {
                         setFilters({
                           ...filters,
                           difficulty: {
-                            ...filters.difficulty,
-                            medium: e.target.checked,
+                            ...filters?.difficulty,
+                            medium: e?.target?.checked,
                           },
                         })
                       }
@@ -541,13 +559,13 @@ export function ReadingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
                     <input
                       type="checkbox"
-                      checked={filters.difficulty.hard}
+                      checked={filters?.difficulty?.hard}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           difficulty: {
-                            ...filters.difficulty,
-                            hard: e.target.checked,
+                            ...filters?.difficulty,
+                            hard: e?.target?.checked,
                           },
                         })
                       }

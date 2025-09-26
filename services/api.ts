@@ -6,7 +6,7 @@ import axios, {
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:8004",
   headers: {
     "Content-Type": "application/json",
   },

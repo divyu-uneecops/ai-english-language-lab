@@ -1,10 +1,9 @@
 import serverInterfaceService from "./serverInterfaceService";
 
 export const readingService = {
-  fetchStories: (page: number = 1, pageSize: number = 10) =>
-    serverInterfaceService.get(
-      `/reading/stories?page=${page}&page_size=${pageSize}`
-    ),
+  fetchStories: (params?: Record<string, any>) => {
+    return serverInterfaceService.get(`/reading/passages`, params);
+  },
   fetchStoryById: (storyId: string) =>
     serverInterfaceService.get(`/reading/stories/${storyId}`),
   verifyAnswers: (
