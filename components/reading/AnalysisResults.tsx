@@ -56,13 +56,11 @@ interface AnalysisResult {
 interface AnalysisResultsProps {
   result: AnalysisResult;
   onRetry: () => void;
-  onViewDetails: () => void;
 }
 
 export default function AnalysisResults({
   result,
   onRetry,
-  onViewDetails,
 }: AnalysisResultsProps) {
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
 
@@ -122,30 +120,6 @@ export default function AnalysisResults({
 
   return (
     <div className="space-y-6">
-      {/* Header Section - Consistent with Reading Module */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full">
-            {result.is_solved ? (
-              <Trophy className="h-8 w-8 text-green-600" />
-            ) : (
-              <Target className="h-8 w-8 text-blue-600" />
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {result.is_solved ? "Congratulations!" : "Analysis Complete"}
-          </h2>
-          <p className="text-gray-600">
-            {result.is_solved
-              ? "You've successfully completed this reading passage!"
-              : "Here's your reading analysis and feedback"}
-          </p>
-        </div>
-      </div>
-
       {/* Overall Score Card - HackerRank Style */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="text-center space-y-4">
@@ -210,7 +184,7 @@ export default function AnalysisResults({
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {result.scoreBreakdown?.accuracy || 0}/10
+              {result.scoreBreakdown?.accuracy || 0}/4
             </div>
             <div className="text-xs text-gray-500">
               {result.detailedMetrics?.accuracy || "Word Recognition"}
@@ -227,7 +201,7 @@ export default function AnalysisResults({
               </span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {result.scoreBreakdown?.pronunciation || 0}/10
+              {result.scoreBreakdown?.pronunciation || 0}/4
             </div>
             <div className="text-xs text-gray-500">
               {result.detailedMetrics?.pronunciation || "Speech Clarity"}
@@ -242,7 +216,7 @@ export default function AnalysisResults({
               <span className="text-sm font-medium text-gray-600">Fluency</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {result.scoreBreakdown?.fluency || 0}/10
+              {result.scoreBreakdown?.fluency || 0}/2
             </div>
             <div className="text-xs text-gray-500">
               {result.detailedMetrics?.fluency || "Reading Speed"}
@@ -276,24 +250,6 @@ export default function AnalysisResults({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Feedback</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDetailedFeedback(!showDetailedFeedback)}
-                className="hover:bg-gray-50"
-              >
-                {showDetailedFeedback ? (
-                  <>
-                    <EyeOff className="h-4 w-4 mr-2" />
-                    Hide Details
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Show Details
-                  </>
-                )}
-              </Button>
             </div>
 
             <div className="space-y-3">
@@ -361,13 +317,6 @@ export default function AnalysisResults({
         <Button onClick={onRetry} variant="outline" className="flex-1">
           <RotateCcw className="h-4 w-4 mr-2" />
           Try Again
-        </Button>
-        <Button
-          onClick={onViewDetails}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          View Detailed Analysis
         </Button>
       </div>
     </div>

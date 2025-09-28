@@ -314,12 +314,10 @@ export default function StoryPage() {
 
   const handleSubmitAnalysis = async () => {
     if (speechChunks.length === 0) {
-      console.log("No speech chunks available to submit");
       return;
     }
 
     if (!story) {
-      console.error("No story available");
       return;
     }
 
@@ -327,14 +325,11 @@ export default function StoryPage() {
       setIsAnalyzing(true);
       setAnalysisError(null);
 
-      console.log("Submitting analysis with chunks:", speechChunks);
-
       const result = await readingService.evaluateReading(
         story.passage_id,
         speechChunks
       );
 
-      console.log("Analysis result:", result);
       setAnalysisResult(result);
       setShowAnalysisResults(true);
     } catch (error) {
@@ -354,12 +349,6 @@ export default function StoryPage() {
     setAnalysisResult(null);
     setAnalysisError(null);
     setSpeechChunks([]);
-  };
-
-  const handleViewDetailedAnalysis = () => {
-    // The detailed analysis is already shown in the modal
-    // This function can be used for additional actions like exporting results
-    console.log("View detailed analysis:", analysisResult);
   };
 
   const renderStoryWithHighlighting = (text: string) => {
@@ -447,12 +436,6 @@ export default function StoryPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link
-              href="/reading"
-              className="text-lg font-bold text-gray-900 hover:text-blue-600"
-            >
-              AI English Lab
-            </Link>
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link
                 href="/reading"
@@ -467,7 +450,7 @@ export default function StoryPage() {
           <div className="flex items-center space-x-3">
             <Badge
               variant="secondary"
-              className={`text-xs font-medium px-3 py-1 ${getDifficultyColor(
+              className={`text-xs font-medium px-3 py-1 capitalize ${getDifficultyColor(
                 story?.difficulty
               )}`}
             >
@@ -557,7 +540,7 @@ export default function StoryPage() {
               <div className="flex items-center space-x-3">
                 <div className="w-1 h-6 bg-green-500 rounded-full"></div>
                 <h2 className="text-lg font-semibold text-gray-900">
-                  Speech Practice
+                  Reading Practice
                 </h2>
               </div>
               <Button
@@ -574,7 +557,7 @@ export default function StoryPage() {
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Submit Analysis
+                    Submit
                   </>
                 )}
               </Button>
@@ -613,23 +596,9 @@ export default function StoryPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Analysis Results
-                </h2>
-                <Button
-                  onClick={() => setShowAnalysisResults(false)}
-                  variant="outline"
-                  size="sm"
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Close
-                </Button>
-              </div>
               <AnalysisResults
                 result={analysisResult}
                 onRetry={handleRetryAnalysis}
-                onViewDetails={handleViewDetailedAnalysis}
               />
             </div>
           </div>
