@@ -254,7 +254,7 @@ export default function EnglishLearningDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -350,8 +350,8 @@ export default function EnglishLearningDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Continue Practicing
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {continuePracticing.map((item) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {continuePracticing.slice(0, 4).map((item) => (
               <Link key={item.id} href={item.href}>
                 <Card className="p-6 bg-white hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="flex items-center justify-between mb-4">
@@ -423,8 +423,8 @@ export default function EnglishLearningDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {aiPoweredTests.map((test) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {aiPoweredTests.slice(0, 4).map((test) => (
               <Card
                 key={test.id}
                 className="p-6 bg-white hover:shadow-lg transition-shadow"
