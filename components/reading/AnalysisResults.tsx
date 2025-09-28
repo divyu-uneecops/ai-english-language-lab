@@ -121,184 +121,166 @@ export default function AnalysisResults({
   const overallRating = getOverallRating(result.score || 0);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Hero Section */}
-      <div className="text-center space-y-6">
-        <div className="relative">
-          <div
-            className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r ${getScoreColor(
-              result.score || 0
-            )} shadow-lg`}
-          >
-            {getScoreIcon(result.score || 0)}
-          </div>
-          <div className="absolute -top-2 -right-2">
-            <div
-              className={`w-8 h-8 rounded-full ${overallRating.bg} flex items-center justify-center shadow-md`}
-            >
-              <Star className="h-4 w-4 text-yellow-500" />
-            </div>
+    <div className="space-y-6">
+      {/* Header Section - Consistent with Reading Module */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full">
+            {result.is_solved ? (
+              <Trophy className="h-8 w-8 text-green-600" />
+            ) : (
+              <Target className="h-8 w-8 text-blue-600" />
+            )}
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {result.is_solved ? "🎉 Congratulations!" : "📊 Reading Analysis"}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {result.is_solved ? "Congratulations!" : "Analysis Complete"}
+          </h2>
+          <p className="text-gray-600">
             {result.is_solved
-              ? "You've successfully completed this reading passage with flying colors!"
-              : "Here's your detailed reading performance analysis"}
+              ? "You've successfully completed this reading passage!"
+              : "Here's your reading analysis and feedback"}
           </p>
         </div>
+      </div>
 
-        {/* Score Display */}
-        <div className="flex items-center justify-center gap-4">
-          <div className="text-center">
-            <div className="text-5xl font-bold text-gray-900 mb-1">
-              {result.score || 0}
-            </div>
-            <div className="text-sm text-gray-500 font-medium">out of 10</div>
+      {/* Overall Score Card - HackerRank Style */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <Star className="h-6 w-6 text-yellow-500" />
+            <span className="text-sm font-medium text-gray-600">
+              Overall Score
+            </span>
           </div>
-          <div className="h-16 w-px bg-gray-200"></div>
-          <div className="text-center">
-            <Badge
-              className={`px-4 py-2 text-sm font-semibold ${getLevelColor(
-                result.level || ""
-              )}`}
-            >
-              {result.level || "Not Rated"}
-            </Badge>
-            <div className="text-sm text-gray-500 mt-1 font-medium">
-              {overallRating.text}
+
+          <div className="space-y-3">
+            <div className="text-4xl font-bold text-gray-900">
+              {result.score || 0}/10
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <Badge
+                variant="outline"
+                className={`text-sm font-semibold px-4 py-1 ${getScoreColor(
+                  (result.score || 0) * 10
+                )}`}
+              >
+                {getScoreIcon((result.score || 0) * 10)}
+                <span className="ml-1">{overallRating.text}</span>
+              </Badge>
+              {result.level && (
+                <Badge
+                  variant="outline"
+                  className={`text-sm font-semibold px-3 py-1 ${getLevelColor(
+                    result.level
+                  )}`}
+                >
+                  {result.level}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className={`h-3 rounded-full transition-all duration-1000 ${
+                (result.score || 0) >= 8
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                  : (result.score || 0) >= 6
+                  ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                  : "bg-gradient-to-r from-red-500 to-pink-500"
+              }`}
+              style={{ width: `${(result.score || 0) * 10}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Scores Grid - Consistent Styling */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle className="h-5 w-5 text-blue-500" />
+              <span className="text-sm font-medium text-gray-600">
+                Accuracy
+              </span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {result.scoreBreakdown?.accuracy || 0}/10
+            </div>
+            <div className="text-xs text-gray-500">
+              {result.detailedMetrics?.accuracy || "Word Recognition"}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Volume2 className="h-5 w-5 text-purple-500" />
+              <span className="text-sm font-medium text-gray-600">
+                Pronunciation
+              </span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {result.scoreBreakdown?.pronunciation || 0}/10
+            </div>
+            <div className="text-xs text-gray-500">
+              {result.detailedMetrics?.pronunciation || "Speech Clarity"}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <TrendingUp className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-medium text-gray-600">Fluency</span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900">
+              {result.scoreBreakdown?.fluency || 0}/10
+            </div>
+            <div className="text-xs text-gray-500">
+              {result.detailedMetrics?.fluency || "Reading Speed"}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Accuracy */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-          <div className="p-6 text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 group-hover:bg-blue-200 transition-colors">
-              <Target className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {result.scoreBreakdown?.accuracy || 0}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">Accuracy</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {result.detailedMetrics?.accuracy || "Word Recognition"}
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-1000"
-                style={{
-                  width: `${(result.scoreBreakdown?.accuracy || 0) * 10}%`,
-                }}
-              ></div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Fluency */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-          <div className="p-6 text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 group-hover:bg-green-200 transition-colors">
-              <Zap className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {result.scoreBreakdown?.fluency || 0}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">Fluency</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {result.detailedMetrics?.fluency || "Reading Speed"}
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-1000"
-                style={{
-                  width: `${(result.scoreBreakdown?.fluency || 0) * 10}%`,
-                }}
-              ></div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Pronunciation */}
-        <Card className="group hover:shadow-lg transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
-          <div className="p-6 text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 group-hover:bg-purple-200 transition-colors">
-              <Volume2 className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">
-                {result.scoreBreakdown?.pronunciation || 0}
-              </div>
-              <div className="text-sm text-gray-600 font-medium">
-                Pronunciation
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {result.detailedMetrics?.pronunciation || "Speech Clarity"}
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-1000"
-                style={{
-                  width: `${(result.scoreBreakdown?.pronunciation || 0) * 10}%`,
-                }}
-              ></div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Previous Attempts */}
+      {/* Previous Attempts Info */}
       {result.previous_attempts && result.previous_attempts > 0 && (
-        <Card className="border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <div className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-full">
-                <RotateCcw className="h-6 w-6 text-blue-600" />
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <RotateCcw className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-blue-800">
+                Previous Attempts: {result.previous_attempts}
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900">
-                  Progress Tracking
-                </h3>
-                <p className="text-blue-700">
-                  This is attempt #{result.previous_attempts + 1}. Your best
-                  score so far is {result.best_score || 0}/10.
-                </p>
+              <div className="text-xs text-blue-600">
+                Best Score: {result.best_score || 0}/10
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Feedback Section */}
+      {/* Feedback Section - Consistent with Reading Module */}
       {result.feedback && result.feedback.length > 0 && (
-        <Card className="border-0 bg-white/80 backdrop-blur-sm">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <MessageSquare className="h-5 w-5 text-indigo-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Personalized Feedback
-                </h3>
-              </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Feedback</h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowDetailedFeedback(!showDetailedFeedback)}
-                className="hover:bg-indigo-50 hover:border-indigo-200"
+                className="hover:bg-gray-50"
               >
                 {showDetailedFeedback ? (
                   <>
@@ -314,16 +296,18 @@ export default function AnalysisResults({
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {result.feedback.map((feedbackItem, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200"
+                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
                 >
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    {index + 1}
+                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-semibold text-blue-600">
+                      {index + 1}
+                    </span>
                   </div>
-                  <p className="text-gray-700 leading-relaxed flex-1">
+                  <p className="text-gray-700 leading-relaxed text-sm">
                     {feedbackItem}
                   </p>
                 </div>
@@ -332,19 +316,18 @@ export default function AnalysisResults({
 
             {/* Detailed Segment Analysis */}
             {showDetailedFeedback && result.audio_data && (
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-gray-600" />
+              <div className="space-y-3 pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-800">
                   Segment Analysis
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {result.audio_data.map((segment, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 mb-1">
+                        <div className="text-sm font-medium text-gray-900">
                           "{segment.text}"
                         </div>
                         <div className="text-xs text-gray-500">
@@ -352,14 +335,14 @@ export default function AnalysisResults({
                           {segment.endTime.toFixed(1)}s
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         {segment.accuracy && (
                           <Badge variant="outline" className="text-xs bg-white">
                             {segment.accuracy}%
                           </Badge>
                         )}
                         {segment.feedback && (
-                          <div className="text-xs text-gray-600 max-w-xs">
+                          <div className="text-xs text-gray-600 max-w-xs truncate">
                             {segment.feedback}
                           </div>
                         )}
@@ -370,24 +353,20 @@ export default function AnalysisResults({
               </div>
             )}
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button
-          onClick={onRetry}
-          variant="outline"
-          className="flex-1 h-12 text-base font-medium hover:bg-gray-50"
-        >
-          <RotateCcw className="h-5 w-5 mr-2" />
+      {/* Action Buttons - Consistent with Reading Module */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Button onClick={onRetry} variant="outline" className="flex-1">
+          <RotateCcw className="h-4 w-4 mr-2" />
           Try Again
         </Button>
         <Button
           onClick={onViewDetails}
-          className="flex-1 h-12 text-base font-medium bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
+          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
         >
-          <Eye className="h-5 w-5 mr-2" />
+          <Eye className="h-4 w-4 mr-2" />
           View Detailed Analysis
         </Button>
       </div>
