@@ -14,4 +14,12 @@ export const readingService = {
       story_id: storyId,
       answers: answers,
     }),
+  evaluateReading: (
+    passageId: string,
+    audioData: Array<{ text: string; startTime: number; endTime: number }>
+  ) =>
+    serverInterfaceService.post("/reading/evaluate-reading", {
+      passage_id: passageId,
+      audio_data: audioData,
+    }),
 };

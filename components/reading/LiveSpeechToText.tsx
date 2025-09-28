@@ -44,6 +44,10 @@ export default function LiveSpeechToText({
   const streamRef = useRef<MediaStream | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
 
+  useEffect(() => {
+    onChunksUpdate?.(chunks);
+  }, [chunks]);
+
   const startListening = async () => {
     if (listening) return;
 
@@ -135,11 +139,9 @@ export default function LiveSpeechToText({
               startTime,
               endTime,
             };
-            const updatedChunks = [...chunks, newChunk];
-            setChunks(updatedChunks);
-            setTranscript((prev) => prev + " " + response.transcript);
 
-            onChunksUpdate?.(updatedChunks);
+            setChunks((prev) => [...prev, newChunk]);
+            setTranscript((prev) => prev + " " + response.transcript);
           }
         }
       });

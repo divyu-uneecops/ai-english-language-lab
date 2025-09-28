@@ -14,10 +14,12 @@ import {
   Square,
   Mic,
   Send,
+  CheckCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
 import LiveSpeechToText from "@/components/reading/LiveSpeechToText";
+import AnalysisResults from "@/components/reading/AnalysisResults";
 import { getDifficultyColor } from "@/lib/utils";
 
 interface Question {
@@ -37,6 +39,37 @@ interface Story {
   standard: number;
   questions: Question[];
   created_at: string;
+}
+
+interface AudioSegment {
+  text: string;
+  startTime: number;
+  endTime: number;
+  accuracy?: number;
+  pronunciation?: number;
+  fluency?: number;
+  feedback?: string;
+}
+
+interface AnalysisResult {
+  passage_id: string;
+  audio_data: AudioSegment[];
+  score?: number;
+  scoreBreakdown?: {
+    accuracy: number;
+    fluency: number;
+    pronunciation: number;
+  };
+  detailedMetrics?: {
+    accuracy: string;
+    fluency: string;
+    pronunciation: string;
+  };
+  feedback?: string[];
+  level?: string;
+  is_solved?: boolean;
+  previous_attempts?: number;
+  best_score?: number;
 }
 
 // Simple TTS Service for English only
@@ -93,6 +126,14 @@ export default function StoryPage() {
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+
+  // Analysis results state
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [showAnalysisResults, setShowAnalysisResults] = useState(false);
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -271,12 +312,54 @@ export default function StoryPage() {
     stopSpeech();
   };
 
-  const handleSubmitAnalysis = () => {
+  const handleSubmitAnalysis = async () => {
     if (speechChunks.length === 0) {
       console.log("No speech chunks available to submit");
       return;
     }
-    console.log(speechChunks);
+
+    if (!story) {
+      console.error("No story available");
+      return;
+    }
+
+    try {
+      setIsAnalyzing(true);
+      setAnalysisError(null);
+
+      console.log("Submitting analysis with chunks:", speechChunks);
+
+      const result = await readingService.evaluateReading(
+        story.passage_id,
+        speechChunks
+      );
+
+      console.log("Analysis result:", result);
+      setAnalysisResult(result);
+      setShowAnalysisResults(true);
+    } catch (error) {
+      console.error("Error submitting analysis:", error);
+      setAnalysisError(
+        error instanceof Error
+          ? error.message
+          : "Failed to analyze reading. Please try again."
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleRetryAnalysis = () => {
+    setShowAnalysisResults(false);
+    setAnalysisResult(null);
+    setAnalysisError(null);
+    setSpeechChunks([]);
+  };
+
+  const handleViewDetailedAnalysis = () => {
+    // The detailed analysis is already shown in the modal
+    // This function can be used for additional actions like exporting results
+    console.log("View detailed analysis:", analysisResult);
   };
 
   const renderStoryWithHighlighting = (text: string) => {
@@ -359,149 +442,237 @@ export default function StoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+    <div className="min-h-screen bg-gray-100">
+      {/* Header Bar - HackerRank Style */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
             <Link
               href="/reading"
-              className="hover:text-blue-600 transition-colors font-medium"
+              className="text-lg font-bold text-gray-900 hover:text-blue-600"
             >
-              Reading
+              AI English Lab
             </Link>
-            <span>/</span>
-            <span className="text-gray-900 font-semibold">{story?.title}</span>
-          </nav>
-
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <Badge
-                  variant="secondary"
-                  className={`text-xs font-medium border ${getDifficultyColor(
-                    story?.difficulty
-                  )}`}
-                >
-                  {story?.difficulty}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Clock className="h-4 w-4" />
-                  <span>5 Min</span>
-                </div>
-              </div>
-            </div>
+            <nav className="flex items-center space-x-2 text-sm text-gray-500">
+              <Link
+                href="/reading"
+                className="hover:text-blue-600 transition-colors"
+              >
+                Reading
+              </Link>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">{story?.title}</span>
+            </nav>
           </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Two-Column Layout */}
-          <div
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            style={{ height: "calc(100vh - 250px)" }}
-          >
-            {/* Story Text Panel */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {/* <Volume2 className="h-5 w-5 text-gray-600" /> */}
-                    <h3 className="font-semibold text-gray-900">Story Text</h3>
-                  </div>
-                  {/* Audio Controls */}
-                  <div className="flex items-center space-x-3">
-                    <Button
-                      onClick={handleSpeakerClick}
-                      disabled={isGenerating}
-                      variant={isPlaying ? "secondary" : "outline"}
-                      size="sm"
-                      className="group font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 hover:border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                          <span className="group-hover:text-blue-600 transition-colors">
-                            Generating
-                          </span>
-                        </>
-                      ) : isPlaying ? (
-                        isPaused ? (
-                          <>
-                            <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="group-hover:text-green-600 transition-colors">
-                              Resume Audio
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Pause className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="group-hover:text-orange-600 transition-colors">
-                              Pause Audio
-                            </span>
-                          </>
-                        )
-                      ) : (
-                        <>
-                          <Volume2 className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-blue-600 transition-all duration-200" />
-                          <span className="group-hover:text-blue-600 transition-colors">
-                            Play Audio
-                          </span>
-                        </>
-                      )}
-                    </Button>
-
-                    {(isPlaying || isGenerating) && (
-                      <Button
-                        onClick={handleStopClick}
-                        disabled={isGenerating}
-                        variant="outline"
-                        size="sm"
-                        className="group transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/25 hover:border-red-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                      >
-                        <Square className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-red-600 transition-all duration-200" />
-                        <span className="group-hover:text-red-600 transition-colors">
-                          Stop
-                        </span>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 h-full overflow-y-auto">
-                <div className="prose prose-lg max-w-none">
-                  {renderStoryWithHighlighting(story?.passage || "")}
-                </div>
-              </div>
-            </div>
-
-            {/* Speech Practice Panel */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Mic className="h-5 w-5 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900">
-                      Speech Practice
-                    </h3>
-                  </div>
-                  <Button
-                    onClick={handleSubmitAnalysis}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
-                    disabled={speechChunks.length === 0}
-                  >
-                    <Send className="h-4 w-4 mr-1.5" />
-                    Submit Analysis
-                  </Button>
-                </div>
-              </div>
-              <div className="p-6 h-full overflow-hidden">
-                <LiveSpeechToText onChunksUpdate={setSpeechChunks} />
-              </div>
+          <div className="flex items-center space-x-3">
+            <Badge
+              variant="secondary"
+              className={`text-xs font-medium px-3 py-1 ${getDifficultyColor(
+                story?.difficulty
+              )}`}
+            >
+              {story?.difficulty}
+            </Badge>
+            <div className="flex items-center gap-1 text-sm text-gray-500">
+              <Clock className="h-4 w-4" />
+              <span>5 Min</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Main Content - Two Panel Layout */}
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Left Panel - Story Content */}
+        <div className="flex-1 bg-white border-r border-gray-200 flex flex-col">
+          {/* Left Panel Header */}
+          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Reading Passage
+                </h2>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={handleSpeakerClick}
+                  disabled={isGenerating}
+                  variant={isPlaying ? "secondary" : "outline"}
+                  size="sm"
+                  className="font-medium"
+                >
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                      Generating
+                    </>
+                  ) : isPlaying ? (
+                    isPaused ? (
+                      <>
+                        <Play className="h-4 w-4 mr-2" />
+                        Resume
+                      </>
+                    ) : (
+                      <>
+                        <Pause className="h-4 w-4 mr-2" />
+                        Pause
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <Volume2 className="h-4 w-4 mr-2" />
+                      Play Audio
+                    </>
+                  )}
+                </Button>
+                {(isPlaying || isGenerating) && (
+                  <Button
+                    onClick={handleStopClick}
+                    disabled={isGenerating}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Square className="h-4 w-4 mr-2" />
+                    Stop
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Story Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="prose prose-lg max-w-none">
+              {renderStoryWithHighlighting(story?.passage || "")}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Speech Practice */}
+        <div className="w-1/2 bg-white flex flex-col">
+          {/* Right Panel Header */}
+          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Speech Practice
+                </h2>
+              </div>
+              <Button
+                onClick={handleSubmitAnalysis}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white font-medium"
+                disabled={speechChunks.length === 0 || isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Submit Analysis
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Speech Practice Content */}
+          <div className="flex-1 overflow-hidden">
+            <LiveSpeechToText onChunksUpdate={setSpeechChunks} />
+
+            {/* Speech Chunks Preview */}
+            {speechChunks.length > 0 && (
+              <div className="p-4 bg-green-50 border-t border-green-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">
+                    Captured {speechChunks.length} segment(s)
+                  </span>
+                </div>
+                <div className="text-xs text-green-600">
+                  Total duration:{" "}
+                  {speechChunks.length > 0
+                    ? `${speechChunks[speechChunks.length - 1].endTime.toFixed(
+                        1
+                      )}s`
+                    : "0s"}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Analysis Results Modal Overlay */}
+      {showAnalysisResults && analysisResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Analysis Results
+                </h2>
+                <Button
+                  onClick={() => setShowAnalysisResults(false)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Close
+                </Button>
+              </div>
+              <AnalysisResults
+                result={analysisResult}
+                onRetry={handleRetryAnalysis}
+                onViewDetails={handleViewDetailedAnalysis}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Error Modal */}
+      {analysisError && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-red-100 rounded-full">
+                  <XCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-red-800 mb-2">
+                    Analysis Failed
+                  </h3>
+                  <p className="text-red-700 leading-relaxed">
+                    {analysisError}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  onClick={() => setAnalysisError(null)}
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                >
+                  Dismiss
+                </Button>
+                <Button
+                  onClick={handleRetryAnalysis}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
