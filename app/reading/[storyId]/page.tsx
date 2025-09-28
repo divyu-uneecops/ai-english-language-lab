@@ -351,6 +351,15 @@ export default function StoryPage() {
     setSpeechChunks([]);
   };
 
+  const handlePracticeMore = () => {
+    // Navigate to reading practice page or show more practice options
+    console.log("Practice more clicked:", analysisResult);
+    // This could navigate to a practice selection page or show more reading materials
+    // For now, we'll just close the modal and show a message
+    setShowAnalysisResults(false);
+    // You can implement navigation logic here
+  };
+
   const renderStoryWithHighlighting = (text: string) => {
     if (!text) return null;
 
@@ -599,6 +608,7 @@ export default function StoryPage() {
               <AnalysisResults
                 result={analysisResult}
                 onRetry={handleRetryAnalysis}
+                onPracticeMore={handlePracticeMore}
               />
             </div>
           </div>

@@ -20,6 +20,7 @@ import {
   BookOpen,
   Zap,
   MessageSquare,
+  BookOpenCheck,
 } from "lucide-react";
 
 interface AudioSegment {
@@ -56,11 +57,13 @@ interface AnalysisResult {
 interface AnalysisResultsProps {
   result: AnalysisResult;
   onRetry: () => void;
+  onPracticeMore: () => void;
 }
 
 export default function AnalysisResults({
   result,
   onRetry,
+  onPracticeMore,
 }: AnalysisResultsProps) {
   const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
 
@@ -317,6 +320,13 @@ export default function AnalysisResults({
         <Button onClick={onRetry} variant="outline" className="flex-1">
           <RotateCcw className="h-4 w-4 mr-2" />
           Try Again
+        </Button>
+        <Button
+          onClick={onPracticeMore}
+          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+        >
+          <BookOpenCheck className="h-4 w-4 mr-2" />
+          Practice More
         </Button>
       </div>
     </div>
