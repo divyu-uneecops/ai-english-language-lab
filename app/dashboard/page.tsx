@@ -254,161 +254,190 @@ export default function EnglishLearningDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 relative overflow-hidden">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* AI-Powered Personalized Header */}
         <div className="mb-8">
-          {user && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Welcome back,</span>
-              <span className="font-semibold text-gray-900">
-                {user.name || user.email}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {user && (
+                <div className="flex items-center gap-4 group">
+                  <div>
+                    <h1 className="text-sm text-gray-600">
+                      Welcome back, {user.name || user.email?.split("@")[0]}
+                    </h1>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Achievement Status - Expert UI/UX Design */}
+        {/* Simplified Achievement Section */}
         <div className="mb-12">
-          {/* Primary Achievement Focus */}
-          <div className="text-center mb-8">
-            {/* Achievement Message with Emotional Design */}
-            <div className="space-y-3">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {userStats.totalPoints >= 35 ? (
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
-                    🌟 First Star Achieved! 🌟
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-orange-600 font-extrabold">
-                      {35 - userStats.totalPoints}
-                    </span>{" "}
-                    points to your first star
-                  </>
-                )}
-              </h1>
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white relative overflow-hidden">
+            {/* Simple Background Element */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
 
-              {/* Progress with Visual Feedback */}
-              <div className="flex items-center justify-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full shadow-sm">
-                  <Trophy className="h-4 w-4 text-orange-600" />
-                  <span className="text-sm font-semibold text-gray-700">
-                    {userStats.totalPoints}/35
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {Math.round((userStats.totalPoints / 35) * 100)}% complete
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Secondary Stats with Card-like Design */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Level Card */}
-            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
-              <div className="p-2 bg-blue-100 rounded-lg w-fit mx-auto mb-2">
-                <Target className="h-5 w-5 text-blue-600" />
-              </div>
-              <p className="text-lg font-bold text-gray-900">
-                {userStats.level}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Current Level</p>
-            </div>
-
-            {/* Streak Card */}
-            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
-              <div className="p-2 bg-orange-100 rounded-lg w-fit mx-auto mb-2">
-                <TrendingUp className="h-5 w-5 text-orange-600" />
-              </div>
-              <p className="text-lg font-bold text-gray-900">
-                {userStats.streak}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Day Streak</p>
-            </div>
-
-            {/* Completed Card */}
-            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
-              <div className="p-2 bg-green-100 rounded-lg w-fit mx-auto mb-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <p className="text-lg font-bold text-gray-900">
-                {userStats.completedModules}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Completed</p>
-            </div>
-
-            {/* Time Spent Card */}
-            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
-              <div className="p-2 bg-indigo-100 rounded-lg w-fit mx-auto mb-2">
-                <Clock className="h-5 w-5 text-indigo-600" />
-              </div>
-              <p className="text-lg font-bold text-gray-900">
-                {userStats.timeSpent}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Time Spent</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Continue Practicing Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Continue Practicing
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {continuePracticing.map((item) => (
-              <Link key={item.id} href={item.href}>
-                <Card className="p-6 bg-white hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-2 rounded-lg ${getSkillColor(
-                          item.color
-                        )}`}
-                      >
-                        {item.icon}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {item.completed}/{item.total} completed
-                        </p>
-                      </div>
+            <div className="relative z-10">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                {/* Achievement Content */}
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="flex items-center justify-center lg:justify-start gap-4 mb-6">
+                    <div className="p-3 bg-white/20 rounded-xl">
+                      <Star className="h-8 w-8 text-yellow-300" />
                     </div>
-                    {item.locked ? (
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    )}
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        {userStats.totalPoints >= 35 ? (
+                          "🌟 First Star Achieved! 🌟"
+                        ) : (
+                          <>
+                            <span className="text-yellow-300 font-bold text-3xl">
+                              {35 - userStats.totalPoints}
+                            </span>{" "}
+                            <span className="text-lg">
+                              points to your first star
+                            </span>
+                          </>
+                        )}
+                      </h2>
+                    </div>
                   </div>
 
-                  <div className="mb-3">
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
-                      <span>Progress</span>
-                      <span>{item.progress}%</span>
+                  {/* Progress Bar */}
+                  <div className="w-full max-w-md mx-auto lg:mx-0">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-orange-100">Progress</span>
+                      <span className="text-sm font-bold text-yellow-300">
+                        {userStats.totalPoints}/35
+                      </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-white/20 rounded-full h-3">
                       <div
-                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(
-                          item.progress
-                        )}`}
-                        style={{ width: `${item.progress}%` }}
+                        className="bg-gradient-to-r from-yellow-300 to-yellow-400 h-3 rounded-full transition-all duration-1000"
+                        style={{
+                          width: `${Math.min(
+                            (userStats.totalPoints / 35) * 100,
+                            100
+                          )}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
+                </div>
 
-                  <p className="text-sm text-gray-600">
-                    {item.locked
-                      ? `Unlock at ${item.pointsNeeded} points`
-                      : `${
-                          item.pointsNeeded - item.progress * 0.1
-                        } points to next level`}
-                  </p>
-                </Card>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                    <Target className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">{userStats.level}</p>
+                    <p className="text-xs text-orange-100">Level</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                    <TrendingUp className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">{userStats.streak}</p>
+                    <p className="text-xs text-orange-100">Streak</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                    <CheckCircle className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">
+                      {userStats.completedModules}
+                    </p>
+                    <p className="text-xs text-orange-100">Done</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* AI-Powered Learning Modules Section */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
+                Continue Learning
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {continuePracticing.map((item, index) => (
+              <Link key={item.id} href={item.href}>
+                <div className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 hover:border-orange-200/50 cursor-pointer hover:scale-[1.02]">
+                  {/* Enhanced Header */}
+                  <div className="relative z-10 flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div
+                          className={`p-4 rounded-2xl ${getSkillColor(
+                            item.color
+                          )} bg-opacity-10 group-hover:scale-110 transition-all duration-300`}
+                        >
+                          {item.icon}
+                        </div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-xl group-hover:text-orange-600 transition-colors mb-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {item.completed}/{item.total} lessons completed
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-2 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
+                      <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
+                    </div>
+                  </div>
+
+                  {/* Enhanced Progress Section */}
+                  <div className="relative z-10 mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-semibold text-gray-700">
+                        Progress
+                      </span>
+                      <span className="text-lg font-bold text-gray-900">
+                        {item.progress}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                      <div
+                        className={`h-3 rounded-full transition-all duration-700 ease-out relative ${getProgressColor(
+                          item.progress
+                        )}`}
+                        style={{ width: `${item.progress}%` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Footer */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+                        <span className="text-xs font-medium text-gray-600">
+                          {item.locked
+                            ? `Unlock at ${item.pointsNeeded} points`
+                            : `${Math.max(
+                                0,
+                                item.pointsNeeded -
+                                  Math.floor(item.progress * 0.1)
+                              )} points to next level`}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
+                      <span className="text-xs font-semibold text-gray-600 group-hover:text-orange-600">
+                        {item.progress > 0 ? "In Progress" : "Not Started"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
