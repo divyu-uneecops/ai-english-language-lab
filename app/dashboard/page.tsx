@@ -350,63 +350,8 @@ export default function EnglishLearningDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Continue Practicing
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {continuePracticing.slice(0, 4).map((item) => (
-              <Link key={item.id} href={item.href}>
-                <Card className="p-6 bg-white hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-2 rounded-lg ${getSkillColor(
-                          item.color
-                        )}`}
-                      >
-                        {item.icon}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {item.completed}/{item.total} completed
-                        </p>
-                      </div>
-                    </div>
-                    {item.locked ? (
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
-                      <span>Progress</span>
-                      <span>{item.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(
-                          item.progress
-                        )}`}
-                        style={{ width: `${item.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-600">
-                    {item.locked
-                      ? `Unlock at ${item.pointsNeeded} points`
-                      : `${
-                          item.pointsNeeded - item.progress * 0.1
-                        } points to next level`}
-                  </p>
-                </Card>
-              </Link>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-            {continuePracticing.slice(4).map((item) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {continuePracticing.map((item) => (
               <Link key={item.id} href={item.href}>
                 <Card className="p-6 bg-white hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="flex items-center justify-between mb-4">
