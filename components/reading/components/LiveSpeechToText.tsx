@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SarvamAIClient } from "sarvamai";
 import { Button } from "@/components/ui/button";
-import {
-  Mic,
-  MicOff,
-  CheckCircle2,
-  AlertCircle,
-  RotateCcw,
-} from "lucide-react";
+import { Mic, MicOff, CheckCircle2, RotateCcw } from "lucide-react";
 
 interface SarvamResponse {
   request_id: string;

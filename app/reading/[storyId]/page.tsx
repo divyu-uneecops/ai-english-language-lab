@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
-import LiveSpeechToText from "@/components/reading/LiveSpeechToText";
-import AnalysisResults from "@/components/reading/AnalysisResults";
+import LiveSpeechToText from "@/components/reading/components/LiveSpeechToText";
+import AnalysisResults from "@/components/reading/components/AnalysisResults";
 import { getDifficultyColor } from "@/lib/utils";
 
 interface Question {
@@ -65,7 +65,12 @@ interface AnalysisResult {
     fluency: string;
     pronunciation: string;
   };
-  feedback?: string[];
+  feedback?: {
+    accuracy: string[];
+    fluency: string[];
+    consistency: string[];
+    overall: string[];
+  };
   level?: string;
   is_solved?: boolean;
   previous_attempts?: number;
