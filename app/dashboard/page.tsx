@@ -39,29 +39,7 @@ export default function EnglishLearningDashboard() {
     level: "Intermediate",
     streak: 7,
     completedModules: 12,
-    timeSpent: "2h 15m",
   });
-
-  const [prepKits] = useState([
-    {
-      id: 1,
-      title: "Complete English Mastery Kit",
-      description:
-        "45 Reading Passages • 30 Speaking Exercises • 20 Writing Tasks • 25 Vocabulary Sets • 1 Certification",
-      difficulty: "Beginner to Advanced",
-      isNew: true,
-      modules: ["Reading", "Speaking", "Writing", "Vocabulary", "Chat"],
-    },
-    {
-      id: 2,
-      title: "Vocabulary & Reading Kit",
-      description:
-        "50 Vocabulary Sets • 20 Reading Passages • 15 Comprehension Tests • 1 Certification",
-      difficulty: "Intermediate",
-      isNew: false,
-      modules: ["Vocabulary", "Reading"],
-    },
-  ]);
 
   const [continuePracticing] = useState([
     {
@@ -122,105 +100,6 @@ export default function EnglishLearningDashboard() {
     },
   ]);
 
-  const [practiceSkills] = useState([
-    {
-      name: "Reading Comprehension",
-      icon: <BookOpen className="h-5 w-5" />,
-      color: "orange",
-      href: "/reading",
-    },
-    {
-      name: "Pronunciation",
-      icon: <Mic className="h-5 w-5" />,
-      color: "pink",
-      href: "/speaking",
-    },
-    {
-      name: "Fluency",
-      icon: <Zap className="h-5 w-5" />,
-      color: "green",
-      href: "/speaking",
-    },
-    {
-      name: "Vocabulary",
-      icon: <Brain className="h-5 w-5" />,
-      color: "purple",
-      href: "/reading",
-    },
-    {
-      name: "Grammar",
-      icon: <FileText className="h-5 w-5" />,
-      color: "red",
-      href: "/writing",
-    },
-    {
-      name: "Listening",
-      icon: <Volume2 className="h-5 w-5" />,
-      color: "indigo",
-      href: "/speaking",
-    },
-    {
-      name: "Speaking",
-      icon: <Users className="h-5 w-5" />,
-      color: "pink",
-      href: "/speaking",
-    },
-    {
-      name: "Writing",
-      icon: <PenTool className="h-5 w-5" />,
-      color: "yellow",
-      href: "/writing",
-    },
-  ]);
-
-  const [aiPoweredTests] = useState([
-    {
-      id: 1,
-      title: "Reading Assessment",
-      description: "Comprehension Test (Medium)",
-      duration: "30 mins",
-      difficulty: "Medium",
-      available: true,
-      module: "Reading",
-    },
-    {
-      id: 2,
-      title: "Vocabulary Mastery Test",
-      description: "Word Knowledge & Usage (Easy)",
-      duration: "20 mins",
-      difficulty: "Easy",
-      available: true,
-      module: "Vocabulary",
-    },
-    {
-      id: 3,
-      title: "Speaking Evaluation",
-      description: "Pronunciation & Fluency (Medium)",
-      duration: "20 mins",
-      difficulty: "Medium",
-      available: false,
-      module: "Speaking",
-    },
-    {
-      id: 4,
-      title: "Writing Challenge",
-      description: "Essay Writing (Hard)",
-      duration: "45 mins",
-      difficulty: "Hard",
-      available: false,
-      module: "Writing",
-    },
-    {
-      id: 5,
-      title: "Conversation Test",
-      description: "AI Chat Assessment (Medium)",
-      duration: "25 mins",
-      difficulty: "Medium",
-      available: false,
-      module: "Chat",
-    },
-  ]);
-
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return "bg-green-500";
     if (progress >= 60) return "bg-blue-500";
@@ -240,17 +119,6 @@ export default function EnglishLearningDashboard() {
       blue: "text-blue-600",
     };
     return colors[color as keyof typeof colors] || "text-gray-600";
-  };
-
-  const getModuleColor = (module: string) => {
-    const colors = {
-      Reading: "bg-orange-100 text-orange-800",
-      Speaking: "bg-pink-100 text-pink-800",
-      Writing: "bg-yellow-100 text-yellow-800",
-      Vocabulary: "bg-purple-100 text-purple-800",
-      Chat: "bg-blue-100 text-blue-800",
-    };
-    return colors[module as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
   return (
