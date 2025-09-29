@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Clock,
   ChevronRight,
+  ChevronDown,
   Loader2,
   Star,
   Filter,
@@ -88,6 +89,13 @@ export function ReadingInterface() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Filter collapse/expand state
+  const [filterExpanded, setFilterExpanded] = useState({
+    status: true, // Status filter expanded by default
+    level: false, // Level filter collapsed by default
+    difficulty: false, // Difficulty filter collapsed by default
+  });
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
@@ -290,7 +298,7 @@ export function ReadingInterface() {
               </div>
 
               {/* Status Filter */}
-              <div className="mb-8">
+              <div>
                 <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   STATUS
@@ -344,155 +352,189 @@ export function ReadingInterface() {
               </div>
 
               {/* Level Filter */}
-              <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  LEVEL
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={filters?.level?.beginner}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters?.level,
-                            beginner: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Beginner
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.level.intermediate}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters?.level,
-                            intermediate: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                        Intermediate
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                    <input
-                      type="checkbox"
-                      checked={filters?.level?.advanced}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters?.level,
-                            advanced: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                        Advanced
-                      </span>
-                    </div>
-                  </label>
-                </div>
+              <div>
+                <button
+                  onClick={() =>
+                    setFilterExpanded((prev) => ({
+                      ...prev,
+                      level: !prev.level,
+                    }))
+                  }
+                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-blue-600 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-blue-500" />
+                    LEVEL
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      filterExpanded.level ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {filterExpanded.level && (
+                  <div className="space-y-3">
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.level?.beginner}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              beginner: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          Beginner
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.level.intermediate}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              intermediate: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
+                          Intermediate
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.level?.advanced}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              advanced: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
+                          Advanced
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Difficulty Filter */}
               <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Target className="h-4 w-4 text-red-500" />
-                  DIFFICULTY
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.difficulty.easy}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters?.difficulty,
-                            easy: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Easy
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.difficulty.medium}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters?.difficulty,
-                            medium: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                        Medium
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                    <input
-                      type="checkbox"
-                      checked={filters?.difficulty?.hard}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters?.difficulty,
-                            hard: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                        Hard
-                      </span>
-                    </div>
-                  </label>
-                </div>
+                <button
+                  onClick={() =>
+                    setFilterExpanded((prev) => ({
+                      ...prev,
+                      difficulty: !prev.difficulty,
+                    }))
+                  }
+                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-red-600 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-red-500" />
+                    DIFFICULTY
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      filterExpanded.difficulty ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {filterExpanded.difficulty && (
+                  <div className="space-y-3">
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.difficulty.easy}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              easy: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          Easy
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.difficulty.medium}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              medium: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
+                          Medium
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.difficulty?.hard}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              hard: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
+                          Hard
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
             </Card>
           </div>
