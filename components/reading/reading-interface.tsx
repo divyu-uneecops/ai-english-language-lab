@@ -257,8 +257,8 @@ export function ReadingInterface() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">
-          {/* Left Section - Header and Story Cards */}
-          <div className="flex-1">
+          {/* Left Section - User Progress Stats and Filters */}
+          <div className="w-80 space-y-6">
             {/* Header Section */}
             <div className="mb-8">
               <div className="space-y-2 mb-6">
@@ -268,7 +268,7 @@ export function ReadingInterface() {
                     href="/dashboard"
                     className="hover:text-orange-600 transition-colors font-medium"
                   >
-                    Prepare
+                    Dashboard
                   </Link>
                   <ChevronRight className="h-4 w-4" />
                   <span className="text-gray-900 font-semibold">Reading</span>
@@ -280,222 +280,6 @@ export function ReadingInterface() {
                 </h1>
               </div>
             </div>
-
-            {/* Main Content Area */}
-            {/* Loading State - Enhanced */}
-            {loading && (
-              <div className="flex items-center justify-center py-16">
-                <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-                  <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Loading stories...
-                  </h3>
-                  <p className="text-gray-600">
-                    Please wait while we fetch the content
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Error State - Enhanced */}
-            {error && (
-              <div className="text-center py-16">
-                <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-                  <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <MessageCircle className="h-8 w-8 text-red-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Unable to load stories
-                  </h3>
-                  <p className="text-gray-600 mb-6">{error}</p>
-                  <button
-                    onClick={() => window?.location?.reload()}
-                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Stories List - Similar to coding challenges */}
-            {!loading && !error && (
-              <div
-                ref={scrollContainerRef}
-                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2"
-              >
-                <div className="space-y-4">
-                  {stories?.length === 0 ? (
-                    <div className="text-center py-16">
-                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
-                        <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                          <BookOpen className="h-8 w-8 text-gray-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No stories available
-                        </h3>
-                        <p className="text-gray-600">
-                          Check back later for new reading materials
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    stories.map((story) => (
-                      <Card
-                        key={story?.passage_id}
-                        className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
-                        onClick={() =>
-                          router.push(`/reading/${story?.passage_id}`)
-                        }
-                      >
-                        {/* Gradient overlay for visual appeal */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                        <div className="relative p-6">
-                          {/* Header with star and badges */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                                <Star className="h-4 w-4 text-yellow-600" />
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                    story?.level
-                                  )} shadow-sm`}
-                                >
-                                  {story?.level}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                    story?.difficulty
-                                  )} shadow-sm`}
-                                >
-                                  {story?.difficulty}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Story title */}
-                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                            {story?.title}
-                          </h3>
-
-                          {/* Story description */}
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                            {story?.passage}
-                          </p>
-
-                          {/* Stats and metadata */}
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                                <Trophy className="h-3 w-3 text-yellow-500" />
-                                <span className="font-medium">
-                                  Max Score: 10
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                                <Clock className="h-3 w-3 text-orange-500" />
-                                <span className="font-medium">
-                                  {story?.readTime || "5 Min"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action button */}
-                          <div className="flex justify-end">
-                            <Button
-                              size="sm"
-                              className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                            >
-                              Start Reading
-                              <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                          </div>
-                        </div>
-                      </Card>
-                    ))
-                  )}
-
-                  {/* Infinite Scroll Loading Indicator */}
-                  {loadingMore && (
-                    <div className="mt-4 flex items-center justify-center">
-                      <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
-                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
-                        <span className="text-sm font-medium text-gray-700">
-                          Loading more stories...
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* End of results indicator */}
-                  {!loading && !error && !hasMore && stories.length > 0 && (
-                    <div className="mt-4 flex items-center justify-center">
-                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-gray-700">
-                            You've reached the end! No more stories to load.
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Section - User Progress Stats and Filters */}
-          <div className="w-80 space-y-6">
-            {/* User Progress Stats */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full">
-                    <Trophy className="h-6 w-6 text-orange-600" />
-                  </div>
-                </div>
-                <div className="text-sm text-gray-600 mb-2 font-medium">
-                  {userStats.nextStar - userStats.points} more points to get
-                  your first star!
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center space-x-4 text-sm">
-                    <div className="flex items-center space-x-1 text-gray-500">
-                      <BookOpen className="h-4 w-4" />
-                      <span className="font-semibold">Points:</span>
-                      <span className="font-bold text-gray-900">
-                        {userStats.points}/{userStats.nextStar}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Progress bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                    <div
-                      className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (userStats.points / userStats.nextStar) * 100
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
             {/* Enhanced Filters */}
             <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
               <div className="flex items-center gap-3 mb-6">
@@ -711,6 +495,184 @@ export function ReadingInterface() {
                 </div>
               </div>
             </Card>
+          </div>
+
+          {/* Right Section - Header and Story Cards */}
+          <div className="flex-1">
+            {/* Main Content Area */}
+            {/* Loading State - Enhanced */}
+            {loading && (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                  <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Loading stories...
+                  </h3>
+                  <p className="text-gray-600">
+                    Please wait while we fetch the content
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error State - Enhanced */}
+            {error && (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                  <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <MessageCircle className="h-8 w-8 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Unable to load stories
+                  </h3>
+                  <p className="text-gray-600 mb-6">{error}</p>
+                  <button
+                    onClick={() => window?.location?.reload()}
+                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Stories List - Similar to coding challenges */}
+            {!loading && !error && (
+              <div
+                ref={scrollContainerRef}
+                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2 mt-10"
+              >
+                <div className="space-y-4">
+                  {stories?.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+                        <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <BookOpen className="h-8 w-8 text-gray-500" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          No stories available
+                        </h3>
+                        <p className="text-gray-600">
+                          Check back later for new reading materials
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    stories.map((story) => (
+                      <Card
+                        key={story?.passage_id}
+                        className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
+                        onClick={() =>
+                          router.push(`/reading/${story?.passage_id}`)
+                        }
+                      >
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div className="relative p-6">
+                          {/* Header with star and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <Star className="h-4 w-4 text-yellow-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    story?.level
+                                  )} shadow-sm`}
+                                >
+                                  {story?.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    story?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {story?.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Story title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {story?.title}
+                          </h3>
+
+                          {/* Story description */}
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {story?.passage}
+                          </p>
+
+                          {/* Stats and metadata */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Trophy className="h-3 w-3 text-yellow-500" />
+                                <span className="font-medium">
+                                  Max Score: 10
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Clock className="h-3 w-3 text-orange-500" />
+                                <span className="font-medium">
+                                  {story?.readTime || "5 Min"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                            >
+                              Start Reading
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  )}
+
+                  {/* Infinite Scroll Loading Indicator */}
+                  {loadingMore && (
+                    <div className="mt-4 flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Loading more stories...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* End of results indicator */}
+                  {!loading && !error && !hasMore && stories.length > 0 && (
+                    <div className="mt-4 flex items-center justify-center">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium text-gray-700">
+                            You've reached the end! No more stories to load.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
