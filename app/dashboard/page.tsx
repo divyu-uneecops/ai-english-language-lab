@@ -268,81 +268,88 @@ export default function EnglishLearningDashboard() {
           )}
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <Card className="p-6 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total Points
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {userStats.totalPoints}
-                </p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Trophy className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </Card>
+        {/* Achievement Status - Expert UI/UX Design */}
+        <div className="mb-12">
+          {/* Primary Achievement Focus */}
+          <div className="text-center mb-8">
+            {/* Achievement Message with Emotional Design */}
+            <div className="space-y-3">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {userStats.totalPoints >= 35 ? (
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-orange-600">
+                    🌟 First Star Achieved! 🌟
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-orange-600 font-extrabold">
+                      {35 - userStats.totalPoints}
+                    </span>{" "}
+                    points to your first star
+                  </>
+                )}
+              </h1>
 
-          <Card className="p-6 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Current Level
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {userStats.level}
-                </p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <Star className="h-6 w-6 text-green-600" />
+              {/* Progress with Visual Feedback */}
+              <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full shadow-sm">
+                  <Trophy className="h-4 w-4 text-orange-600" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    {userStats.totalPoints}/35
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {Math.round((userStats.totalPoints / 35) * 100)}% complete
+                </div>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-6 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Day Streak</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {userStats.streak}
-                </p>
+          {/* Secondary Stats with Card-like Design */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Level Card */}
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
+              <div className="p-2 bg-blue-100 rounded-lg w-fit mx-auto mb-2">
+                <Target className="h-5 w-5 text-blue-600" />
               </div>
-              <div className="p-3 bg-orange-100 rounded-full">
-                <TrendingUp className="h-6 w-6 text-orange-600" />
-              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {userStats.level}
+              </p>
+              <p className="text-xs text-gray-600 font-medium">Current Level</p>
             </div>
-          </Card>
 
-          <Card className="p-6 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {userStats.completedModules}
-                </p>
+            {/* Streak Card */}
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
+              <div className="p-2 bg-orange-100 rounded-lg w-fit mx-auto mb-2">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
               </div>
-              <div className="p-3 bg-purple-100 rounded-full">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
-              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {userStats.streak}
+              </p>
+              <p className="text-xs text-gray-600 font-medium">Day Streak</p>
             </div>
-          </Card>
 
-          <Card className="p-6 bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Time Spent</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {userStats.timeSpent}
-                </p>
+            {/* Completed Card */}
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
+              <div className="p-2 bg-green-100 rounded-lg w-fit mx-auto mb-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
               </div>
-              <div className="p-3 bg-indigo-100 rounded-full">
-                <Clock className="h-6 w-6 text-indigo-600" />
-              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {userStats.completedModules}
+              </p>
+              <p className="text-xs text-gray-600 font-medium">Completed</p>
             </div>
-          </Card>
+
+            {/* Time Spent Card */}
+            <div className="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20 hover:bg-white/60 transition-all duration-300">
+              <div className="p-2 bg-indigo-100 rounded-lg w-fit mx-auto mb-2">
+                <Clock className="h-5 w-5 text-indigo-600" />
+              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {userStats.timeSpent}
+              </p>
+              <p className="text-xs text-gray-600 font-medium">Time Spent</p>
+            </div>
+          </div>
         </div>
 
         {/* Continue Practicing Section */}
