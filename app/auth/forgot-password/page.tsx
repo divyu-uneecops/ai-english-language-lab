@@ -1,5 +1,6 @@
+"use client";
+
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
-import { BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {

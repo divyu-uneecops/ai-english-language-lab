@@ -14,7 +14,6 @@ import {
 import Link from "next/link";
 import { PronunciationPractice } from "./pronunciation-practice";
 import { SpeakingExercise } from "./speaking-exercise";
-import { ChatPanel } from "../reading/chat-panel";
 
 const exercises = [
   {
