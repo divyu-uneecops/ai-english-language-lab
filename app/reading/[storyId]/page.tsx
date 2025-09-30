@@ -12,7 +12,6 @@ import {
   Play,
   Pause,
   Square,
-  Mic,
   Send,
   CheckCircle,
 } from "lucide-react";
@@ -34,18 +33,18 @@ interface Story {
 }
 
 interface AnalysisResult {
-  score?: number;
-  scoreBreakdown?: {
+  score: number;
+  scoreBreakdown: {
     accuracy: number;
     fluency: number;
     pronunciation: number;
   };
-  detailedMetrics?: {
+  detailedMetrics: {
     accuracy: string;
     fluency: string;
     pronunciation: string;
   };
-  feedback?: {
+  feedback: {
     accuracy: string[];
     fluency: string[];
     consistency: string[];
@@ -96,7 +95,6 @@ export default function StoryPage() {
   const [ttsService] = useState(new TTSService());
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState(-1);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
@@ -125,6 +123,7 @@ export default function StoryPage() {
 
         // Fetch the specific story by ID
         const response = await readingService.fetchStoryById(storyId);
+
         const storyData: Story = response;
 
         if (!isEmpty(storyData)) {
@@ -134,12 +133,15 @@ export default function StoryPage() {
             setShowAnalysisResults(true);
             setAnalysisResult(storyData?.evaluation_data || {});
           }
-        } else {
-          setError("Story not found");
         }
-      } catch (err) {
-        console.error("Error fetching story:", err);
-        setError("Failed to load story. Please try again.");
+      } catch (err: any) {
+        if (err?.response) {
+          // If using axios
+          setError(
+            err?.response?.data?.message ||
+              "Failed to load story. Please try again."
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -187,31 +189,9 @@ export default function StoryPage() {
       const audio = new Audio(generatedAudioUrl);
       setAudioElement(audio);
 
-      const words = splitTextIntoWords(text);
-      let currentIndex = 0;
-
-      // Update current word based on time
-      audio.ontimeupdate = () => {
-        if (words.length > 0 && audio.duration && audio.duration > 0) {
-          const currentTime = audio.currentTime;
-          const duration = audio.duration;
-          const progress = currentTime / duration;
-          const estimatedIndex = Math.min(
-            Math.floor(progress * words.length),
-            words.length - 1
-          );
-
-          if (estimatedIndex !== currentIndex) {
-            currentIndex = estimatedIndex;
-            setCurrentWordIndex(currentIndex);
-          }
-        }
-      };
-
       audio.onended = () => {
         setIsPlaying(false);
         setIsPaused(false);
-        setCurrentWordIndex(-1);
         // Clean up URL object
         if (audioUrl) {
           URL.revokeObjectURL(audioUrl);
@@ -223,7 +203,6 @@ export default function StoryPage() {
         console.error("Audio playback error:", e);
         setIsPlaying(false);
         setIsPaused(false);
-        setCurrentWordIndex(-1);
         setIsGenerating(false);
       };
 
@@ -277,7 +256,6 @@ export default function StoryPage() {
 
     setIsPlaying(false);
     setIsPaused(false);
-    setCurrentWordIndex(-1);
     setIsGenerating(false);
   };
 
@@ -342,41 +320,6 @@ export default function StoryPage() {
     setShowAnalysisResults(false);
     router.push("/reading");
     // You can implement navigation logic here
-  };
-
-  const renderStoryWithHighlighting = (text: string) => {
-    if (!text) return null;
-
-    // Split text into words and spaces separately for better control
-    const parts = text.split(/(\s+)/);
-    let wordCount = 0;
-
-    return (
-      <div className="text-xl leading-relaxed text-slate-700 font-medium">
-        {parts.map((part, index) => {
-          const isWord = part.trim().length > 0 && !/^\s+$/.test(part);
-          const isHighlighted =
-            isWord && wordCount === currentWordIndex && isPlaying;
-
-          if (isWord) {
-            wordCount++;
-          }
-
-          return (
-            <span
-              key={index}
-              className={`${
-                isHighlighted
-                  ? "bg-gradient-to-r from-yellow-300 to-amber-300 text-amber-900"
-                  : ""
-              }`}
-            >
-              {part}
-            </span>
-          );
-        })}
-      </div>
-    );
   };
 
   if (loading) {
