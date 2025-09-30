@@ -21,6 +21,7 @@ import { readingService } from "@/services/readingService";
 import LiveSpeechToText from "@/components/reading/components/LiveSpeechToText";
 import AnalysisResults from "@/components/reading/components/AnalysisResults";
 import { getDifficultyColor, isEmpty } from "@/lib/utils";
+import Markdown from "@/components/shared/MarkDown";
 
 interface Story {
   passage_id: string;
@@ -519,7 +520,7 @@ export default function StoryPage() {
           {/* Story Content */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="prose prose-lg max-w-none">
-              {renderStoryWithHighlighting(story?.passage || "")}
+              <Markdown passage={story?.passage || ""} />
             </div>
           </div>
         </div>

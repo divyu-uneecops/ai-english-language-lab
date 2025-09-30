@@ -28,6 +28,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { readingService } from "@/services/readingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
+import Markdown from "@/components/shared/MarkDown";
 
 // Internal Story interface
 interface Story {
@@ -663,10 +664,10 @@ export function ReadingInterface() {
                             {story?.title}
                           </h3>
 
-                          {/* Story description */}
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                            {story?.passage}
-                          </p>
+                          <Markdown
+                            passage={story?.passage}
+                            className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed"
+                          />
 
                           {/* Stats and metadata */}
                           <div className="flex items-center justify-between mb-4">
