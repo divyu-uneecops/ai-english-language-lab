@@ -37,6 +37,7 @@ interface Story {
   difficulty: string;
   readTime?: string;
   passage: string;
+  solved: boolean;
 }
 
 interface PaginatedResponse {
@@ -76,10 +77,7 @@ export function ReadingInterface() {
       hard: false,
     },
   });
-  const [userStats] = useState({
-    points: 0,
-    nextStar: 35,
-  });
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 10,
@@ -99,6 +97,9 @@ export function ReadingInterface() {
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
+    const selectedStatus = Object.entries(filters.status)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([status, _]) => status);
     const selectedLevels = Object.entries(filters.level)
       .filter(([_, isSelected]) => isSelected)
       .map(([level, _]) => level);
@@ -110,6 +111,7 @@ export function ReadingInterface() {
       level: selectedLevels.length > 0 ? selectedLevels : undefined,
       difficulty:
         selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
+      status: selectedStatus.length > 0 ? selectedStatus : undefined,
     };
   };
 
@@ -124,13 +126,14 @@ export function ReadingInterface() {
           setError(null);
         }
 
-        const { level, difficulty } = getSelectedFilters();
+        const { level, difficulty, status } = getSelectedFilters();
 
         const params = {
           page: isLoadMore ? pagination.currentPage + 1 : 1,
           page_size: pagination.pageSize,
           level: level,
           difficulty: difficulty,
+          status: status,
         };
         const paginatedData: PaginatedResponse =
           await readingService.fetchStories(params);
@@ -641,6 +644,18 @@ export function ReadingInterface() {
                                 </Badge>
                               </div>
                             </div>
+                            {/* Solved status badge - moved to right side */}
+                            {story?.solved && (
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Solved
+                                </Badge>
+                              </div>
+                            )}
                           </div>
 
                           {/* Story title */}
@@ -676,9 +691,13 @@ export function ReadingInterface() {
                           <div className="flex justify-end">
                             <Button
                               size="sm"
-                              className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                              className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
+                                story?.solved
+                                  ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                              }`}
                             >
-                              Start Reading
+                              {story?.solved ? "Read Again" : "Start Reading"}
                               <ChevronRight className="h-4 w-4 ml-1" />
                             </Button>
                           </div>
