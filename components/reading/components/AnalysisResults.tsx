@@ -282,24 +282,6 @@ export default function AnalysisResults({
                             className="mt-0 h-full"
                           >
                             <div className="h-full flex flex-col">
-                              <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-                                <div
-                                  className={`p-1.5 rounded-lg bg-gradient-to-r ${getCategoryColor(
-                                    category
-                                  )}`}
-                                >
-                                  {getCategoryIcon(category)}
-                                </div>
-                                <div>
-                                  <h3 className="font-semibold text-gray-900 capitalize text-sm">
-                                    {category} Feedback
-                                  </h3>
-                                  <p className="text-xs text-gray-600">
-                                    {feedbackItems.length} improvement point
-                                    {feedbackItems.length !== 1 ? "s" : ""}
-                                  </p>
-                                </div>
-                              </div>
                               <div className="flex-1 min-h-0">
                                 {renderFeedbackItems(feedbackItems)}
                               </div>
