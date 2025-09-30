@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -139,6 +139,7 @@ export default function StoryPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [showAnalysisResults, setShowAnalysisResults] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -357,11 +358,8 @@ export default function StoryPage() {
   };
 
   const handlePracticeMore = () => {
-    // Navigate to reading practice page or show more practice options
-    console.log("Practice more clicked:", analysisResult);
-    // This could navigate to a practice selection page or show more reading materials
-    // For now, we'll just close the modal and show a message
     setShowAnalysisResults(false);
+    router.push("/reading");
     // You can implement navigation logic here
   };
 
