@@ -20,40 +20,19 @@ import Link from "next/link";
 import { readingService } from "@/services/readingService";
 import LiveSpeechToText from "@/components/reading/components/LiveSpeechToText";
 import AnalysisResults from "@/components/reading/components/AnalysisResults";
-import { getDifficultyColor } from "@/lib/utils";
-
-interface Question {
-  question_id: string;
-  question: string;
-  options: string[];
-  answer: string;
-  explanation: string;
-}
+import { getDifficultyColor, isEmpty } from "@/lib/utils";
 
 interface Story {
-  _id: string;
   passage_id: string;
   title: string;
   passage: string;
   difficulty: string;
-  standard: number;
-  questions: Question[];
-  created_at: string;
-}
-
-interface AudioSegment {
-  text: string;
-  startTime: number;
-  endTime: number;
-  accuracy?: number;
-  pronunciation?: number;
-  fluency?: number;
-  feedback?: string;
+  solved: boolean;
+  level: string;
+  evaluation_data: AnalysisResult;
 }
 
 interface AnalysisResult {
-  passage_id: string;
-  audio_data: AudioSegment[];
   score?: number;
   scoreBreakdown?: {
     accuracy: number;
@@ -71,10 +50,6 @@ interface AnalysisResult {
     consistency: string[];
     overall: string[];
   };
-  level?: string;
-  is_solved?: boolean;
-  previous_attempts?: number;
-  best_score?: number;
 }
 
 // Simple TTS Service for English only
@@ -149,10 +124,15 @@ export default function StoryPage() {
 
         // Fetch the specific story by ID
         const response = await readingService.fetchStoryById(storyId);
-        const storyData: Story[] = response;
+        const storyData: Story = response;
 
-        if (storyData && storyData.length > 0) {
-          setStory(storyData[0]);
+        if (!isEmpty(storyData)) {
+          setStory(storyData);
+
+          if (storyData?.solved) {
+            setShowAnalysisResults(true);
+            setAnalysisResult(storyData?.evaluation_data || {});
+          }
         } else {
           setError("Story not found");
         }

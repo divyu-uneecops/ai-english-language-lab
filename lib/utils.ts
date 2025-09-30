@@ -117,3 +117,27 @@ export const getCategoryConfig = (category: string) => {
   };
   return configs[category as keyof typeof configs];
 };
+
+export function isEmpty(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return true;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().length === 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+
+  if (typeof value === "object") {
+    return Object.keys(value as Record<string, unknown>).length === 0;
+  }
+
+  if (typeof value === "number") {
+    return false; // Numbers are never empty unless null/undefined
+  }
+
+  return false; // Other types
+}

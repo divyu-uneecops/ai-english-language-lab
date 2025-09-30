@@ -5,7 +5,7 @@ export const readingService = {
     return serverInterfaceService.get(`/reading/passages`, params);
   },
   fetchStoryById: (storyId: string) =>
-    serverInterfaceService.get(`/reading/stories/${storyId}`),
+    serverInterfaceService.get(`/reading/passages/${storyId}`),
   verifyAnswers: (
     storyId: string,
     answers: Array<{ question_id: string; answer: string }>
