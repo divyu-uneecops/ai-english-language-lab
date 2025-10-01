@@ -20,11 +20,7 @@ import {
   BarChart3,
   Lightbulb,
 } from "lucide-react";
-import {
-  getCategoryConfig,
-  getOverallRating,
-  getScoreColor,
-} from "@/lib/utils";
+import { getOverallRating, getScoreColor } from "@/lib/utils";
 import { AnalysisResultsProps } from "../interfaces";
 
 export default function AnalysisResults({
@@ -235,7 +231,7 @@ export default function AnalysisResults({
 
           {/* Right Column: Feedback Tabs */}
           <div className="lg:col-span-2">
-            {result.feedback && (
+            {result?.feedback && (
               <Card className="glass-card border-0 shadow-lg h-full">
                 <div className="p-4 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-4">

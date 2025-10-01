@@ -37,12 +37,12 @@ interface AnalysisResult {
   scoreBreakdown: {
     accuracy: number;
     fluency: number;
-    pronunciation: number;
+    consistency: number;
   };
   detailedMetrics: {
     accuracy: string;
     fluency: string;
-    pronunciation: string;
+    consistency: string;
   };
   feedback: {
     accuracy: string[];
@@ -85,10 +85,11 @@ class TTSService {
 }
 
 export default function StoryPage() {
+  const router = useRouter();
   const params = useParams();
-  const storyId = params.storyId as string;
+  const storyId = params?.storyId as string;
   const [story, setStory] = useState<Story | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Text-to-speech state
@@ -113,7 +114,6 @@ export default function StoryPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [showAnalysisResults, setShowAnalysisResults] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchStory = async () => {
@@ -122,7 +122,7 @@ export default function StoryPage() {
         setError(null);
 
         // Fetch the specific story by ID
-        const response = await readingService.fetchStoryById(storyId);
+        const response = await readingService?.fetchStoryById(storyId);
 
         const storyData: Story = response;
 
@@ -158,11 +158,6 @@ export default function StoryPage() {
       stopSpeech();
     };
   }, []);
-
-  // TTS functions
-  const splitTextIntoWords = (text: string) => {
-    return text.split(/\s+/).filter((word) => word.trim().length > 0);
-  };
 
   const generateAndPlaySpeech = async (text: string) => {
     if (!story) return;

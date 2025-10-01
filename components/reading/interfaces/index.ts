@@ -1,16 +1,16 @@
 export interface AnalysisResult {
-  score?: number;
-  scoreBreakdown?: {
+  score: number;
+  scoreBreakdown: {
     accuracy: number;
     fluency: number;
     consistency: number;
   };
-  detailedMetrics?: {
+  detailedMetrics: {
     accuracy: string;
     fluency: string;
     consistency: string;
   };
-  feedback?: {
+  feedback: {
     accuracy: string[];
     fluency: string[];
     consistency: string[];
@@ -19,7 +19,7 @@ export interface AnalysisResult {
 }
 
 export interface AnalysisResultsProps {
-  result: AnalysisResult;
+  result: AnalysisResult | null;
   onRetry: () => void;
   onPracticeMore: () => void;
 }
