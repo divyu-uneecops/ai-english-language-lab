@@ -11,6 +11,10 @@ export const writingService = {
       `/writing/topics?category=${category}&page=${page}&page_size=${pageSize}`
     ),
 
+  // Fetch a single writing topic by ID
+  fetchTopicById: async (topicId: string) =>
+    serverInterfaceService.get(`/writing/topics/${topicId}`),
+
   // Submit writing for evaluation
   submitForEvaluation: async (content: string, topicId: string) =>
     serverInterfaceService.post("/writing/verify", {

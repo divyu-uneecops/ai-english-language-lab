@@ -28,7 +28,7 @@ export default function AnalysisResults({
   onRetry,
   onPracticeMore,
 }: AnalysisResultsProps) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("accuracy");
 
   const getScoreIcon = (score: number) => {
     if (score >= 8) return <Award className="h-4 w-4" />;
@@ -120,34 +120,6 @@ export default function AnalysisResults({
                       {getScoreIcon(result?.score || 0)}
                       <span className="ml-1">{overallRating?.text}</span>
                     </Badge>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Quick Score Breakdown */}
-              <div className="flex gap-3">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-gray-900">
-                    {result?.scoreBreakdown?.accuracy || 0}/4
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Accuracy
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-gray-900">
-                    {result?.scoreBreakdown?.fluency || 0}/4
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Fluency
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-gray-900">
-                    {result?.scoreBreakdown?.consistency || 0}/2
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Consistency
                   </div>
                 </div>
               </div>

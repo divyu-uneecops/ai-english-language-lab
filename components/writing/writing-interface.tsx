@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -12,13 +12,13 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { WritingEditor } from "./writing-editor";
 import {
   FileText,
   Mail,
   Newspaper,
   Clock,
   ChevronRight,
+  ChevronDown,
   CheckCircle,
   Star,
   Filter,
@@ -26,40 +26,32 @@ import {
   Target,
   Brain,
   PenTool,
+  Loader2,
+  MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { writingService } from "@/services/writingService";
 import { getDifficultyColor } from "@/lib/utils";
 
-const writingTypes = [
-  {
-    id: "letter",
-    title: "Letter Writing",
-    description: "Personal and formal letters",
-    icon: Mail,
-    color: "bg-blue-500",
-    difficulty: "Beginner",
-    timeEstimate: "15-20 mins",
-  },
-  {
-    id: "article",
-    title: "Article Writing",
-    description: "News articles and blog posts",
-    icon: Newspaper,
-    color: "bg-green-500",
-    difficulty: "Intermediate",
-    timeEstimate: "20-25 mins",
-  },
-  {
-    id: "notice",
-    title: "Notice Writing",
-    description: "Official notices and announcements",
-    icon: FileText,
-    color: "bg-purple-500",
-    difficulty: "Advanced",
-    timeEstimate: "10-15 mins",
-  },
-];
+// Internal Writing Prompt interface
+interface WritingPrompt {
+  topic_id: string;
+  category: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  audience: string;
+  guidelines: string[];
+  solved: boolean;
+}
+
+interface PaginatedResponse {
+  page: number;
+  page_size: number;
+  total: number;
+  results: WritingPrompt[];
+}
 
 const writingTypeOptions = [
   {
@@ -116,188 +108,11 @@ const writingTypeOptions = [
   },
 ];
 
-// Dummy data for writing prompts
-const writingPrompts = [
-  // Letter prompts
-  {
-    id: "91123966-a564-4163-9811-7769deb71428",
-    category: "letter",
-    context:
-      "Write a letter to your best friend telling them about a new hobby you have started.",
-    difficulty: "Easy",
-    level: "Beginner",
-    guidelines: [
-      "Start with a friendly greeting.",
-      "Introduce your new hobby clearly.",
-      "Explain why you enjoy it and how you spend time on it.",
-      "Invite your friend to try it or share their thoughts.",
-    ],
-  },
-  {
-    id: "letter-2",
-    category: "letter",
-    context: "Write a cover letter for your dream job application.",
-    difficulty: "Medium",
-    level: "Intermediate",
-    guidelines: [
-      "Start with a professional greeting.",
-      "Introduce yourself and mention the position you're applying for.",
-      "Highlight your relevant skills and experience.",
-      "Express enthusiasm for the role and company.",
-      "End with a professional closing.",
-    ],
-  },
-  {
-    id: "letter-3",
-    category: "letter",
-    context: "Write a formal complaint letter to a company about poor service.",
-    difficulty: "Hard",
-    level: "Advanced",
-    guidelines: [
-      "Use formal language and tone.",
-      "Clearly state the problem and its impact.",
-      "Provide specific details and evidence.",
-      "Request a specific resolution.",
-      "Maintain professionalism throughout.",
-    ],
-  },
-  // Article prompts
-  {
-    id: "article-1",
-    category: "article",
-    context:
-      "Write an article about a recent school sports day or cultural event.",
-    difficulty: "Easy",
-    level: "Beginner",
-    guidelines: [
-      "Start with an engaging introduction.",
-      "Describe the event in chronological order.",
-      "Include quotes from participants or organizers.",
-      "Highlight key moments and achievements.",
-      "End with a conclusion about the event's success.",
-    ],
-  },
-  {
-    id: "article-2",
-    category: "article",
-    context:
-      "Write an article about climate change and its impact on your community.",
-    difficulty: "Medium",
-    level: "Intermediate",
-    guidelines: [
-      "Research and present factual information.",
-      "Include local examples and impacts.",
-      "Interview community members if possible.",
-      "Suggest practical solutions.",
-      "Use a balanced and informative tone.",
-    ],
-  },
-  {
-    id: "article-3",
-    category: "article",
-    context:
-      "Write an investigative article about social media's influence on teenage mental health.",
-    difficulty: "Hard",
-    level: "Advanced",
-    guidelines: [
-      "Conduct thorough research from credible sources.",
-      "Present multiple perspectives on the issue.",
-      "Include statistics and expert opinions.",
-      "Analyze the psychological and social implications.",
-      "Provide balanced conclusions and recommendations.",
-    ],
-  },
-  // Notice prompts
-  {
-    id: "notice-1",
-    category: "notice",
-    context:
-      "Write a notice about upcoming school holidays and important dates.",
-    difficulty: "Easy",
-    level: "Beginner",
-    guidelines: [
-      "Use clear and simple language.",
-      "Include all important dates and holidays.",
-      "Mention any special instructions or requirements.",
-      "Use bullet points for easy reading.",
-      "Include contact information for questions.",
-    ],
-  },
-  {
-    id: "notice-2",
-    category: "notice",
-    context: "Write a notice about a community cleanup drive or social event.",
-    difficulty: "Medium",
-    level: "Intermediate",
-    guidelines: [
-      "Create an attention-grabbing headline.",
-      "Provide clear event details (date, time, location).",
-      "Explain the purpose and benefits of participation.",
-      "Include registration or contact information.",
-      "Use persuasive language to encourage attendance.",
-    ],
-  },
-  {
-    id: "notice-3",
-    category: "notice",
-    context: "Write a formal notice about new company policies and procedures.",
-    difficulty: "Hard",
-    level: "Advanced",
-    guidelines: [
-      "Use formal business language.",
-      "Clearly explain the new policies.",
-      "Provide rationale for the changes.",
-      "Include implementation timeline.",
-      "Specify consequences for non-compliance.",
-    ],
-  },
-  // Essay prompts
-  {
-    id: "essay-1",
-    category: "essay",
-    context: "Write an essay about environmental issues affecting our planet.",
-    difficulty: "Easy",
-    level: "Beginner",
-    guidelines: [
-      "Choose a specific environmental issue to focus on.",
-      "Start with a clear thesis statement.",
-      "Provide examples and evidence to support your points.",
-      "Use simple, clear language.",
-      "End with a call to action or personal reflection.",
-    ],
-  },
-  {
-    id: "essay-2",
-    category: "essay",
-    context: "Write an essay about the impact of social media on teenagers.",
-    difficulty: "Medium",
-    level: "Intermediate",
-    guidelines: [
-      "Present both positive and negative impacts.",
-      "Include relevant statistics and research.",
-      "Use personal examples or case studies.",
-      "Analyze the psychological and social effects.",
-      "Provide balanced conclusions and recommendations.",
-    ],
-  },
-  {
-    id: "essay-3",
-    category: "essay",
-    context:
-      "Write a critical essay analyzing the role of artificial intelligence in modern education.",
-    difficulty: "Hard",
-    level: "Advanced",
-    guidelines: [
-      "Conduct extensive research from academic sources.",
-      "Present multiple theoretical perspectives.",
-      "Analyze current trends and future implications.",
-      "Critically evaluate benefits and limitations.",
-      "Use sophisticated academic language and structure.",
-    ],
-  },
-];
-
 export function WritingInterface() {
+  const router = useRouter();
+  const [writingPrompts, setWritingPrompts] = useState<WritingPrompt[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
   const [selectedLevel, setSelectedLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "ai" | null
@@ -326,11 +141,195 @@ export function WritingInterface() {
       medium: false,
       hard: false,
     },
+    category: {
+      article: false,
+      notice: false,
+      essay: false,
+      letter: false,
+      application: false,
+    },
   });
-  const [userStats] = useState({
-    points: 0,
-    nextStar: 35,
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 10,
+    total: 0,
+    totalPages: 0,
   });
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Filter collapse/expand state
+  const [filterExpanded, setFilterExpanded] = useState({
+    status: true, // Status filter expanded by default
+    level: false, // Level filter collapsed by default
+    difficulty: false, // Difficulty filter collapsed by default
+    category: false, // Category filter collapsed by default
+  });
+
+  // Helper function to extract selected filter values
+  const getSelectedFilters = () => {
+    const selectedStatus = Object.entries(filters.status)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([status, _]) => status);
+    const selectedLevels = Object.entries(filters.level)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([level, _]) => level);
+    const selectedDifficulties = Object.entries(filters.difficulty)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([difficulty, _]) => difficulty);
+    const selectedCategories = Object.entries(filters.category)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([category, _]) => category);
+
+    return {
+      level: selectedLevels.length > 0 ? selectedLevels : undefined,
+      difficulty:
+        selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
+      status: selectedStatus.length > 0 ? selectedStatus : undefined,
+      category: selectedCategories.length > 0 ? selectedCategories : undefined,
+    };
+  };
+
+  // Fetch writing topics from API
+  useEffect(() => {
+    const fetchWritingTopics = async (isLoadMore = false) => {
+      try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+          setError(null);
+        }
+
+        const { level, difficulty, status, category } = getSelectedFilters();
+        const selectedCategory =
+          category && category.length > 0 ? category[0] : "article"; // Default to article if no category selected
+
+        const params = {
+          page: isLoadMore ? pagination.currentPage + 1 : 1,
+          page_size: pagination.pageSize,
+          category: selectedCategory,
+          level: level,
+          difficulty: difficulty,
+          status: status,
+        };
+
+        const paginatedData: PaginatedResponse =
+          await writingService.fetchTopics(
+            selectedCategory,
+            params.page,
+            params.page_size
+          );
+
+        // Transform the API data to match our interface
+        const transformedPrompts: WritingPrompt[] =
+          paginatedData?.results || [];
+
+        if (isLoadMore) {
+          // Append new prompts to existing ones
+          setWritingPrompts((prev) => [...prev, ...transformedPrompts]);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: prev.currentPage + 1,
+          }));
+        } else {
+          // Replace prompts for initial load or filter change
+          setWritingPrompts(transformedPrompts);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 1,
+            total: paginatedData?.total || 0,
+            totalPages: Math.ceil(
+              (paginatedData?.total || 0) / pagination.pageSize
+            ),
+          }));
+        }
+
+        // Check if there are more prompts to load
+        const totalLoaded = isLoadMore
+          ? writingPrompts.length + transformedPrompts.length
+          : transformedPrompts.length;
+        setHasMore(totalLoaded < (paginatedData?.total || 0));
+      } catch (err) {
+        console.error("Error fetching writing topics:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch writing topics"
+        );
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    };
+
+    fetchWritingTopics();
+  }, [filters]);
+
+  // Load more prompts function
+  const loadMorePrompts = async () => {
+    if (!hasMore || loadingMore) return;
+
+    try {
+      setLoadingMore(true);
+      const { level, difficulty, category } = getSelectedFilters();
+      const selectedCategory =
+        category && category.length > 0 ? category[0] : "article";
+
+      const params = {
+        page: pagination.currentPage + 1,
+        page_size: pagination.pageSize,
+        category: selectedCategory,
+        level: level,
+        difficulty: difficulty,
+      };
+
+      const paginatedData: PaginatedResponse = await writingService.fetchTopics(
+        selectedCategory,
+        params.page,
+        params.page_size
+      );
+
+      const transformedPrompts: WritingPrompt[] = paginatedData?.results || [];
+
+      // Append new prompts to existing ones
+      setWritingPrompts((prev) => [...prev, ...transformedPrompts]);
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: prev.currentPage + 1,
+      }));
+
+      // Check if there are more prompts to load
+      const totalLoaded = writingPrompts.length + transformedPrompts.length;
+      setHasMore(totalLoaded < (paginatedData?.total || 0));
+    } catch (err) {
+      console.error("Error loading more prompts:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Scroll detection for infinite scroll within container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Load more when scrolled to within 100px of bottom
+      if (
+        scrollTop + clientHeight >= scrollHeight - 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
+        loadMorePrompts();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingMore, writingPrompts.length]);
 
   // Open level selection dialog on first mount
   useEffect(() => {
@@ -352,14 +351,16 @@ export function WritingInterface() {
     setShowDifficultyDialog(false);
   };
 
-  const handlePromptSelection = (prompt: any) => {};
+  const handlePromptSelection = (prompt: WritingPrompt) => {
+    router.push(`/writing/${prompt.topic_id}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">
-          {/* Left Section - Header and Writing Type Cards */}
-          <div className="flex-1">
+          {/* Left Section - User Progress Stats and Filters */}
+          <div className="w-80 space-y-6">
             {/* Header Section */}
             <div className="mb-8">
               <div className="space-y-2 mb-6">
@@ -369,7 +370,7 @@ export function WritingInterface() {
                     href="/dashboard"
                     className="hover:text-orange-600 transition-colors font-medium"
                   >
-                    Prepare
+                    Dashboard
                   </Link>
                   <ChevronRight className="h-4 w-4" />
                   <span className="text-gray-900 font-semibold">Writing</span>
@@ -382,201 +383,6 @@ export function WritingInterface() {
               </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="space-y-4">
-              {writingPrompts.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
-                    <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                      <PenTool className="h-8 w-8 text-gray-500" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No writing prompts available
-                    </h3>
-                    <p className="text-gray-600">
-                      Check back later for new writing materials
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                writingPrompts.map((prompt, index) => {
-                  const getIcon = (category: string) => {
-                    switch (category) {
-                      case "letter":
-                        return Mail;
-                      case "article":
-                        return Newspaper;
-                      case "notice":
-                        return FileText;
-                      case "essay":
-                        return PenTool;
-                      default:
-                        return PenTool;
-                    }
-                  };
-
-                  const getIconColor = (category: string) => {
-                    switch (category) {
-                      case "letter":
-                        return "bg-blue-500";
-                      case "article":
-                        return "bg-green-500";
-                      case "notice":
-                        return "bg-purple-500";
-                      case "essay":
-                        return "bg-orange-500";
-                      default:
-                        return "bg-orange-500";
-                    }
-                  };
-                  const IconComponent = getIcon(prompt.category);
-                  return (
-                    <Card
-                      key={prompt.id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
-                      onClick={() => handlePromptSelection(prompt)}
-                    >
-                      {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                      <div className="relative p-6">
-                        {/* Header with icon and badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 ${getIconColor(
-                                prompt.category
-                              )} rounded-full group-hover:scale-110 transition-transform duration-200`}
-                            >
-                              <IconComponent className="h-4 w-4 text-white" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                                  prompt.difficulty === "Easy"
-                                    ? "border-green-300 text-green-700 bg-green-50"
-                                    : prompt.difficulty === "Medium"
-                                    ? "border-yellow-300 text-yellow-700 bg-yellow-50"
-                                    : "border-red-300 text-red-700 bg-red-50"
-                                } shadow-sm`}
-                              >
-                                {prompt.difficulty}
-                              </Badge>
-                              <Badge
-                                variant="secondary"
-                                className="text-xs font-semibold px-3 py-1 rounded-full"
-                              >
-                                {prompt.level}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Prompt title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-2">
-                          {prompt.context}
-                        </h3>
-
-                        {/* Guidelines preview */}
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                            Guidelines:
-                          </h4>
-                          <ul className="text-xs text-gray-600 space-y-1">
-                            {prompt.guidelines
-                              .slice(0, 2)
-                              .map((guideline: string, idx: number) => (
-                                <li
-                                  key={idx}
-                                  className="flex items-start gap-2"
-                                >
-                                  <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                                  <span className="line-clamp-1">
-                                    {guideline}
-                                  </span>
-                                </li>
-                              ))}
-                            {prompt.guidelines.length > 2 && (
-                              <li className="text-gray-500 text-xs">
-                                +{prompt.guidelines.length - 2} more guidelines
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-
-                        {/* Stats and metadata */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Trophy className="h-3 w-3 text-yellow-500" />
-                              <span className="font-medium">Max Score: 10</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Clock className="h-3 w-3 text-orange-500" />
-                              <span className="font-medium">15-20 mins</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Action button */}
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                          >
-                            Start Writing
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Right Section - User Progress Stats and Filters */}
-          <div className="w-80 space-y-6">
-            {/* User Progress Stats */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full">
-                    <Trophy className="h-6 w-6 text-orange-600" />
-                  </div>
-                </div>
-                <div className="text-sm text-gray-600 mb-2 font-medium">
-                  {userStats.nextStar - userStats.points} more points to get
-                  your first star!
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center space-x-4 text-sm">
-                    <div className="flex items-center space-x-1 text-gray-500">
-                      <PenTool className="h-4 w-4" />
-                      <span className="font-semibold">Points:</span>
-                      <span className="font-bold text-gray-900">
-                        {userStats.points}/{userStats.nextStar}
-                      </span>
-                    </div>
-                  </div>
-                  {/* Progress bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                    <div
-                      className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          (userStats.points / userStats.nextStar) * 100
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
             {/* Enhanced Filters */}
             <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
               <div className="flex items-center gap-3 mb-6">
@@ -587,7 +393,7 @@ export function WritingInterface() {
               </div>
 
               {/* Status Filter */}
-              <div className="mb-8">
+              <div>
                 <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   STATUS
@@ -596,13 +402,13 @@ export function WritingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                     <input
                       type="checkbox"
-                      checked={filters.status.solved}
+                      checked={filters?.status?.solved}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           status: {
-                            ...filters.status,
-                            solved: e.target.checked,
+                            ...filters?.status,
+                            solved: e?.target?.checked,
                           },
                         })
                       }
@@ -618,13 +424,13 @@ export function WritingInterface() {
                   <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
                     <input
                       type="checkbox"
-                      checked={filters.status.unsolved}
+                      checked={filters?.status?.unsolved}
                       onChange={(e) =>
                         setFilters({
                           ...filters,
                           status: {
-                            ...filters.status,
-                            unsolved: e.target.checked,
+                            ...filters?.status,
+                            unsolved: e?.target?.checked,
                           },
                         })
                       }
@@ -640,158 +446,542 @@ export function WritingInterface() {
                 </div>
               </div>
 
+              {/* Category Filter */}
+              <div>
+                <button
+                  onClick={() =>
+                    setFilterExpanded((prev) => ({
+                      ...prev,
+                      category: !prev.category,
+                    }))
+                  }
+                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-purple-600 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <PenTool className="h-4 w-4 text-purple-500" />
+                    CATEGORY
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      filterExpanded.category ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {filterExpanded.category && (
+                  <div className="space-y-3">
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.category?.article}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            category: {
+                              ...filters?.category,
+                              article: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          Article
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-purple-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.category?.notice}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            category: {
+                              ...filters?.category,
+                              notice: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700">
+                          Notice
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.category?.essay}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            category: {
+                              ...filters?.category,
+                              essay: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">
+                          Essay
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-blue-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.category?.letter}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            category: {
+                              ...filters?.category,
+                              letter: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">
+                          Letter
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.category?.application}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            category: {
+                              ...filters?.category,
+                              application: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700">
+                          Application
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
+              </div>
+
               {/* Level Filter */}
-              <div className="mb-8">
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  LEVEL
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.level.beginner}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters.level,
-                            beginner: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Beginner
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.level.intermediate}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters.level,
-                            intermediate: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                        Intermediate
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.level.advanced}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          level: {
-                            ...filters.level,
-                            advanced: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                        Advanced
-                      </span>
-                    </div>
-                  </label>
-                </div>
+              <div>
+                <button
+                  onClick={() =>
+                    setFilterExpanded((prev) => ({
+                      ...prev,
+                      level: !prev.level,
+                    }))
+                  }
+                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-blue-600 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-blue-500" />
+                    LEVEL
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      filterExpanded.level ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {filterExpanded.level && (
+                  <div className="space-y-3">
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.level?.beginner}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              beginner: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          Beginner
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.level.intermediate}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              intermediate: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
+                          Intermediate
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.level?.advanced}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            level: {
+                              ...filters?.level,
+                              advanced: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
+                          Advanced
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Difficulty Filter */}
               <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <Target className="h-4 w-4 text-red-500" />
-                  DIFFICULTY
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.difficulty.easy}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters.difficulty,
-                            easy: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Easy
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.difficulty.medium}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters.difficulty,
-                            medium: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                        Medium
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                    <input
-                      type="checkbox"
-                      checked={filters.difficulty.hard}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          difficulty: {
-                            ...filters.difficulty,
-                            hard: e.target.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                        Hard
-                      </span>
-                    </div>
-                  </label>
-                </div>
+                <button
+                  onClick={() =>
+                    setFilterExpanded((prev) => ({
+                      ...prev,
+                      difficulty: !prev.difficulty,
+                    }))
+                  }
+                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-red-600 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-red-500" />
+                    DIFFICULTY
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      filterExpanded.difficulty ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {filterExpanded.difficulty && (
+                  <div className="space-y-3">
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.difficulty.easy}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              easy: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
+                          Easy
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
+                      <input
+                        type="checkbox"
+                        checked={filters.difficulty.medium}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              medium: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
+                          Medium
+                        </span>
+                      </div>
+                    </label>
+                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
+                      <input
+                        type="checkbox"
+                        checked={filters?.difficulty?.hard}
+                        onChange={(e) =>
+                          setFilters({
+                            ...filters,
+                            difficulty: {
+                              ...filters?.difficulty,
+                              hard: e?.target?.checked,
+                            },
+                          })
+                        }
+                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                      />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
+                          Hard
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
             </Card>
+          </div>
+
+          {/* Right Section - Header and Writing Prompt Cards */}
+          <div className="flex-1">
+            {/* Main Content Area */}
+            {/* Loading State - Enhanced */}
+            {loading && (
+              <div className="flex items-center justify-center py-16">
+                <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                  <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Loading writing prompts...
+                  </h3>
+                  <p className="text-gray-600">
+                    Please wait while we fetch the content
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error State - Enhanced */}
+            {error && (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                  <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <MessageCircle className="h-8 w-8 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Unable to load prompts
+                  </h3>
+                  <p className="text-gray-600 mb-6">{error}</p>
+                  <button
+                    onClick={() => window?.location?.reload()}
+                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Writing Prompts List - Similar to reading stories */}
+            {!loading && !error && (
+              <div
+                ref={scrollContainerRef}
+                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2 mt-10"
+              >
+                <div className="space-y-4">
+                  {writingPrompts?.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+                        <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                          <PenTool className="h-8 w-8 text-gray-500" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          No writing prompts available
+                        </h3>
+                        <p className="text-gray-600">
+                          Check back later for new writing materials
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    writingPrompts?.map((prompt) => (
+                      <Card
+                        key={prompt?.topic_id}
+                        className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
+                        onClick={() => handlePromptSelection(prompt)}
+                      >
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                        <div className="relative p-6">
+                          {/* Header with icon and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <PenTool className="h-4 w-4 text-yellow-600" />
+                              </div>
+                              <div className="flex items-center gap-2"></div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    prompt?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {prompt?.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                            {/* Solved status badge - moved to right side */}
+                            {prompt?.solved && (
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Solved
+                                </Badge>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Prompt title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {prompt?.title}
+                          </h3>
+
+                          {/* Description preview */}
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {prompt?.description}
+                          </p>
+
+                          {/* Guidelines preview */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                              Guidelines:
+                            </h4>
+                            <ul className="text-xs text-gray-600 space-y-1">
+                              {prompt?.guidelines
+                                ?.slice(0, 2)
+                                .map((guideline: string, idx: number) => (
+                                  <li
+                                    key={idx}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <span className="line-clamp-1">
+                                      {guideline}
+                                    </span>
+                                  </li>
+                                ))}
+                              {prompt?.guidelines &&
+                                prompt.guidelines.length > 2 && (
+                                  <li className="text-gray-500 text-xs">
+                                    +{prompt.guidelines.length - 2} more
+                                    guidelines
+                                  </li>
+                                )}
+                            </ul>
+                          </div>
+
+                          {/* Stats and metadata */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Trophy className="h-3 w-3 text-yellow-500" />
+                                <span className="font-medium">
+                                  Max Score: 10
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Clock className="h-3 w-3 text-orange-500" />
+                                <span className="font-medium">15-20 mins</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
+                                prompt?.solved
+                                  ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                              }`}
+                            >
+                              {prompt?.solved ? "Write Again" : "Start Writing"}
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  )}
+
+                  {/* Infinite Scroll Loading Indicator */}
+                  {loadingMore && (
+                    <div className="mt-4 flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Loading more prompts...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* End of results indicator */}
+                  {!loading &&
+                    !error &&
+                    !hasMore &&
+                    writingPrompts.length > 0 && (
+                      <div className="mt-4 flex items-center justify-center">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                          <div className="flex items-center gap-3">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium text-gray-700">
+                              You've reached the end! No more prompts to load.
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
