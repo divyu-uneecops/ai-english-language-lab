@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  RotateCcw,
-  Clock,
-  Target,
-  CheckCircle,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Clock, Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { EvaluationResults } from "./evaluation-results";
 import { writingService } from "@/services/writingService";
 
@@ -21,26 +20,21 @@ interface WritingEditorProps {
   onBack: () => void;
 }
 
-export function WritingEditor({
-  prompt,
-  writingType,
-  onBack,
-}: WritingEditorProps) {
+export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
 
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
-  const typeName = writingType?.charAt(0).toUpperCase() + writingType?.slice(1);
 
   const handleContentChange = (value: string) => {
     setContent(value);
     const words = value
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
-    setWordCount(words.length);
+      ?.trim()
+      ?.split(/\s+/)
+      ?.filter((word) => word?.length > 0);
+    setWordCount(words?.length);
   };
 
   const handleSubmitForEvaluation = async () => {
@@ -54,7 +48,7 @@ export function WritingEditor({
     try {
       const evaluationData = await writingService.submitForEvaluation(
         content,
-        prompt.id
+        prompt?.topic_id
       );
       setEvaluation(evaluationData);
       setShowEvaluation(true);
@@ -74,19 +68,9 @@ export function WritingEditor({
 
   const handleReviseWriting = () => {
     setShowEvaluation(false);
-    // Focus back on the textarea for revision
   };
 
-  if (showEvaluation && evaluation) {
-    return (
-      <EvaluationResults
-        evaluation={evaluation}
-        userContent={content}
-        onClose={handleCloseEvaluation}
-        onRevise={handleReviseWriting}
-      />
-    );
-  }
+  // Remove the early return for evaluation results - we'll show them in a dialog instead
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -100,7 +84,7 @@ export function WritingEditor({
                   className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors cursor-pointer"
                   onClick={onBack}
                 >
-                  {typeName} Writing
+                  Writing
                 </span>
                 <span>/</span>
                 <span className="text-gray-900 dark:text-gray-100 font-medium">
@@ -108,9 +92,6 @@ export function WritingEditor({
                 </span>
               </nav>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  {prompt?.title}
-                </h1>
                 <p className="text-gray-600 dark:text-gray-400">
                   {prompt?.description}
                 </p>
@@ -267,6 +248,22 @@ export function WritingEditor({
           </div>
         </div>
       </div>
+
+      {/* Evaluation Results Dialog */}
+      <Dialog open={showEvaluation} onOpenChange={setShowEvaluation}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+          <div className="overflow-y-auto max-h-[90vh]">
+            {evaluation && (
+              <EvaluationResults
+                evaluation={evaluation}
+                userContent={content}
+                onClose={handleCloseEvaluation}
+                onRevise={handleReviseWriting}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
