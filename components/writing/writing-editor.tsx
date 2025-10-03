@@ -1,22 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Clock, Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { EvaluationResults } from "./evaluation-results";
 import { writingService } from "@/services/writingService";
+import { getDifficultyColor, isEmpty } from "@/lib/utils";
+
+interface WritingPrompt {
+  topic_id: string;
+  category: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  guidelines: string[];
+  solved: boolean;
+  evaluation_data?: {
+    your_answer: string;
+    score: number;
+    feedback: {
+      strengths: string[];
+      areas_for_improvement: string[];
+    };
+    example_answer: string;
+  };
+}
 
 interface WritingEditorProps {
-  prompt: any;
-  writingType: string;
+  prompt: WritingPrompt;
   onBack: () => void;
 }
 
@@ -25,8 +39,25 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   const [wordCount, setWordCount] = useState(0);
 
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const [evaluation, setEvaluation] = useState(null);
+  const [evaluation, setEvaluation] = useState<{
+    your_answer: string;
+    score: number;
+    feedback: {
+      strengths: string[];
+      areas_for_improvement: string[];
+    };
+    example_answer: string;
+  } | null>(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
+
+  useEffect(() => {
+    if (!isEmpty(prompt)) {
+      if (prompt?.solved) {
+        setShowEvaluation(true);
+        setEvaluation(prompt?.evaluation_data || null);
+      }
+    }
+  }, [prompt]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -53,7 +84,6 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
       setEvaluation(evaluationData);
       setShowEvaluation(true);
     } catch (error) {
-      console.error("Error evaluating writing:", error);
       alert(
         "An error occurred while evaluating your writing. Please try again."
       );
@@ -63,7 +93,7 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   };
 
   const handleCloseEvaluation = () => {
-    setShowEvaluation(false);
+    onBack();
   };
 
   const handleReviseWriting = () => {
@@ -98,36 +128,14 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                  Time Estimate
-                </div>
-                <div className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {prompt?.timeEstimate}
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                  Difficulty
-                </div>
-                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  <Badge
-                    variant="secondary"
-                    className={`text-xs font-medium ${
-                      prompt?.difficulty === "Easy" ||
-                      prompt?.difficulty === "easy"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-                        : prompt?.difficulty === "Medium" ||
-                          prompt?.difficulty === "medium"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800"
-                    }`}
-                  >
-                    {prompt?.difficulty}
-                  </Badge>
-                </div>
-              </div>
+              <Badge
+                variant="secondary"
+                className={`text-xs font-medium px-3 py-1 capitalize ${getDifficultyColor(
+                  prompt?.difficulty
+                )}`}
+              >
+                {prompt?.difficulty}
+              </Badge>
             </div>
           </div>
         </div>
@@ -202,14 +210,19 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
               </div>
               <div className="p-6">
                 <ul className="space-y-3">
-                  {prompt.guidelines.map((guideline: string, index: number) => (
-                    <li key={index} className="flex items-start gap-3 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        {guideline}
-                      </span>
-                    </li>
-                  ))}
+                  {prompt?.guidelines?.map(
+                    (guideline: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-3 text-sm"
+                      >
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {guideline}
+                        </span>
+                      </li>
+                    )
+                  )}
                 </ul>
               </div>
             </div>
@@ -256,7 +269,6 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
             {evaluation && (
               <EvaluationResults
                 evaluation={evaluation}
-                userContent={content}
                 onClose={handleCloseEvaluation}
                 onRevise={handleReviseWriting}
               />

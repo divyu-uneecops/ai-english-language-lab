@@ -15,16 +15,12 @@ import {
   Award,
   MessageSquare,
   BookOpenCheck,
-  Target,
-  BarChart3,
-  Lightbulb,
-  Eye,
-  EyeOff,
   FileText,
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
 
 interface EvaluationData {
+  your_answer: string;
   score: number;
   feedback: {
     strengths: string[];
@@ -35,14 +31,12 @@ interface EvaluationData {
 
 interface EvaluationResultsProps {
   evaluation: EvaluationData;
-  userContent: string;
   onClose: () => void;
   onRevise: () => void;
 }
 
 export function EvaluationResults({
   evaluation,
-  userContent,
   onClose,
   onRevise,
 }: EvaluationResultsProps) {
@@ -56,36 +50,10 @@ export function EvaluationResults({
     return <XCircle className="h-4 w-4" />;
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "strengths":
-        return <CheckCircle className="h-4 w-4" />;
-      case "areas_for_improvement":
-        return <TrendingUp className="h-4 w-4" />;
-      case "comparison":
-        return <FileText className="h-4 w-4" />;
-      default:
-        return <Lightbulb className="h-4 w-4" />;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "strengths":
-        return "from-green-100 to-green-200 text-green-600";
-      case "areas_for_improvement":
-        return "from-blue-100 to-blue-200 text-blue-600";
-      case "comparison":
-        return "from-purple-100 to-purple-200 text-purple-600";
-      default:
-        return "from-gray-100 to-gray-200 text-gray-600";
-    }
-  };
-
   const renderFeedbackItems = (feedbackItems: string[]) => {
     return (
       <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
-        {feedbackItems.map((item, index) => (
+        {feedbackItems?.map((item, index) => (
           <div
             key={index}
             className="flex items-start gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
@@ -237,63 +205,34 @@ export function EvaluationResults({
                     <TabsContent value="comparison" className="mt-0 h-full">
                       <div className="h-full flex flex-col">
                         <div className="flex-1 min-h-0">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-sm font-medium text-gray-900">
-                                Writing Comparison
-                              </h3>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  setShowComparison(!showComparison)
-                                }
-                                className="flex items-center gap-2"
-                              >
-                                {showComparison ? (
-                                  <>
-                                    <EyeOff className="h-4 w-4" />
-                                    Hide
-                                  </>
-                                ) : (
-                                  <>
-                                    <Eye className="h-4 w-4" />
-                                    Show
-                                  </>
-                                )}
-                              </Button>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* User Writing */}
+                            <div>
+                              <h4 className="text-xs font-medium text-gray-700 mb-2">
+                                Your Writing
+                              </h4>
+                              <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
+                                <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
+                                  {evaluation?.your_answer ||
+                                    "No content written yet."}
+                                </pre>
+                              </div>
                             </div>
 
-                            {showComparison && (
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* User Writing */}
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-2">
-                                    Your Writing
-                                  </h4>
-                                  <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
-                                    <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
-                                      {userContent || "No content written yet."}
-                                    </pre>
-                                  </div>
-                                </div>
-
-                                {/* Example Answer */}
-                                <div>
-                                  <h4 className="text-xs font-medium text-gray-700 mb-2">
-                                    Example Answer
-                                  </h4>
-                                  <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
-                                    <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
-                                      {typeof evaluation?.example_answer ===
-                                      "string"
-                                        ? evaluation?.example_answer
-                                        : "No example available."}
-                                    </pre>
-                                  </div>
-                                </div>
+                            {/* Example Answer */}
+                            <div>
+                              <h4 className="text-xs font-medium text-gray-700 mb-2">
+                                Example Answer
+                              </h4>
+                              <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
+                                <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
+                                  {typeof evaluation?.example_answer ===
+                                  "string"
+                                    ? evaluation?.example_answer
+                                    : "No example available."}
+                                </pre>
                               </div>
-                            )}
+                            </div>
                           </div>
                         </div>
                       </div>

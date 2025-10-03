@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/protected-route";
 import { writingService } from "@/services/writingService";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isEmpty } from "@/lib/utils";
 
 interface WritingPrompt {
   topic_id: string;
@@ -14,15 +15,23 @@ interface WritingPrompt {
   title: string;
   description: string;
   difficulty: string;
-  audience: string;
   guidelines: string[];
   solved: boolean;
+  evaluation_data?: {
+    your_answer: string;
+    score: number;
+    feedback: {
+      strengths: string[];
+      areas_for_improvement: string[];
+    };
+    example_answer: string;
+  };
 }
 
 export default function WritingTopicPage() {
   const params = useParams();
   const router = useRouter();
-  const topicId = params.topicId as string;
+  const topicId = params?.topicId as string;
 
   const [prompt, setPrompt] = useState<WritingPrompt | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,11 +44,21 @@ export default function WritingTopicPage() {
         setError(null);
 
         // Fetch the specific writing topic by ID
-        const topicData = await writingService.fetchTopicById(topicId);
-        setPrompt(topicData);
-      } catch (err) {
-        console.error("Error fetching writing topic:", err);
-        setError("Failed to load writing topic");
+        const response = await writingService?.fetchTopicById(topicId);
+
+        const topicData: WritingPrompt = response;
+
+        if (!isEmpty(topicData)) {
+          setPrompt(topicData);
+        }
+      } catch (err: any) {
+        if (err?.response) {
+          // If using axios
+          setError(
+            err?.response?.data?.message ||
+              "Failed to load story. Please try again."
+          );
+        }
       } finally {
         setLoading(false);
       }
@@ -95,7 +114,7 @@ export default function WritingTopicPage() {
                 Back to Writing
               </Button>
               <Button
-                onClick={() => window.location.reload()}
+                onClick={() => window?.location?.reload()}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Try Again
@@ -135,11 +154,7 @@ export default function WritingTopicPage() {
 
   return (
     <ProtectedRoute>
-      <WritingEditor
-        prompt={prompt}
-        writingType={prompt.category}
-        onBack={handleBack}
-      />
+      <WritingEditor prompt={prompt} onBack={handleBack} />
     </ProtectedRoute>
   );
 }
