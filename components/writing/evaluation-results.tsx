@@ -205,32 +205,49 @@ export function EvaluationResults({
                     <TabsContent value="comparison" className="mt-0 h-full">
                       <div className="h-full flex flex-col">
                         <div className="flex-1 min-h-0">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* User Writing */}
-                            <div>
-                              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                                Your Writing
-                              </h4>
-                              <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
-                                <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
-                                  {evaluation?.your_answer ||
-                                    "No content written yet."}
-                                </pre>
+                          <div className="space-y-4">
+                            {/* Comparison Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* User Writing */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <h4 className="text-sm font-semibold text-gray-900">
+                                      Your Writing
+                                    </h4>
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-blue-50/50 to-blue-100/30 backdrop-blur-sm p-4 rounded-lg border border-blue-200/50 hover:border-blue-300/50 transition-all duration-200">
+                                  <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                                    <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
+                                      {evaluation?.your_answer ||
+                                        "No content written yet."}
+                                    </pre>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
 
-                            {/* Example Answer */}
-                            <div>
-                              <h4 className="text-xs font-medium text-gray-700 mb-2">
-                                Example Answer
-                              </h4>
-                              <div className="bg-white/60 backdrop-blur-sm p-3 rounded-md border border-white/30">
-                                <pre className="whitespace-pre-wrap text-xs text-gray-700 leading-relaxed">
-                                  {typeof evaluation?.example_answer ===
-                                  "string"
-                                    ? evaluation?.example_answer
-                                    : "No example available."}
-                                </pre>
+                              {/* Example Answer */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <h4 className="text-sm font-semibold text-gray-900">
+                                      Example Answer
+                                    </h4>
+                                  </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
+                                  <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-green-200 scrollbar-track-transparent">
+                                    <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
+                                      {typeof evaluation?.example_answer ===
+                                        "string" && evaluation.example_answer
+                                        ? evaluation.example_answer
+                                        : "No example available."}
+                                    </pre>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
