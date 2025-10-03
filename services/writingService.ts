@@ -2,14 +2,8 @@ import serverInterfaceService from "./serverInterfaceService";
 
 export const writingService = {
   // Fetch writing topics by category
-  fetchTopics: async (
-    category: string,
-    page: number = 1,
-    pageSize: number = 10
-  ) =>
-    serverInterfaceService.get(
-      `/writing/topics?category=${category}&page=${page}&page_size=${pageSize}`
-    ),
+  fetchTopics: async (params?: Record<string, any>) =>
+    serverInterfaceService.get(`/writing/topics`, params),
 
   // Fetch a single writing topic by ID
   fetchTopicById: async (topicId: string) =>

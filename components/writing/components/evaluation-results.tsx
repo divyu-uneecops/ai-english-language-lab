@@ -18,22 +18,7 @@ import {
   FileText,
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
-
-interface EvaluationData {
-  your_answer: string;
-  score: number;
-  feedback: {
-    strengths: string[];
-    areas_for_improvement: string[];
-  };
-  example_answer: string;
-}
-
-interface EvaluationResultsProps {
-  evaluation: EvaluationData;
-  onClose: () => void;
-  onRevise: () => void;
-}
+import { EvaluationResultsProps } from "../types";
 
 export function EvaluationResults({
   evaluation,

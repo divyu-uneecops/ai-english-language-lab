@@ -13,9 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  FileText,
-  Mail,
-  Newspaper,
   Clock,
   ChevronRight,
   ChevronDown,
@@ -33,86 +30,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { writingService } from "@/services/writingService";
 import { getDifficultyColor } from "@/lib/utils";
-
-// Internal Writing Prompt interface
-interface WritingPrompt {
-  topic_id: string;
-  category: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  audience: string;
-  guidelines: string[];
-  solved: boolean;
-}
-
-interface PaginatedResponse {
-  page: number;
-  page_size: number;
-  total: number;
-  results: WritingPrompt[];
-}
-
-const writingTypeOptions = [
-  {
-    id: "article",
-    title: "Article Writing",
-    description: "News articles, blog posts, and informative content",
-    icon: Newspaper,
-    color: "bg-green-500",
-    examples: [
-      "Technology trends",
-      "Health tips",
-      "Travel guide",
-      "Product review",
-    ],
-  },
-  {
-    id: "notice",
-    title: "Notice Writing",
-    description: "Official notices, announcements, and formal communications",
-    icon: FileText,
-    color: "bg-purple-500",
-    examples: [
-      "School event",
-      "Office meeting",
-      "Public announcement",
-      "Event cancellation",
-    ],
-  },
-  {
-    id: "letter",
-    title: "Letter Writing",
-    description: "Personal and formal letters for various purposes",
-    icon: Mail,
-    color: "bg-blue-500",
-    examples: [
-      "Job application",
-      "Complaint letter",
-      "Thank you letter",
-      "Invitation letter",
-    ],
-  },
-  {
-    id: "essay",
-    title: "Essay Writing",
-    description: "Structured essays on various topics and themes",
-    icon: PenTool,
-    color: "bg-orange-500",
-    examples: [
-      "Environmental issues",
-      "Education system",
-      "Social media impact",
-      "Future of technology",
-    ],
-  },
-];
+import { PaginatedResponse, WritingPrompt } from "../types";
+import { writingTypeOptions } from "../constants";
 
 export function WritingInterface() {
   const router = useRouter();
-  const [writingPrompts, setWritingPrompts] = useState<WritingPrompt[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
   const [selectedLevel, setSelectedLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "ai" | null
@@ -126,6 +48,10 @@ export function WritingInterface() {
     null
   );
   const [topicContext, setTopicContext] = useState<string>("");
+
+  const [writingPrompts, setWritingPrompts] = useState<WritingPrompt[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     status: {
       solved: false,
@@ -146,7 +72,6 @@ export function WritingInterface() {
       notice: false,
       essay: false,
       letter: false,
-      application: false,
     },
   });
 
@@ -170,25 +95,25 @@ export function WritingInterface() {
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
-    const selectedStatus = Object.entries(filters.status)
+    const selectedStatus = Object.entries(filters?.status)
       .filter(([_, isSelected]) => isSelected)
       .map(([status, _]) => status);
-    const selectedLevels = Object.entries(filters.level)
+    const selectedLevels = Object.entries(filters?.level)
       .filter(([_, isSelected]) => isSelected)
       .map(([level, _]) => level);
-    const selectedDifficulties = Object.entries(filters.difficulty)
+    const selectedDifficulties = Object.entries(filters?.difficulty)
       .filter(([_, isSelected]) => isSelected)
       .map(([difficulty, _]) => difficulty);
-    const selectedCategories = Object.entries(filters.category)
+    const selectedCategories = Object.entries(filters?.category)
       .filter(([_, isSelected]) => isSelected)
       .map(([category, _]) => category);
 
     return {
-      level: selectedLevels.length > 0 ? selectedLevels : undefined,
+      level: selectedLevels?.length > 0 ? selectedLevels : undefined,
       difficulty:
-        selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
-      status: selectedStatus.length > 0 ? selectedStatus : undefined,
-      category: selectedCategories.length > 0 ? selectedCategories : undefined,
+        selectedDifficulties?.length > 0 ? selectedDifficulties : undefined,
+      status: selectedStatus?.length > 0 ? selectedStatus : undefined,
+      category: selectedCategories?.length > 0 ? selectedCategories : undefined,
     };
   };
 
@@ -204,24 +129,18 @@ export function WritingInterface() {
         }
 
         const { level, difficulty, status, category } = getSelectedFilters();
-        const selectedCategory =
-          category && category.length > 0 ? category[0] : "article"; // Default to article if no category selected
 
         const params = {
-          page: isLoadMore ? pagination.currentPage + 1 : 1,
-          page_size: pagination.pageSize,
-          category: selectedCategory,
+          page: isLoadMore ? pagination?.currentPage + 1 : 1,
+          page_size: pagination?.pageSize,
+          category: category,
           level: level,
           difficulty: difficulty,
           status: status,
         };
 
         const paginatedData: PaginatedResponse =
-          await writingService.fetchTopics(
-            selectedCategory,
-            params.page,
-            params.page_size
-          );
+          await writingService.fetchTopics(params);
 
         // Transform the API data to match our interface
         const transformedPrompts: WritingPrompt[] =
@@ -249,14 +168,17 @@ export function WritingInterface() {
 
         // Check if there are more prompts to load
         const totalLoaded = isLoadMore
-          ? writingPrompts.length + transformedPrompts.length
-          : transformedPrompts.length;
+          ? writingPrompts?.length + transformedPrompts?.length
+          : transformedPrompts?.length;
         setHasMore(totalLoaded < (paginatedData?.total || 0));
-      } catch (err) {
-        console.error("Error fetching writing topics:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch writing topics"
-        );
+      } catch (err: any) {
+        if (err?.response) {
+          // If using axios
+          setError(
+            err?.response?.data?.message ||
+              "Failed to load story. Please try again."
+          );
+        }
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -272,22 +194,19 @@ export function WritingInterface() {
 
     try {
       setLoadingMore(true);
-      const { level, difficulty, category } = getSelectedFilters();
-      const selectedCategory =
-        category && category.length > 0 ? category[0] : "article";
+      const { level, difficulty, category, status } = getSelectedFilters();
 
       const params = {
-        page: pagination.currentPage + 1,
-        page_size: pagination.pageSize,
-        category: selectedCategory,
+        page: pagination?.currentPage + 1,
+        page_size: pagination?.pageSize,
+        category: category,
+        status: status,
         level: level,
         difficulty: difficulty,
       };
 
       const paginatedData: PaginatedResponse = await writingService.fetchTopics(
-        selectedCategory,
-        params.page,
-        params.page_size
+        params
       );
 
       const transformedPrompts: WritingPrompt[] = paginatedData?.results || [];
@@ -296,14 +215,20 @@ export function WritingInterface() {
       setWritingPrompts((prev) => [...prev, ...transformedPrompts]);
       setPagination((prev) => ({
         ...prev,
-        currentPage: prev.currentPage + 1,
+        currentPage: prev?.currentPage + 1,
       }));
 
       // Check if there are more prompts to load
-      const totalLoaded = writingPrompts.length + transformedPrompts.length;
+      const totalLoaded = writingPrompts?.length + transformedPrompts?.length;
       setHasMore(totalLoaded < (paginatedData?.total || 0));
-    } catch (err) {
-      console.error("Error loading more prompts:", err);
+    } catch (err: any) {
+      if (err?.response) {
+        // If using axios
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load story. Please try again."
+        );
+      }
     } finally {
       setLoadingMore(false);
     }
@@ -329,7 +254,7 @@ export function WritingInterface() {
 
     scrollContainer.addEventListener("scroll", handleScroll);
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loadingMore, writingPrompts.length]);
+  }, [hasMore, loadingMore, writingPrompts?.length]);
 
   // Open level selection dialog on first mount
   useEffect(() => {
@@ -346,13 +271,12 @@ export function WritingInterface() {
     setShowDifficultyDialog(true);
   };
 
-  const applyDifficulty = (difficulty: "easy" | "medium" | "hard") => {
-    setSelectedDifficulty(difficulty);
+  const applyDifficulty = () => {
     setShowDifficultyDialog(false);
   };
 
   const handlePromptSelection = (prompt: WritingPrompt) => {
-    router.push(`/writing/${prompt.topic_id}`);
+    router.push(`/writing/${prompt?.topic_id}`);
   };
 
   return (
@@ -463,11 +387,11 @@ export function WritingInterface() {
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded.category ? "rotate-180" : ""
+                      filterExpanded?.category ? "rotate-180" : ""
                     }`}
                   />
                 </button>
-                {filterExpanded.category && (
+                {filterExpanded?.category && (
                   <div className="space-y-3">
                     <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                       <input
@@ -557,28 +481,6 @@ export function WritingInterface() {
                         </span>
                       </div>
                     </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.category?.application}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            category: {
-                              ...filters?.category,
-                              application: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700">
-                          Application
-                        </span>
-                      </div>
-                    </label>
                   </div>
                 )}
               </div>
@@ -589,7 +491,7 @@ export function WritingInterface() {
                   onClick={() =>
                     setFilterExpanded((prev) => ({
                       ...prev,
-                      level: !prev.level,
+                      level: !prev?.level,
                     }))
                   }
                   className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-blue-600 transition-colors"
@@ -600,11 +502,11 @@ export function WritingInterface() {
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded.level ? "rotate-180" : ""
+                      filterExpanded?.level ? "rotate-180" : ""
                     }`}
                   />
                 </button>
-                {filterExpanded.level && (
+                {filterExpanded?.level && (
                   <div className="space-y-3">
                     <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                       <input
@@ -682,7 +584,7 @@ export function WritingInterface() {
                   onClick={() =>
                     setFilterExpanded((prev) => ({
                       ...prev,
-                      difficulty: !prev.difficulty,
+                      difficulty: !prev?.difficulty,
                     }))
                   }
                   className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-red-600 transition-colors"
@@ -693,16 +595,16 @@ export function WritingInterface() {
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded.difficulty ? "rotate-180" : ""
+                      filterExpanded?.difficulty ? "rotate-180" : ""
                     }`}
                   />
                 </button>
-                {filterExpanded.difficulty && (
+                {filterExpanded?.difficulty && (
                   <div className="space-y-3">
                     <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                       <input
                         type="checkbox"
-                        checked={filters.difficulty.easy}
+                        checked={filters?.difficulty?.easy}
                         onChange={(e) =>
                           setFilters({
                             ...filters,
@@ -724,7 +626,7 @@ export function WritingInterface() {
                     <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
                       <input
                         type="checkbox"
-                        checked={filters.difficulty.medium}
+                        checked={filters?.difficulty?.medium}
                         onChange={(e) =>
                           setFilters({
                             ...filters,
@@ -1113,17 +1015,17 @@ export function WritingInterface() {
                   Writing Type
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
-                  {writingTypeOptions.map((type) => {
-                    const IconComponent = type.icon;
+                  {writingTypeOptions?.map((type) => {
+                    const IconComponent = type?.icon;
                     return (
                       <button
-                        key={type.id}
+                        key={type?.id}
                         className={`group w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                          selectedWritingType === type.id
+                          selectedWritingType === type?.id
                             ? "border-orange-300 bg-orange-50"
                             : "border-gray-200 hover:border-orange-300 hover:bg-gray-50"
                         }`}
-                        onClick={() => setSelectedWritingType(type.id)}
+                        onClick={() => setSelectedWritingType(type?.id)}
                       >
                         <div
                           className={`p-2 rounded-lg ${type.color} text-white group-hover:scale-110 transition-transform`}
@@ -1132,7 +1034,7 @@ export function WritingInterface() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-gray-900 text-sm">
-                            {type.title}
+                            {type?.title}
                           </div>
                         </div>
                       </button>
@@ -1226,7 +1128,7 @@ export function WritingInterface() {
                       : "Enter what you want to write about..."
                   }
                   value={topicContext}
-                  onChange={(e) => setTopicContext(e.target.value)}
+                  onChange={(e) => setTopicContext(e?.target?.value)}
                   className="w-full"
                 />
                 <p className="text-xs text-gray-500 mt-2">
@@ -1278,7 +1180,7 @@ export function WritingInterface() {
                     selectedDifficulty &&
                     topicContext.trim()
                   ) {
-                    applyDifficulty(selectedDifficulty);
+                    applyDifficulty();
                   }
                 }}
                 disabled={

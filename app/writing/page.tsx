@@ -1,4 +1,6 @@
-import { WritingInterface } from "@/components/writing/writing-interface";
+"use client";
+
+import { WritingInterface } from "@/components/writing/components/writing-interface";
 import { ProtectedRoute } from "@/components/protected-route";
 
 export default function WritingPage() {

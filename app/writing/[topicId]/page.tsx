@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { WritingEditor } from "@/components/writing/writing-editor";
+import { WritingEditor } from "@/components/writing/components/writing-editor";
 import { ProtectedRoute } from "@/components/protected-route";
 import { writingService } from "@/services/writingService";
 import { Loader2, AlertCircle } from "lucide-react";

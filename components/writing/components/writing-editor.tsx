@@ -9,30 +9,7 @@ import { Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { EvaluationResults } from "./evaluation-results";
 import { writingService } from "@/services/writingService";
 import { getDifficultyColor, isEmpty } from "@/lib/utils";
-
-interface WritingPrompt {
-  topic_id: string;
-  category: string;
-  title: string;
-  description: string;
-  difficulty: string;
-  guidelines: string[];
-  solved: boolean;
-  evaluation_data?: {
-    your_answer: string;
-    score: number;
-    feedback: {
-      strengths: string[];
-      areas_for_improvement: string[];
-    };
-    example_answer: string;
-  };
-}
-
-interface WritingEditorProps {
-  prompt: WritingPrompt;
-  onBack: () => void;
-}
+import { WritingEditorProps } from "../types";
 
 export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   const [content, setContent] = useState("");

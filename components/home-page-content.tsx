@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Hero } from "@/components/hero";
-import { CultivateThink } from "@/components/writing/CultivateThink";
+import { CultivateThink } from "@/components/writing/components/CultivateThink";
 import { ModuleCards } from "@/components/module-cards";
 
 export function HomePageContent() {
