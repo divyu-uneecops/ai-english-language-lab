@@ -26,7 +26,6 @@ export function EvaluationResults({
   onRevise,
 }: EvaluationResultsProps) {
   const [activeTab, setActiveTab] = useState("strengths");
-  const [showComparison, setShowComparison] = useState(false);
 
   const getScoreIcon = (score: number) => {
     if (score >= 8) return <Award className="h-4 w-4" />;
