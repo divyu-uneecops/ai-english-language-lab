@@ -25,6 +25,8 @@ import {
   PenTool,
   Loader2,
   MessageCircle,
+  X,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -58,14 +60,30 @@ export function WritingInterface() {
       unsolved: false,
     },
     level: {
-      beginner: false,
-      intermediate: false,
-      advanced: false,
-    },
-    difficulty: {
-      easy: false,
-      medium: false,
-      hard: false,
+      beginner: {
+        selected: false,
+        difficulties: {
+          easy: false,
+          medium: false,
+          hard: false,
+        },
+      },
+      intermediate: {
+        selected: false,
+        difficulties: {
+          easy: false,
+          medium: false,
+          hard: false,
+        },
+      },
+      advanced: {
+        selected: false,
+        difficulties: {
+          easy: false,
+          medium: false,
+          hard: false,
+        },
+      },
     },
     category: {
       article: false,
@@ -89,21 +107,43 @@ export function WritingInterface() {
   const [filterExpanded, setFilterExpanded] = useState({
     status: true, // Status filter expanded by default
     level: false, // Level filter collapsed by default
-    difficulty: false, // Difficulty filter collapsed by default
     category: false, // Category filter collapsed by default
   });
 
-  // Helper function to extract selected filter values
+  // Level-specific difficulty expansion state
+  const [levelDifficultyExpanded, setLevelDifficultyExpanded] = useState({
+    beginner: false,
+    intermediate: false,
+    advanced: false,
+  });
+
+  // Helper function to extract selected filter values with smart query logic
   const getSelectedFilters = () => {
     const selectedStatus = Object.entries(filters?.status)
       .filter(([_, isSelected]) => isSelected)
       .map(([status, _]) => status);
-    const selectedLevels = Object.entries(filters?.level)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([level, _]) => level);
-    const selectedDifficulties = Object.entries(filters?.difficulty)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([difficulty, _]) => difficulty);
+
+    // Smart logic: Extract levels and difficulties with optimization
+    const selectedLevels: string[] = [];
+    const selectedDifficulties: string[] = [];
+
+    Object.entries(filters?.level).forEach(([level, levelData]) => {
+      if (levelData.selected) {
+        const levelDifficulties = Object.entries(levelData.difficulties)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([difficulty, _]) => difficulty);
+
+        // If all difficulties are selected for this level, only send the level
+        if (levelDifficulties.length === 3) {
+          selectedLevels.push(level);
+        } else {
+          // If not all difficulties are selected, send both level and specific difficulties
+          selectedLevels.push(level);
+          selectedDifficulties.push(...levelDifficulties);
+        }
+      }
+    });
+
     const selectedCategories = Object.entries(filters?.category)
       .filter(([_, isSelected]) => isSelected)
       .map(([category, _]) => category);
@@ -115,6 +155,54 @@ export function WritingInterface() {
       status: selectedStatus?.length > 0 ? selectedStatus : undefined,
       category: selectedCategories?.length > 0 ? selectedCategories : undefined,
     };
+  };
+
+  // Helper function to clear all filters
+  const clearAllFilters = () => {
+    setFilters({
+      status: {
+        solved: false,
+        unsolved: false,
+      },
+      level: {
+        beginner: {
+          selected: false,
+          difficulties: {
+            easy: false,
+            medium: false,
+            hard: false,
+          },
+        },
+        intermediate: {
+          selected: false,
+          difficulties: {
+            easy: false,
+            medium: false,
+            hard: false,
+          },
+        },
+        advanced: {
+          selected: false,
+          difficulties: {
+            easy: false,
+            medium: false,
+            hard: false,
+          },
+        },
+      },
+      category: {
+        article: false,
+        notice: false,
+        essay: false,
+        letter: false,
+      },
+    });
+  };
+
+  // Helper function to check if any filters are active
+  const hasActiveFilters = () => {
+    const { level, difficulty, status, category } = getSelectedFilters();
+    return !!(level || difficulty || status || category);
   };
 
   // Fetch writing topics from API
@@ -282,9 +370,9 @@ export function WritingInterface() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left Section - User Progress Stats and Filters */}
-          <div className="w-80 space-y-6">
+          <div className="w-full lg:w-80 space-y-6">
             {/* Header Section */}
             <div className="mb-8">
               <div className="space-y-2 mb-6">
@@ -307,23 +395,44 @@ export function WritingInterface() {
               </div>
             </div>
 
-            {/* Enhanced Filters */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
-                  <Filter className="h-5 w-5 text-white" />
+            {/* Modern Enhanced Filters */}
+            <Card className="p-4 sm:p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30">
+              {/* Filter Header with Clear Button */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg">
+                    <Filter className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">
+                      Smart Filters
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Refine your writing practice
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Filters</h3>
+                {hasActiveFilters() && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAllFilters}
+                    className="text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Clear All
+                  </Button>
+                )}
               </div>
 
-              {/* Status Filter */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
+              {/* Status Filter - Checkbox Design */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  STATUS
+                  Status
                 </h4>
                 <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
+                  <label className="group flex items-center space-x-3 p-3 rounded-xl hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
                     <input
                       type="checkbox"
                       checked={filters?.status?.solved}
@@ -345,7 +454,7 @@ export function WritingInterface() {
                       </span>
                     </div>
                   </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
+                  <label className="group flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
                     <input
                       type="checkbox"
                       checked={filters?.status?.unsolved}
@@ -370,8 +479,8 @@ export function WritingInterface() {
                 </div>
               </div>
 
-              {/* Category Filter */}
-              <div>
+              {/* Category Filter - Modern Card Design */}
+              <div className="mb-6">
                 <button
                   onClick={() =>
                     setFilterExpanded((prev) => ({
@@ -379,11 +488,11 @@ export function WritingInterface() {
                       category: !prev.category,
                     }))
                   }
-                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-purple-600 transition-colors"
+                  className="w-full text-left text-sm font-semibold text-gray-700 mb-3 flex items-center justify-between hover:text-purple-600 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <PenTool className="h-4 w-4 text-purple-500" />
-                    CATEGORY
+                    Writing Categories
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
@@ -393,99 +502,69 @@ export function WritingInterface() {
                 </button>
                 {filterExpanded?.category && (
                   <div className="space-y-3">
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.category?.article}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            category: {
-                              ...filters?.category,
-                              article: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          Article
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-purple-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.category?.notice}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            category: {
-                              ...filters?.category,
-                              notice: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-purple-700">
-                          Notice
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.category?.essay}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            category: {
-                              ...filters?.category,
-                              essay: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">
-                          Essay
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-blue-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.category?.letter}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            category: {
-                              ...filters?.category,
-                              letter: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700">
-                          Letter
-                        </span>
-                      </div>
-                    </label>
+                    {[
+                      {
+                        key: "article",
+                        label: "Article",
+                        color: "green",
+                        icon: "📰",
+                      },
+                      {
+                        key: "notice",
+                        label: "Notice",
+                        color: "purple",
+                        icon: "📋",
+                      },
+                      {
+                        key: "essay",
+                        label: "Essay",
+                        color: "orange",
+                        icon: "📝",
+                      },
+                      {
+                        key: "letter",
+                        label: "Letter",
+                        color: "blue",
+                        icon: "✉️",
+                      },
+                    ].map(({ key, label, color, icon }) => (
+                      <label
+                        key={key}
+                        className={`group flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:border-${color}-200 hover:bg-${color}-50`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={
+                            filters?.category?.[
+                              key as keyof typeof filters.category
+                            ]
+                          }
+                          onChange={(e) =>
+                            setFilters({
+                              ...filters,
+                              category: {
+                                ...filters?.category,
+                                [key]: e?.target?.checked,
+                              },
+                            })
+                          }
+                          className={`w-4 h-4 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-2`}
+                        />
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{icon}</span>
+                          <span
+                            className={`text-sm font-medium text-gray-700 group-hover:text-${color}-700`}
+                          >
+                            {label}
+                          </span>
+                        </div>
+                      </label>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Level Filter */}
+              {/* Level & Difficulty Filter - Modern Accordion Design */}
               <div>
                 <button
                   onClick={() =>
@@ -494,11 +573,11 @@ export function WritingInterface() {
                       level: !prev?.level,
                     }))
                   }
-                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-blue-600 transition-colors"
+                  className="w-full text-left text-sm font-semibold text-gray-700 mb-3 flex items-center justify-between hover:text-blue-600 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <Brain className="h-4 w-4 text-blue-500" />
-                    LEVEL
+                    Skill Level & Difficulty
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 transition-transform duration-200 ${
@@ -508,165 +587,284 @@ export function WritingInterface() {
                 </button>
                 {filterExpanded?.level && (
                   <div className="space-y-3">
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.level?.beginner}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              beginner: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          Beginner
-                        </span>
+                    {/* Beginner Level */}
+                    <div className="border border-green-200 rounded-xl p-4 bg-gradient-to-r from-green-50 to-green-25">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="group flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filters?.level?.beginner?.selected}
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                level: {
+                                  ...filters?.level,
+                                  beginner: {
+                                    ...filters?.level?.beginner,
+                                    selected: e?.target?.checked,
+                                  },
+                                },
+                              })
+                            }
+                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                          />
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span className="text-sm font-semibold text-gray-700 group-hover:text-green-700">
+                              Beginner
+                            </span>
+                          </div>
+                        </label>
+                        <button
+                          onClick={() =>
+                            setLevelDifficultyExpanded((prev) => ({
+                              ...prev,
+                              beginner: !prev.beginner,
+                            }))
+                          }
+                          className="p-1 hover:bg-green-100 rounded-lg transition-colors"
+                        >
+                          <ChevronDown
+                            className={`h-3 w-3 transition-transform duration-200 ${
+                              levelDifficultyExpanded?.beginner
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        </button>
                       </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                      <input
-                        type="checkbox"
-                        checked={filters.level.intermediate}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              intermediate: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                          Intermediate
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.level?.advanced}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              advanced: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                          Advanced
-                        </span>
-                      </div>
-                    </label>
-                  </div>
-                )}
-              </div>
+                      {levelDifficultyExpanded?.beginner && (
+                        <div className="ml-6 space-y-2">
+                          {[
+                            { key: "easy", label: "Easy", color: "green" },
+                            { key: "medium", label: "Medium", color: "yellow" },
+                            { key: "hard", label: "Hard", color: "red" },
+                          ].map(({ key, label, color }) => (
+                            <label
+                              key={key}
+                              className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-green-100 transition-all duration-200 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  filters?.level?.beginner?.difficulties?.[
+                                    key as keyof typeof filters.level.beginner.difficulties
+                                  ]
+                                }
+                                onChange={(e) =>
+                                  setFilters({
+                                    ...filters,
+                                    level: {
+                                      ...filters?.level,
+                                      beginner: {
+                                        ...filters?.level?.beginner,
+                                        difficulties: {
+                                          ...filters?.level?.beginner
+                                            ?.difficulties,
+                                          [key]: e?.target?.checked,
+                                        },
+                                      },
+                                    },
+                                  })
+                                }
+                                className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
+                              />
+                              <span
+                                className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
+                              >
+                                {label}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-              {/* Difficulty Filter */}
-              <div>
-                <button
-                  onClick={() =>
-                    setFilterExpanded((prev) => ({
-                      ...prev,
-                      difficulty: !prev?.difficulty,
-                    }))
-                  }
-                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-red-600 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-red-500" />
-                    DIFFICULTY
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded?.difficulty ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {filterExpanded?.difficulty && (
-                  <div className="space-y-3">
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.difficulty?.easy}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              easy: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          Easy
-                        </span>
+                    {/* Intermediate Level */}
+                    <div className="border border-yellow-200 rounded-xl p-4 bg-gradient-to-r from-yellow-50 to-yellow-25">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="group flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filters?.level?.intermediate?.selected}
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                level: {
+                                  ...filters?.level,
+                                  intermediate: {
+                                    ...filters?.level?.intermediate,
+                                    selected: e?.target?.checked,
+                                  },
+                                },
+                              })
+                            }
+                            className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                          />
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                            <span className="text-sm font-semibold text-gray-700 group-hover:text-yellow-700">
+                              Intermediate
+                            </span>
+                          </div>
+                        </label>
+                        <button
+                          onClick={() =>
+                            setLevelDifficultyExpanded((prev) => ({
+                              ...prev,
+                              intermediate: !prev.intermediate,
+                            }))
+                          }
+                          className="p-1 hover:bg-yellow-100 rounded-lg transition-colors"
+                        >
+                          <ChevronDown
+                            className={`h-3 w-3 transition-transform duration-200 ${
+                              levelDifficultyExpanded?.intermediate
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        </button>
                       </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.difficulty?.medium}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              medium: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                          Medium
-                        </span>
+                      {levelDifficultyExpanded?.intermediate && (
+                        <div className="ml-6 space-y-2">
+                          {[
+                            { key: "easy", label: "Easy", color: "green" },
+                            { key: "medium", label: "Medium", color: "yellow" },
+                            { key: "hard", label: "Hard", color: "red" },
+                          ].map(({ key, label, color }) => (
+                            <label
+                              key={key}
+                              className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-yellow-100 transition-all duration-200 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  filters?.level?.intermediate?.difficulties?.[
+                                    key as keyof typeof filters.level.intermediate.difficulties
+                                  ]
+                                }
+                                onChange={(e) =>
+                                  setFilters({
+                                    ...filters,
+                                    level: {
+                                      ...filters?.level,
+                                      intermediate: {
+                                        ...filters?.level?.intermediate,
+                                        difficulties: {
+                                          ...filters?.level?.intermediate
+                                            ?.difficulties,
+                                          [key]: e?.target?.checked,
+                                        },
+                                      },
+                                    },
+                                  })
+                                }
+                                className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
+                              />
+                              <span
+                                className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
+                              >
+                                {label}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Advanced Level */}
+                    <div className="border border-red-200 rounded-xl p-4 bg-gradient-to-r from-red-50 to-red-25">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="group flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filters?.level?.advanced?.selected}
+                            onChange={(e) =>
+                              setFilters({
+                                ...filters,
+                                level: {
+                                  ...filters?.level,
+                                  advanced: {
+                                    ...filters?.level?.advanced,
+                                    selected: e?.target?.checked,
+                                  },
+                                },
+                              })
+                            }
+                            className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+                          />
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span className="text-sm font-semibold text-gray-700 group-hover:text-red-700">
+                              Advanced
+                            </span>
+                          </div>
+                        </label>
+                        <button
+                          onClick={() =>
+                            setLevelDifficultyExpanded((prev) => ({
+                              ...prev,
+                              advanced: !prev.advanced,
+                            }))
+                          }
+                          className="p-1 hover:bg-red-100 rounded-lg transition-colors"
+                        >
+                          <ChevronDown
+                            className={`h-3 w-3 transition-transform duration-200 ${
+                              levelDifficultyExpanded?.advanced
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        </button>
                       </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.difficulty?.hard}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              hard: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                          Hard
-                        </span>
-                      </div>
-                    </label>
+                      {levelDifficultyExpanded?.advanced && (
+                        <div className="ml-6 space-y-2">
+                          {[
+                            { key: "easy", label: "Easy", color: "green" },
+                            { key: "medium", label: "Medium", color: "yellow" },
+                            { key: "hard", label: "Hard", color: "red" },
+                          ].map(({ key, label, color }) => (
+                            <label
+                              key={key}
+                              className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-red-100 transition-all duration-200 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={
+                                  filters?.level?.advanced?.difficulties?.[
+                                    key as keyof typeof filters.level.advanced.difficulties
+                                  ]
+                                }
+                                onChange={(e) =>
+                                  setFilters({
+                                    ...filters,
+                                    level: {
+                                      ...filters?.level,
+                                      advanced: {
+                                        ...filters?.level?.advanced,
+                                        difficulties: {
+                                          ...filters?.level?.advanced
+                                            ?.difficulties,
+                                          [key]: e?.target?.checked,
+                                        },
+                                      },
+                                    },
+                                  })
+                                }
+                                className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
+                              />
+                              <span
+                                className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
+                              >
+                                {label}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -718,7 +916,7 @@ export function WritingInterface() {
             {!loading && !error && (
               <div
                 ref={scrollContainerRef}
-                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2 mt-10"
+                className="h-[600px] sm:h-[700px] lg:h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2 mt-6 sm:mt-10"
               >
                 <div className="space-y-4">
                   {writingPrompts?.length === 0 ? (
