@@ -15,6 +15,7 @@ export interface WritingPrompt {
   title: string;
   description: string;
   difficulty: string;
+  level: string;
   guidelines: string[];
   solved: boolean;
   evaluation_data?: {
