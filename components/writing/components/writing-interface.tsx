@@ -387,40 +387,38 @@ export function WritingInterface() {
     <div className="bg-gradient-to-br from-yellow-50 via-white to-orange-50">
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Header Section */}
-        <div>
-          <div className="flex items-center justify-between">
-            <div className="space-y-2 mb-6">
-              {/* Breadcrumb Navigation */}
-              <nav className="flex items-center space-x-2 text-sm text-gray-500">
-                <Link
-                  href="/dashboard"
-                  className="hover:text-orange-600 transition-colors font-medium"
-                >
-                  Dashboard
-                </Link>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-gray-900 font-semibold">Writing</span>
-              </nav>
+        <div className="flex items-center justify-between">
+          <div className="space-y-2 mb-6">
+            {/* Breadcrumb Navigation */}
+            <nav className="flex items-center space-x-2 text-sm text-gray-500">
+              <Link
+                href="/dashboard"
+                className="hover:text-orange-600 transition-colors font-medium"
+              >
+                Dashboard
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-gray-900 font-semibold">Writing</span>
+            </nav>
 
-              {/* Page Title */}
-              <h1 className="text-2xl font-bold text-gray-900">
-                Writing Practice
-              </h1>
-            </div>
-            <Button
-              onClick={() => setShowFilterDialog(true)}
-              variant="outline"
-              className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-              {hasActiveFilters() && (
-                <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                  {getActiveFiltersCount()}
-                </Badge>
-              )}
-            </Button>
+            {/* Page Title */}
+            <h1 className="text-2xl font-bold text-gray-900">
+              Writing Practice
+            </h1>
           </div>
+          <Button
+            onClick={() => setShowFilterDialog(true)}
+            variant="outline"
+            className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+            {hasActiveFilters() && (
+              <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {getActiveFiltersCount()}
+              </Badge>
+            )}
+          </Button>
         </div>
 
         {/* Main Content Area */}
@@ -566,9 +564,9 @@ export function WritingInterface() {
                                 </li>
                               ))}
                             {prompt?.guidelines &&
-                              prompt.guidelines.length > 2 && (
+                              prompt?.guidelines?.length > 2 && (
                                 <li className="text-gray-500 text-xs">
-                                  +{prompt.guidelines.length - 2} more
+                                  +{prompt?.guidelines?.length - 2} more
                                   guidelines
                                 </li>
                               )}
