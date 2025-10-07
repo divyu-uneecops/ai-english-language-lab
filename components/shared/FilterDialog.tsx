@@ -30,7 +30,6 @@ export interface FilterDialogProps {
   selectedFilters: Record<string, string[]>;
   onFiltersChange: (filters: Record<string, string[]>) => void;
   onApply: () => void;
-
 }
 
 export function FilterDialog({
@@ -368,15 +367,7 @@ export function FilterDialog({
 
         {/* Actions */}
         <div className="p-8 bg-gradient-to-r from-orange-50 to-yellow-50 border-t border-orange-200/30">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              className="px-6 py-2 text-gray-600 hover:text-gray-800 hover:bg-white/80 backdrop-blur-sm rounded-xl transition-all duration-200"
-            >
-              Cancel
-            </Button>
-
+          <div className="flex items-center justify-end">
             <div className="flex items-center gap-4">
               {hasActiveFilters() && (
                 <Button
