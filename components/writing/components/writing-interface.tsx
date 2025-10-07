@@ -15,7 +15,6 @@ import {
 import {
   Clock,
   ChevronRight,
-  ChevronDown,
   CheckCircle,
   Star,
   Filter,
@@ -34,6 +33,7 @@ import { writingService } from "@/services/writingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import { PaginatedResponse, WritingPrompt } from "../types";
 import { writingTypeOptions } from "../constants";
+import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
 
 export function WritingInterface() {
   const router = useRouter();
@@ -53,88 +53,149 @@ export function WritingInterface() {
 
   // Filter dialog state
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
+  // Filter categories configuration
+  const filterCategories: FilterCategory[] = [
+    {
+      key: "status",
+      label: "Progress Status",
+      description: "Filter by completion status",
+      icon: <CheckCircle className="h-5 w-5" />,
+      type: "checkbox",
+      multiSelect: true,
+      options: [
+        {
+          key: "solved",
+          label: "Completed",
+          description: "Writing exercises you've finished",
+        },
+        {
+          key: "unsolved",
+          label: "Not Started",
+          description: "New writing challenges to explore",
+        },
+      ],
+    },
+    {
+      key: "category",
+      label: "Writing Types",
+      description: "Choose your preferred writing format",
+      icon: <PenTool className="h-5 w-5" />,
+      type: "checkbox",
+      multiSelect: true,
+      options: [
+        {
+          key: "article",
+          label: "Article",
+          description: "Informative content",
+        },
+        {
+          key: "notice",
+          label: "Notice",
+          description: "Official announcements",
+        },
+        {
+          key: "essay",
+          label: "Essay",
+          description: "Structured arguments",
+        },
+        {
+          key: "letter",
+          label: "Letter",
+          description: "Personal communication",
+        },
+      ],
+    },
+    {
+      key: "level",
+      label: "Skill Level & Difficulty",
+      description: "Match your current writing abilities",
+      icon: <Brain className="h-5 w-5" />,
+      type: "checkbox",
+      multiSelect: true,
+      options: [
+        {
+          key: "beginner",
+          label: "Beginner",
+          description: "Basic vocabulary & simple structures",
+          icon: <Star className="h-4 w-4" />,
+          children: [
+            {
+              key: "beginner.easy",
+              label: "Easy",
+              description: "Simple prompts",
+            },
+            {
+              key: "beginner.medium",
+              label: "Medium",
+              description: "Moderate challenge",
+            },
+            {
+              key: "beginner.hard",
+              label: "Hard",
+              description: "Advanced beginner",
+            },
+          ],
+        },
+        {
+          key: "intermediate",
+          label: "Intermediate",
+          description: "Balanced challenge & creativity",
+          icon: <Target className="h-4 w-4" />,
+          children: [
+            {
+              key: "intermediate.easy",
+              label: "Easy",
+              description: "Comfortable level",
+            },
+            {
+              key: "intermediate.medium",
+              label: "Medium",
+              description: "Good challenge",
+            },
+            {
+              key: "intermediate.hard",
+              label: "Hard",
+              description: "Push your limits",
+            },
+          ],
+        },
+        {
+          key: "advanced",
+          label: "Advanced",
+          description: "Complex topics & sophisticated writing",
+          icon: <Trophy className="h-4 w-4" />,
+          children: [
+            {
+              key: "advanced.easy",
+              label: "Easy",
+              description: "Warm-up level",
+            },
+            {
+              key: "advanced.medium",
+              label: "Medium",
+              description: "Standard advanced",
+            },
+            {
+              key: "advanced.hard",
+              label: "Hard",
+              description: "Expert level",
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
-  // Temporary filters for dialog (only applied when user clicks Apply)
-  const [tempFilters, setTempFilters] = useState({
-    status: {
-      solved: false,
-      unsolved: false,
-    },
-    level: {
-      beginner: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-      intermediate: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-      advanced: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-    },
-    category: {
-      article: false,
-      notice: false,
-      essay: false,
-      letter: false,
-    },
+  // Simplified filters state
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    status: [],
+    category: [],
+    level: [],
   });
 
   const [writingPrompts, setWritingPrompts] = useState<WritingPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
-    status: {
-      solved: false,
-      unsolved: false,
-    },
-    level: {
-      beginner: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-      intermediate: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-      advanced: {
-        selected: false,
-        difficulties: {
-          easy: false,
-          medium: false,
-          hard: false,
-        },
-      },
-    },
-    category: {
-      article: false,
-      notice: false,
-      essay: false,
-      letter: false,
-    },
-  });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -146,364 +207,61 @@ export function WritingInterface() {
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter collapse/expand state
-  const [filterExpanded, setFilterExpanded] = useState({
-    status: true, // Status filter expanded by default
-    level: false, // Level filter collapsed by default
-    category: false, // Category filter collapsed by default
-  });
-
-  // Level-specific difficulty expansion state
-  const [levelDifficultyExpanded, setLevelDifficultyExpanded] = useState({
-    beginner: false,
-    intermediate: false,
-    advanced: false,
-  });
-
-  // Helper function to extract selected filter values with explicit level-difficulty mapping
+  // Helper function to extract selected filter values
   const getSelectedFilters = () => {
-    // Build status filter: comma-separated selected statuses
-    const selectedStatuses = Object.entries(filters?.status)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([status, _]) => status);
-    const statusParam =
-      selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined;
+    const params: Record<string, string> = {};
 
-    // Build category filter: comma-separated selected categories
-    const selectedCategories = Object.entries(filters?.category)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([category, _]) => category);
-    const categoryParam =
-      selectedCategories.length > 0 ? selectedCategories.join(",") : undefined;
+    // Add status filter
+    if (filters.status.length > 0) {
+      params.status = filters.status.join(",");
+    }
 
-    // Build level-difficulty mapping with "level." prefix
-    const levelDifficultyMap: Record<string, string> = {};
+    // Add category filter
+    if (filters.category.length > 0) {
+      params.category = filters.category.join(",");
+    }
 
-    Object.entries(filters?.level).forEach(([level, levelData]) => {
-      const levelDifficulties = Object.entries(levelData.difficulties)
-        .filter(([_, isSelected]) => isSelected)
-        .map(([difficulty, _]) => difficulty);
+    // Add level-difficulty filter
+    if (filters.level.length > 0) {
+      const levelDifficultyMap: Record<string, string[]> = {};
 
-      // Only add to map if there are selected difficulties
-      if (levelDifficulties.length > 0) {
-        levelDifficultyMap[`level.${level}`] = levelDifficulties.join(",");
-      }
-    });
+      filters.level.forEach((levelDiff) => {
+        const [level, difficulty] = levelDiff.split(".");
+        if (!levelDifficultyMap[`level.${level}`]) {
+          levelDifficultyMap[`level.${level}`] = [];
+        }
+        levelDifficultyMap[`level.${level}`].push(difficulty);
+      });
 
-    return {
-      ...levelDifficultyMap, // This spreads the level-difficulty pairs with prefix
-      ...(statusParam && { status: statusParam }),
-      ...(categoryParam && { category: categoryParam }),
-    };
+      // Convert to comma-separated strings
+      Object.entries(levelDifficultyMap).forEach(([key, difficulties]) => {
+        params[key] = difficulties.join(",");
+      });
+    }
+
+    return params;
   };
 
   // Helper function to clear all filters
   const clearAllFilters = () => {
     setFilters({
-      status: {
-        solved: false,
-        unsolved: false,
-      },
-      level: {
-        beginner: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-        intermediate: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-        advanced: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-      },
-      category: {
-        article: false,
-        notice: false,
-        essay: false,
-        letter: false,
-      },
+      status: [],
+      category: [],
+      level: [],
     });
-  };
-
-  // Helper function to clear all temporary filters
-  const clearAllTempFilters = () => {
-    setTempFilters({
-      status: {
-        solved: false,
-        unsolved: false,
-      },
-      level: {
-        beginner: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-        intermediate: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-        advanced: {
-          selected: false,
-          difficulties: {
-            easy: false,
-            medium: false,
-            hard: false,
-          },
-        },
-      },
-      category: {
-        article: false,
-        notice: false,
-        essay: false,
-        letter: false,
-      },
-    });
-  };
-
-  // Function to apply temporary filters to main filters
-  const applyTempFilters = () => {
-    setFilters(tempFilters);
-    setShowFilterDialog(false);
-  };
-
-  // Function to initialize temp filters with current filters when dialog opens
-  const initializeTempFilters = () => {
-    setTempFilters(filters);
-  };
-
-  // Helper function to get temporary level selection state
-  const getTempLevelSelectionState = (
-    levelKey: keyof typeof tempFilters.level
-  ) => {
-    const level = tempFilters.level[levelKey];
-    const difficulties = Object.values(level.difficulties);
-    const selectedCount = difficulties.filter(Boolean).length;
-
-    if (selectedCount === 0) return "none";
-    if (selectedCount === difficulties.length) return "all";
-    return "partial";
-  };
-
-  // Helper function to handle temporary level checkbox change
-  const handleTempLevelCheckboxChange = (
-    levelKey: keyof typeof tempFilters.level,
-    checked: boolean
-  ) => {
-    setTempFilters((prev) => ({
-      ...prev,
-      level: {
-        ...prev.level,
-        [levelKey]: {
-          ...prev.level[levelKey],
-          selected: checked,
-          difficulties: checked
-            ? { easy: true, medium: true, hard: true }
-            : { easy: false, medium: false, hard: false },
-        },
-      },
-    }));
-  };
-
-  // Helper function to handle temporary difficulty checkbox change
-  const handleTempDifficultyCheckboxChange = (
-    levelKey: keyof typeof tempFilters.level,
-    difficultyKey: keyof typeof tempFilters.level.beginner.difficulties,
-    checked: boolean
-  ) => {
-    setTempFilters((prev) => {
-      const newLevel = {
-        ...prev.level[levelKey],
-        difficulties: {
-          ...prev.level[levelKey].difficulties,
-          [difficultyKey]: checked,
-        },
-      };
-
-      // Update level selection state based on difficulty selections
-      const difficulties = Object.values(newLevel.difficulties);
-      const selectedCount = difficulties.filter(Boolean).length;
-
-      if (selectedCount === 0) {
-        newLevel.selected = false;
-      } else if (selectedCount === difficulties.length) {
-        newLevel.selected = true;
-      } else {
-        // Partial selection - keep current state or set to false if it was true
-        newLevel.selected = false;
-      }
-
-      return {
-        ...prev,
-        level: {
-          ...prev.level,
-          [levelKey]: newLevel,
-        },
-      };
-    });
-  };
-
-  // Helper function to check if any temporary filters are active
-  const hasActiveTempFilters = () => {
-    const tempSelectedFilters = getTempSelectedFilters();
-    return Object.keys(tempSelectedFilters).length > 0;
-  };
-
-  // Helper function to get temporary selected filter values
-  const getTempSelectedFilters = () => {
-    // Build status filter: comma-separated selected statuses
-    const selectedStatuses = Object.entries(tempFilters?.status)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([status, _]) => status);
-    const statusParam =
-      selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined;
-
-    // Build category filter: comma-separated selected categories
-    const selectedCategories = Object.entries(tempFilters?.category)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([category, _]) => category);
-    const categoryParam =
-      selectedCategories.length > 0 ? selectedCategories.join(",") : undefined;
-
-    // Build level-difficulty mapping with "level." prefix
-    const levelDifficultyMap: Record<string, string> = {};
-
-    Object.entries(tempFilters?.level).forEach(([level, levelData]) => {
-      const levelDifficulties = Object.entries(levelData.difficulties)
-        .filter(([_, isSelected]) => isSelected)
-        .map(([difficulty, _]) => difficulty);
-
-      // Only add to map if there are selected difficulties
-      if (levelDifficulties.length > 0) {
-        levelDifficultyMap[`level.${level}`] = levelDifficulties.join(",");
-      }
-    });
-
-    return {
-      ...levelDifficultyMap, // This spreads the level-difficulty pairs with prefix
-      ...(statusParam && { status: statusParam }),
-      ...(categoryParam && { category: categoryParam }),
-    };
   };
 
   // Helper function to check if any filters are active
   const hasActiveFilters = () => {
-    const selectedFilters = getSelectedFilters();
-    return Object.keys(selectedFilters).length > 0;
+    return Object.values(filters).some((filterArray) => filterArray.length > 0);
   };
 
   // Helper function to get count of active filters
   const getActiveFiltersCount = () => {
-    const selectedFilters = getSelectedFilters();
-    let count = 0;
-
-    // Count status filters
-    if (selectedFilters.status) {
-      count += selectedFilters.status.split(",").length;
-    }
-
-    // Count category filters
-    if (selectedFilters.category) {
-      count += selectedFilters.category.split(",").length;
-    }
-
-    // Count level-difficulty filters
-    Object.entries(selectedFilters).forEach(([key, value]) => {
-      if (key.startsWith("level.") && typeof value === "string") {
-        count += value.split(",").length;
-      }
-    });
-
-    return count;
-  };
-
-  // Helper function to get level selection state
-  const getLevelSelectionState = (levelKey: keyof typeof filters.level) => {
-    const level = filters.level[levelKey];
-    const difficulties = Object.values(level.difficulties);
-    const selectedCount = difficulties.filter(Boolean).length;
-
-    if (selectedCount === 0) return "none";
-    if (selectedCount === difficulties.length) return "all";
-    return "partial";
-  };
-
-  // Helper function to handle level checkbox change
-  const handleLevelCheckboxChange = (
-    levelKey: keyof typeof filters.level,
-    checked: boolean
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      level: {
-        ...prev.level,
-        [levelKey]: {
-          ...prev.level[levelKey],
-          selected: checked,
-          difficulties: checked
-            ? { easy: true, medium: true, hard: true }
-            : { easy: false, medium: false, hard: false },
-        },
-      },
-    }));
-  };
-
-  // Helper function to handle difficulty checkbox change
-  const handleDifficultyCheckboxChange = (
-    levelKey: keyof typeof filters.level,
-    difficultyKey: keyof typeof filters.level.beginner.difficulties,
-    checked: boolean
-  ) => {
-    setFilters((prev) => {
-      const newLevel = {
-        ...prev.level[levelKey],
-        difficulties: {
-          ...prev.level[levelKey].difficulties,
-          [difficultyKey]: checked,
-        },
-      };
-
-      // Update level selection state based on difficulty selections
-      const difficulties = Object.values(newLevel.difficulties);
-      const selectedCount = difficulties.filter(Boolean).length;
-
-      if (selectedCount === 0) {
-        newLevel.selected = false;
-      } else if (selectedCount === difficulties.length) {
-        newLevel.selected = true;
-      } else {
-        // Partial selection - keep current state or set to false if it was true
-        newLevel.selected = false;
-      }
-
-      return {
-        ...prev,
-        level: {
-          ...prev.level,
-          [levelKey]: newLevel,
-        },
-      };
-    });
+    return Object.values(filters).reduce(
+      (total, filterArray) => total + filterArray.length,
+      0
+    );
   };
 
   // Fetch writing topics from API
@@ -689,12 +447,9 @@ export function WritingInterface() {
               </h1>
             </div>
             <Button
-              onClick={() => {
-                initializeTempFilters();
-                setShowFilterDialog(true);
-              }}
+              onClick={() => setShowFilterDialog(true)}
               variant="outline"
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Filter className="h-4 w-4" />
               Filters
@@ -1237,452 +992,19 @@ export function WritingInterface() {
         </DialogContent>
       </Dialog>
 
-      {/* Filter Dialog */}
-      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
-        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
-          <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
-            <div className="relative z-10 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
-                <Filter className="h-4 w-4" />
-                Smart Filters
-              </div>
-              <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Filter Writing Prompts
-              </DialogTitle>
-              <DialogDescription className="text-white/90 text-sm mt-1">
-                Refine your writing practice with advanced filters
-              </DialogDescription>
-            </div>
-          </div>
-
-          <div className="p-6 bg-white max-h-[70vh] overflow-y-auto">
-            <div className="space-y-6">
-              {/* Status Filter */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  Status
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-xl hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={tempFilters?.status?.solved}
-                      onChange={(e) =>
-                        setTempFilters({
-                          ...tempFilters,
-                          status: {
-                            ...tempFilters?.status,
-                            solved: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Solved
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-xl hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={tempFilters?.status?.unsolved}
-                      onChange={(e) =>
-                        setTempFilters({
-                          ...tempFilters,
-                          status: {
-                            ...tempFilters?.status,
-                            unsolved: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">
-                        Unsolved
-                      </span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <PenTool className="h-4 w-4 text-purple-500" />
-                  Writing Categories
-                </h4>
-                <div className="space-y-3">
-                  {[
-                    {
-                      key: "article",
-                      label: "Article",
-                      color: "green",
-                      icon: "📰",
-                    },
-                    {
-                      key: "notice",
-                      label: "Notice",
-                      color: "purple",
-                      icon: "📋",
-                    },
-                    {
-                      key: "essay",
-                      label: "Essay",
-                      color: "orange",
-                      icon: "📝",
-                    },
-                    {
-                      key: "letter",
-                      label: "Letter",
-                      color: "blue",
-                      icon: "✉️",
-                    },
-                  ].map(({ key, label, color, icon }) => (
-                    <label
-                      key={key}
-                      className={`group flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:border-${color}-200 hover:bg-${color}-50`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={
-                          tempFilters?.category?.[
-                            key as keyof typeof tempFilters.category
-                          ]
-                        }
-                        onChange={(e) =>
-                          setTempFilters({
-                            ...tempFilters,
-                            category: {
-                              ...tempFilters?.category,
-                              [key]: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className={`w-4 h-4 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-2`}
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{icon}</span>
-                        <span
-                          className={`text-sm font-medium text-gray-700 group-hover:text-${color}-700`}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Level & Difficulty Filter */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  Skill Level & Difficulty
-                </h4>
-                <div className="space-y-3">
-                  {/* Beginner Level */}
-                  <div className="border border-green-200 rounded-xl p-4 bg-gradient-to-r from-green-50 to-green-25">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="group flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={tempFilters?.level?.beginner?.selected}
-                          ref={(input) => {
-                            if (input) {
-                              const state =
-                                getTempLevelSelectionState("beginner");
-                              input.indeterminate = state === "partial";
-                            }
-                          }}
-                          onChange={(e) =>
-                            handleTempLevelCheckboxChange(
-                              "beginner",
-                              e.target.checked
-                            )
-                          }
-                          className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                        />
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm font-semibold text-gray-700 group-hover:text-green-700">
-                            Beginner
-                          </span>
-                        </div>
-                      </label>
-                      <button
-                        onClick={() =>
-                          setLevelDifficultyExpanded((prev) => ({
-                            ...prev,
-                            beginner: !prev.beginner,
-                          }))
-                        }
-                        className="p-1 hover:bg-green-100 rounded-lg transition-colors"
-                      >
-                        <ChevronDown
-                          className={`h-3 w-3 transition-transform duration-200 ${
-                            levelDifficultyExpanded?.beginner
-                              ? "rotate-180"
-                              : ""
-                          }`}
-                        />
-                      </button>
-                    </div>
-                    {levelDifficultyExpanded?.beginner && (
-                      <div className="ml-6 space-y-2">
-                        {[
-                          { key: "easy", label: "Easy", color: "green" },
-                          { key: "medium", label: "Medium", color: "yellow" },
-                          { key: "hard", label: "Hard", color: "red" },
-                        ].map(({ key, label, color }) => (
-                          <label
-                            key={key}
-                            className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-green-100 transition-all duration-200 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                tempFilters?.level?.beginner?.difficulties?.[
-                                  key as keyof typeof tempFilters.level.beginner.difficulties
-                                ]
-                              }
-                              onChange={(e) =>
-                                handleTempDifficultyCheckboxChange(
-                                  "beginner",
-                                  key as keyof typeof tempFilters.level.beginner.difficulties,
-                                  e.target.checked
-                                )
-                              }
-                              className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
-                            />
-                            <span
-                              className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
-                            >
-                              {label}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Intermediate Level */}
-                  <div className="border border-yellow-200 rounded-xl p-4 bg-gradient-to-r from-yellow-50 to-yellow-25">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="group flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={tempFilters?.level?.intermediate?.selected}
-                          ref={(input) => {
-                            if (input) {
-                              const state =
-                                getTempLevelSelectionState("intermediate");
-                              input.indeterminate = state === "partial";
-                            }
-                          }}
-                          onChange={(e) =>
-                            handleTempLevelCheckboxChange(
-                              "intermediate",
-                              e.target.checked
-                            )
-                          }
-                          className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                        />
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                          <span className="text-sm font-semibold text-gray-700 group-hover:text-yellow-700">
-                            Intermediate
-                          </span>
-                        </div>
-                      </label>
-                      <button
-                        onClick={() =>
-                          setLevelDifficultyExpanded((prev) => ({
-                            ...prev,
-                            intermediate: !prev.intermediate,
-                          }))
-                        }
-                        className="p-1 hover:bg-yellow-100 rounded-lg transition-colors"
-                      >
-                        <ChevronDown
-                          className={`h-3 w-3 transition-transform duration-200 ${
-                            levelDifficultyExpanded?.intermediate
-                              ? "rotate-180"
-                              : ""
-                          }`}
-                        />
-                      </button>
-                    </div>
-                    {levelDifficultyExpanded?.intermediate && (
-                      <div className="ml-6 space-y-2">
-                        {[
-                          { key: "easy", label: "Easy", color: "green" },
-                          { key: "medium", label: "Medium", color: "yellow" },
-                          { key: "hard", label: "Hard", color: "red" },
-                        ].map(({ key, label, color }) => (
-                          <label
-                            key={key}
-                            className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-yellow-100 transition-all duration-200 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                tempFilters?.level?.intermediate
-                                  ?.difficulties?.[
-                                  key as keyof typeof tempFilters.level.intermediate.difficulties
-                                ]
-                              }
-                              onChange={(e) =>
-                                handleTempDifficultyCheckboxChange(
-                                  "intermediate",
-                                  key as keyof typeof tempFilters.level.intermediate.difficulties,
-                                  e.target.checked
-                                )
-                              }
-                              className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
-                            />
-                            <span
-                              className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
-                            >
-                              {label}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Advanced Level */}
-                  <div className="border border-red-200 rounded-xl p-4 bg-gradient-to-r from-red-50 to-red-25">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="group flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={tempFilters?.level?.advanced?.selected}
-                          ref={(input) => {
-                            if (input) {
-                              const state =
-                                getTempLevelSelectionState("advanced");
-                              input.indeterminate = state === "partial";
-                            }
-                          }}
-                          onChange={(e) =>
-                            handleTempLevelCheckboxChange(
-                              "advanced",
-                              e.target.checked
-                            )
-                          }
-                          className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                        />
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                          <span className="text-sm font-semibold text-gray-700 group-hover:text-red-700">
-                            Advanced
-                          </span>
-                        </div>
-                      </label>
-                      <button
-                        onClick={() =>
-                          setLevelDifficultyExpanded((prev) => ({
-                            ...prev,
-                            advanced: !prev.advanced,
-                          }))
-                        }
-                        className="p-1 hover:bg-red-100 rounded-lg transition-colors"
-                      >
-                        <ChevronDown
-                          className={`h-3 w-3 transition-transform duration-200 ${
-                            levelDifficultyExpanded?.advanced
-                              ? "rotate-180"
-                              : ""
-                          }`}
-                        />
-                      </button>
-                    </div>
-                    {levelDifficultyExpanded?.advanced && (
-                      <div className="ml-6 space-y-2">
-                        {[
-                          { key: "easy", label: "Easy", color: "green" },
-                          { key: "medium", label: "Medium", color: "yellow" },
-                          { key: "hard", label: "Hard", color: "red" },
-                        ].map(({ key, label, color }) => (
-                          <label
-                            key={key}
-                            className="group flex items-center space-x-3 p-2 rounded-lg hover:bg-red-100 transition-all duration-200 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                tempFilters?.level?.advanced?.difficulties?.[
-                                  key as keyof typeof tempFilters.level.advanced.difficulties
-                                ]
-                              }
-                              onChange={(e) =>
-                                handleTempDifficultyCheckboxChange(
-                                  "advanced",
-                                  key as keyof typeof tempFilters.level.advanced.difficulties,
-                                  e.target.checked
-                                )
-                              }
-                              className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
-                            />
-                            <span
-                              className={`text-xs font-medium text-gray-600 group-hover:text-${color}-700`}
-                            >
-                              {label}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Dialog Actions */}
-            <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-200">
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => {
-                  setShowFilterDialog(false);
-                  // Reset temp filters to current filters when canceling
-                  setTempFilters(filters);
-                }}
-              >
-                Cancel
-              </Button>
-
-              <div className="flex items-center gap-3">
-                {hasActiveTempFilters() && (
-                  <Button
-                    variant="outline"
-                    onClick={clearAllTempFilters}
-                    className="text-gray-600 hover:text-red-600 hover:bg-red-50 border-gray-200 hover:border-red-300"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-1" />
-                    Clear All
-                  </Button>
-                )}
-                <Button
-                  onClick={applyTempFilters}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-6"
-                >
-                  Apply Filters
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Reusable Filter Dialog */}
+      <FilterDialog
+        open={showFilterDialog}
+        onOpenChange={setShowFilterDialog}
+        title="Writing Filters"
+        description="Filter writing prompts by your preferences"
+        categories={filterCategories}
+        selectedFilters={filters}
+        onFiltersChange={setFilters}
+        onApply={() => setShowFilterDialog(false)}
+        onClearAll={clearAllFilters}
+        searchPlaceholder="Search filters..."
+      />
     </div>
   );
 }
