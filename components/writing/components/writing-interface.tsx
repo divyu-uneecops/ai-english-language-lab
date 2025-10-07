@@ -772,7 +772,7 @@ export function WritingInterface() {
                   writingPrompts?.map((prompt) => (
                     <Card
                       key={prompt?.topic_id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02] py-0"
+                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0"
                       onClick={() => handlePromptSelection(prompt)}
                     >
                       {/* Gradient overlay for visual appeal */}

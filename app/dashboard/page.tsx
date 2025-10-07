@@ -62,7 +62,7 @@ export default function EnglishLearningDashboard() {
       color: "pink",
       completed: 3,
       total: 8,
-      href: "#",
+      href: "/speaking",
     },
     {
       id: 3,
