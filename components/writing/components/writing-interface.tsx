@@ -31,7 +31,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { writingService } from "@/services/writingService";
-import { getDifficultyColor } from "@/lib/utils";
+import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import { PaginatedResponse, WritingPrompt } from "../types";
 import { writingTypeOptions } from "../constants";
 
@@ -117,43 +117,40 @@ export function WritingInterface() {
     advanced: false,
   });
 
-  // Helper function to extract selected filter values with smart query logic
+  // Helper function to extract selected filter values with explicit level-difficulty mapping
   const getSelectedFilters = () => {
-    const selectedStatus = Object.entries(filters?.status)
+    // Build status filter: comma-separated selected statuses
+    const selectedStatuses = Object.entries(filters?.status)
       .filter(([_, isSelected]) => isSelected)
       .map(([status, _]) => status);
+    const statusParam =
+      selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined;
 
-    // Smart logic: Extract levels and difficulties with optimization
-    const selectedLevels: string[] = [];
-    const selectedDifficulties: string[] = [];
-
-    Object.entries(filters?.level).forEach(([level, levelData]) => {
-      if (levelData.selected) {
-        const levelDifficulties = Object.entries(levelData.difficulties)
-          .filter(([_, isSelected]) => isSelected)
-          .map(([difficulty, _]) => difficulty);
-
-        // If all difficulties are selected for this level, only send the level
-        if (levelDifficulties.length === 3) {
-          selectedLevels.push(level);
-        } else {
-          // If not all difficulties are selected, send both level and specific difficulties
-          selectedLevels.push(level);
-          selectedDifficulties.push(...levelDifficulties);
-        }
-      }
-    });
-
+    // Build category filter: comma-separated selected categories
     const selectedCategories = Object.entries(filters?.category)
       .filter(([_, isSelected]) => isSelected)
       .map(([category, _]) => category);
+    const categoryParam =
+      selectedCategories.length > 0 ? selectedCategories.join(",") : undefined;
+
+    // Build level-difficulty mapping with "level." prefix
+    const levelDifficultyMap: Record<string, string> = {};
+
+    Object.entries(filters?.level).forEach(([level, levelData]) => {
+      const levelDifficulties = Object.entries(levelData.difficulties)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([difficulty, _]) => difficulty);
+
+      // Only add to map if there are selected difficulties
+      if (levelDifficulties.length > 0) {
+        levelDifficultyMap[`level.${level}`] = levelDifficulties.join(",");
+      }
+    });
 
     return {
-      level: selectedLevels?.length > 0 ? selectedLevels : undefined,
-      difficulty:
-        selectedDifficulties?.length > 0 ? selectedDifficulties : undefined,
-      status: selectedStatus?.length > 0 ? selectedStatus : undefined,
-      category: selectedCategories?.length > 0 ? selectedCategories : undefined,
+      ...levelDifficultyMap, // This spreads the level-difficulty pairs with prefix
+      ...(statusParam && { status: statusParam }),
+      ...(categoryParam && { category: categoryParam }),
     };
   };
 
@@ -201,8 +198,77 @@ export function WritingInterface() {
 
   // Helper function to check if any filters are active
   const hasActiveFilters = () => {
-    const { level, difficulty, status, category } = getSelectedFilters();
-    return !!(level || difficulty || status || category);
+    const selectedFilters = getSelectedFilters();
+    return Object.keys(selectedFilters).length > 0;
+  };
+
+  // Helper function to get level selection state
+  const getLevelSelectionState = (levelKey: keyof typeof filters.level) => {
+    const level = filters.level[levelKey];
+    const difficulties = Object.values(level.difficulties);
+    const selectedCount = difficulties.filter(Boolean).length;
+
+    if (selectedCount === 0) return "none";
+    if (selectedCount === difficulties.length) return "all";
+    return "partial";
+  };
+
+  // Helper function to handle level checkbox change
+  const handleLevelCheckboxChange = (
+    levelKey: keyof typeof filters.level,
+    checked: boolean
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      level: {
+        ...prev.level,
+        [levelKey]: {
+          ...prev.level[levelKey],
+          selected: checked,
+          difficulties: checked
+            ? { easy: true, medium: true, hard: true }
+            : { easy: false, medium: false, hard: false },
+        },
+      },
+    }));
+  };
+
+  // Helper function to handle difficulty checkbox change
+  const handleDifficultyCheckboxChange = (
+    levelKey: keyof typeof filters.level,
+    difficultyKey: keyof typeof filters.level.beginner.difficulties,
+    checked: boolean
+  ) => {
+    setFilters((prev) => {
+      const newLevel = {
+        ...prev.level[levelKey],
+        difficulties: {
+          ...prev.level[levelKey].difficulties,
+          [difficultyKey]: checked,
+        },
+      };
+
+      // Update level selection state based on difficulty selections
+      const difficulties = Object.values(newLevel.difficulties);
+      const selectedCount = difficulties.filter(Boolean).length;
+
+      if (selectedCount === 0) {
+        newLevel.selected = false;
+      } else if (selectedCount === difficulties.length) {
+        newLevel.selected = true;
+      } else {
+        // Partial selection - keep current state or set to false if it was true
+        newLevel.selected = false;
+      }
+
+      return {
+        ...prev,
+        level: {
+          ...prev.level,
+          [levelKey]: newLevel,
+        },
+      };
+    });
   };
 
   // Fetch writing topics from API
@@ -216,16 +282,15 @@ export function WritingInterface() {
           setError(null);
         }
 
-        const { level, difficulty, status, category } = getSelectedFilters();
+        const selectedFilters = getSelectedFilters();
 
         const params = {
           page: isLoadMore ? pagination?.currentPage + 1 : 1,
           page_size: pagination?.pageSize,
-          category: category,
-          level: level,
-          difficulty: difficulty,
-          status: status,
+          ...selectedFilters, // Spread all filters (level-difficulty, status, category)
         };
+
+        console.log("API Params:", params); // For debugging
 
         const paginatedData: PaginatedResponse =
           await writingService.fetchTopics(params);
@@ -282,15 +347,12 @@ export function WritingInterface() {
 
     try {
       setLoadingMore(true);
-      const { level, difficulty, category, status } = getSelectedFilters();
+      const selectedFilters = getSelectedFilters();
 
       const params = {
         page: pagination?.currentPage + 1,
         page_size: pagination?.pageSize,
-        category: category,
-        status: status,
-        level: level,
-        difficulty: difficulty,
+        ...selectedFilters, // Spread all filters
       };
 
       const paginatedData: PaginatedResponse = await writingService.fetchTopics(
@@ -594,17 +656,18 @@ export function WritingInterface() {
                           <input
                             type="checkbox"
                             checked={filters?.level?.beginner?.selected}
+                            ref={(input) => {
+                              if (input) {
+                                const state =
+                                  getLevelSelectionState("beginner");
+                                input.indeterminate = state === "partial";
+                              }
+                            }}
                             onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                level: {
-                                  ...filters?.level,
-                                  beginner: {
-                                    ...filters?.level?.beginner,
-                                    selected: e?.target?.checked,
-                                  },
-                                },
-                              })
+                              handleLevelCheckboxChange(
+                                "beginner",
+                                e.target.checked
+                              )
                             }
                             className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
                           />
@@ -652,20 +715,11 @@ export function WritingInterface() {
                                   ]
                                 }
                                 onChange={(e) =>
-                                  setFilters({
-                                    ...filters,
-                                    level: {
-                                      ...filters?.level,
-                                      beginner: {
-                                        ...filters?.level?.beginner,
-                                        difficulties: {
-                                          ...filters?.level?.beginner
-                                            ?.difficulties,
-                                          [key]: e?.target?.checked,
-                                        },
-                                      },
-                                    },
-                                  })
+                                  handleDifficultyCheckboxChange(
+                                    "beginner",
+                                    key as keyof typeof filters.level.beginner.difficulties,
+                                    e.target.checked
+                                  )
                                 }
                                 className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
                               />
@@ -687,17 +741,18 @@ export function WritingInterface() {
                           <input
                             type="checkbox"
                             checked={filters?.level?.intermediate?.selected}
+                            ref={(input) => {
+                              if (input) {
+                                const state =
+                                  getLevelSelectionState("intermediate");
+                                input.indeterminate = state === "partial";
+                              }
+                            }}
                             onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                level: {
-                                  ...filters?.level,
-                                  intermediate: {
-                                    ...filters?.level?.intermediate,
-                                    selected: e?.target?.checked,
-                                  },
-                                },
-                              })
+                              handleLevelCheckboxChange(
+                                "intermediate",
+                                e.target.checked
+                              )
                             }
                             className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
                           />
@@ -745,20 +800,11 @@ export function WritingInterface() {
                                   ]
                                 }
                                 onChange={(e) =>
-                                  setFilters({
-                                    ...filters,
-                                    level: {
-                                      ...filters?.level,
-                                      intermediate: {
-                                        ...filters?.level?.intermediate,
-                                        difficulties: {
-                                          ...filters?.level?.intermediate
-                                            ?.difficulties,
-                                          [key]: e?.target?.checked,
-                                        },
-                                      },
-                                    },
-                                  })
+                                  handleDifficultyCheckboxChange(
+                                    "intermediate",
+                                    key as keyof typeof filters.level.intermediate.difficulties,
+                                    e.target.checked
+                                  )
                                 }
                                 className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
                               />
@@ -780,17 +826,18 @@ export function WritingInterface() {
                           <input
                             type="checkbox"
                             checked={filters?.level?.advanced?.selected}
+                            ref={(input) => {
+                              if (input) {
+                                const state =
+                                  getLevelSelectionState("advanced");
+                                input.indeterminate = state === "partial";
+                              }
+                            }}
                             onChange={(e) =>
-                              setFilters({
-                                ...filters,
-                                level: {
-                                  ...filters?.level,
-                                  advanced: {
-                                    ...filters?.level?.advanced,
-                                    selected: e?.target?.checked,
-                                  },
-                                },
-                              })
+                              handleLevelCheckboxChange(
+                                "advanced",
+                                e.target.checked
+                              )
                             }
                             className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
                           />
@@ -838,20 +885,11 @@ export function WritingInterface() {
                                   ]
                                 }
                                 onChange={(e) =>
-                                  setFilters({
-                                    ...filters,
-                                    level: {
-                                      ...filters?.level,
-                                      advanced: {
-                                        ...filters?.level?.advanced,
-                                        difficulties: {
-                                          ...filters?.level?.advanced
-                                            ?.difficulties,
-                                          [key]: e?.target?.checked,
-                                        },
-                                      },
-                                    },
-                                  })
+                                  handleDifficultyCheckboxChange(
+                                    "advanced",
+                                    key as keyof typeof filters.level.advanced.difficulties,
+                                    e.target.checked
+                                  )
                                 }
                                 className={`w-3 h-3 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500 focus:ring-1`}
                               />
@@ -950,7 +988,16 @@ export function WritingInterface() {
                               <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
                                 <PenTool className="h-4 w-4 text-yellow-600" />
                               </div>
-                              <div className="flex items-center gap-2"></div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    prompt?.level
+                                  )} shadow-sm`}
+                                >
+                                  {prompt?.level}
+                                </Badge>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <Badge
                                   variant="outline"

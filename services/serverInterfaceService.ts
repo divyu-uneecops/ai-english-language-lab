@@ -1,12 +1,9 @@
 import api from "./api"; // import the axios instance we made
-import qs from "qs";
 
 class ServerInterfaceService {
   async get<T = any>(url: string, params?: Record<string, any>) {
     const { data } = await api.get<T>(url, {
       params,
-      paramsSerializer: (params) =>
-        qs.stringify(params, { arrayFormat: "repeat" }),
     });
     return data;
   }
