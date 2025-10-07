@@ -1,14 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
 
 export interface FilterOption {
@@ -32,27 +26,20 @@ export interface FilterCategory {
 export interface FilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
-  description?: string;
   categories: FilterCategory[];
   selectedFilters: Record<string, string[]>;
   onFiltersChange: (filters: Record<string, string[]>) => void;
   onApply: () => void;
-  onClearAll?: () => void;
-  searchPlaceholder?: string;
+
 }
 
 export function FilterDialog({
   open,
   onOpenChange,
-  title,
-  description,
   categories,
   selectedFilters,
   onFiltersChange,
   onApply,
-  onClearAll,
-  searchPlaceholder = "Search filters...",
 }: FilterDialogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>(
     categories[0]?.key || ""
@@ -61,16 +48,16 @@ export function FilterDialog({
   const [expandedOptions, setExpandedOptions] = useState<
     Record<string, boolean>
   >({});
+  const [tempFilters, setTempFilters] = useState<Record<string, string[]>>({});
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      !searchQuery ||
-      category.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.options.some((option) =>
-        option.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-  );
+  // Initialize temp filters when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTempFilters(selectedFilters);
+    }
+  }, [open, selectedFilters]);
+
+  const filteredCategories = categories;
 
   const currentCategory = categories.find(
     (cat) => cat.key === selectedCategory
@@ -80,7 +67,7 @@ export function FilterDialog({
   const hasSelectedChildren = (option: FilterOption): boolean => {
     if (!option.children) return false;
     return option.children.some((child) =>
-      (selectedFilters[currentCategory?.key || ""] || []).includes(child.key)
+      (tempFilters[currentCategory?.key || ""] || []).includes(child.key)
     );
   };
 
@@ -91,7 +78,7 @@ export function FilterDialog({
     if (!option.children) return "none";
 
     const selectedChildren = option.children.filter((child) =>
-      (selectedFilters[currentCategory?.key || ""] || []).includes(child.key)
+      (tempFilters[currentCategory?.key || ""] || []).includes(child.key)
     );
 
     if (selectedChildren.length === 0) return "none";
@@ -103,7 +90,7 @@ export function FilterDialog({
   const toggleAllChildren = (option: FilterOption, checked: boolean) => {
     if (!option.children) return;
 
-    const currentValues = selectedFilters[currentCategory?.key || ""] || [];
+    const currentValues = tempFilters[currentCategory?.key || ""] || [];
     let newValues: string[];
 
     if (checked) {
@@ -116,14 +103,14 @@ export function FilterDialog({
       newValues = currentValues.filter((value) => !childKeys.includes(value));
     }
 
-    onFiltersChange({
-      ...selectedFilters,
+    setTempFilters({
+      ...tempFilters,
       [currentCategory?.key || ""]: newValues,
     });
   };
 
   const handleOptionToggle = (categoryKey: string, optionKey: string) => {
-    const currentValues = selectedFilters[categoryKey] || [];
+    const currentValues = tempFilters[categoryKey] || [];
     const isSelected = currentValues.includes(optionKey);
 
     let newValues: string[];
@@ -137,14 +124,14 @@ export function FilterDialog({
       }
     }
 
-    onFiltersChange({
-      ...selectedFilters,
+    setTempFilters({
+      ...tempFilters,
       [categoryKey]: newValues,
     });
   };
 
   const getActiveFiltersCount = () => {
-    return Object.values(selectedFilters).reduce(
+    return Object.values(tempFilters).reduce(
       (total, values) => total + values.length,
       0
     );
@@ -159,8 +146,7 @@ export function FilterDialog({
     categories.forEach((category) => {
       clearedFilters[category.key] = [];
     });
-    onFiltersChange(clearedFilters);
-    onClearAll?.();
+    setTempFilters(clearedFilters);
   };
 
   return (
@@ -174,7 +160,7 @@ export function FilterDialog({
                 {filteredCategories.map((category) => {
                   const isSelected = selectedCategory === category.key;
                   const hasSelectedOptions =
-                    (selectedFilters[category.key] || []).length > 0;
+                    (tempFilters[category.key] || []).length > 0;
 
                   return (
                     <button
@@ -226,7 +212,7 @@ export function FilterDialog({
                 <div className="space-y-3">
                   {currentCategory.options.map((option) => {
                     const isSelected = (
-                      selectedFilters[currentCategory.key] || []
+                      tempFilters[currentCategory.key] || []
                     ).includes(option.key);
                     const hasChildren =
                       option.children && option.children.length > 0;
@@ -321,7 +307,7 @@ export function FilterDialog({
                           <div className="px-3 pb-3 space-y-1">
                             {option.children!.map((child) => {
                               const isChildSelected = (
-                                selectedFilters[currentCategory.key] || []
+                                tempFilters[currentCategory.key] || []
                               ).includes(child.key);
 
                               return (
@@ -392,7 +378,7 @@ export function FilterDialog({
             </Button>
 
             <div className="flex items-center gap-4">
-              {hasActiveFilters() && onClearAll && (
+              {hasActiveFilters() && (
                 <Button
                   variant="outline"
                   onClick={handleClearAll}
@@ -402,7 +388,10 @@ export function FilterDialog({
                 </Button>
               )}
               <Button
-                onClick={onApply}
+                onClick={() => {
+                  onFiltersChange(tempFilters);
+                  onApply();
+                }}
                 className="px-8 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 Apply Filters

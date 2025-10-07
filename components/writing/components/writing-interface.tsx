@@ -24,8 +24,6 @@ import {
   PenTool,
   Loader2,
   MessageCircle,
-  X,
-  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -49,36 +47,30 @@ export function WritingInterface() {
   const [selectedWritingType, setSelectedWritingType] = useState<string | null>(
     null
   );
-  const [topicContext, setTopicContext] = useState<string>("");
+  // const [topicContext, setTopicContext] = useState<string>("");
 
-  // Filter dialog state
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
-  // Filter categories configuration
   const filterCategories: FilterCategory[] = [
     {
       key: "status",
       label: "Progress Status",
-      description: "Filter by completion status",
       icon: <CheckCircle className="h-5 w-5" />,
       type: "checkbox",
       multiSelect: true,
       options: [
         {
           key: "solved",
-          label: "Completed",
-          description: "Writing exercises you've finished",
+          label: "Solved",
         },
         {
           key: "unsolved",
-          label: "Not Started",
-          description: "New writing challenges to explore",
+          label: "Unsolved",
         },
       ],
     },
     {
       key: "category",
       label: "Writing Types",
-      description: "Choose your preferred writing format",
       icon: <PenTool className="h-5 w-5" />,
       type: "checkbox",
       multiSelect: true,
@@ -86,29 +78,24 @@ export function WritingInterface() {
         {
           key: "article",
           label: "Article",
-          description: "Informative content",
         },
         {
           key: "notice",
           label: "Notice",
-          description: "Official announcements",
         },
         {
           key: "essay",
           label: "Essay",
-          description: "Structured arguments",
         },
         {
           key: "letter",
           label: "Letter",
-          description: "Personal communication",
         },
       ],
     },
     {
       key: "level",
       label: "Skill Level & Difficulty",
-      description: "Match your current writing abilities",
       icon: <Brain className="h-5 w-5" />,
       type: "checkbox",
       multiSelect: true,
@@ -116,77 +103,63 @@ export function WritingInterface() {
         {
           key: "beginner",
           label: "Beginner",
-          description: "Basic vocabulary & simple structures",
           icon: <Star className="h-4 w-4" />,
           children: [
             {
               key: "beginner.easy",
               label: "Easy",
-              description: "Simple prompts",
             },
             {
               key: "beginner.medium",
               label: "Medium",
-              description: "Moderate challenge",
             },
             {
               key: "beginner.hard",
               label: "Hard",
-              description: "Advanced beginner",
             },
           ],
         },
         {
           key: "intermediate",
           label: "Intermediate",
-          description: "Balanced challenge & creativity",
           icon: <Target className="h-4 w-4" />,
           children: [
             {
               key: "intermediate.easy",
               label: "Easy",
-              description: "Comfortable level",
             },
             {
               key: "intermediate.medium",
               label: "Medium",
-              description: "Good challenge",
             },
             {
               key: "intermediate.hard",
               label: "Hard",
-              description: "Push your limits",
             },
           ],
         },
         {
           key: "advanced",
           label: "Advanced",
-          description: "Complex topics & sophisticated writing",
           icon: <Trophy className="h-4 w-4" />,
           children: [
             {
               key: "advanced.easy",
               label: "Easy",
-              description: "Warm-up level",
             },
             {
               key: "advanced.medium",
               label: "Medium",
-              description: "Standard advanced",
             },
             {
               key: "advanced.hard",
               label: "Hard",
-              description: "Expert level",
             },
           ],
         },
       ],
     },
   ];
-
-  // Simplified filters state
   const [filters, setFilters] = useState<Record<string, string[]>>({
     status: [],
     category: [],
@@ -196,7 +169,6 @@ export function WritingInterface() {
   const [writingPrompts, setWritingPrompts] = useState<WritingPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 10,
@@ -242,15 +214,6 @@ export function WritingInterface() {
     return params;
   };
 
-  // Helper function to clear all filters
-  const clearAllFilters = () => {
-    setFilters({
-      status: [],
-      category: [],
-      level: [],
-    });
-  };
-
   // Helper function to check if any filters are active
   const hasActiveFilters = () => {
     return Object.values(filters).some((filterArray) => filterArray.length > 0);
@@ -282,8 +245,6 @@ export function WritingInterface() {
           page_size: pagination?.pageSize,
           ...selectedFilters, // Spread all filters (level-difficulty, status, category)
         };
-
-        console.log("API Params:", params); // For debugging
 
         const paginatedData: PaginatedResponse =
           await writingService.fetchTopics(params);
@@ -900,7 +861,7 @@ export function WritingInterface() {
               </div>
 
               {/* Topic Context Input */}
-              <div>
+              {/* <div>
                 <Label
                   htmlFor="topic-context"
                   className="text-sm font-semibold text-gray-900 mb-3 block"
@@ -955,7 +916,7 @@ export function WritingInterface() {
                     </>
                   )}
                 </p>
-              </div>
+              </div> */}
             </div>
 
             <div className="mt-6 flex items-center justify-between">
@@ -971,16 +932,15 @@ export function WritingInterface() {
                 onClick={() => {
                   if (
                     selectedWritingType &&
-                    selectedDifficulty &&
-                    topicContext.trim()
+                    selectedDifficulty
+                    // topicContext.trim()
                   ) {
                     applyDifficulty();
                   }
                 }}
                 disabled={
-                  !selectedWritingType ||
-                  !selectedDifficulty ||
-                  !topicContext.trim()
+                  !selectedWritingType || !selectedDifficulty
+                  // !topicContext.trim()
                 }
                 className="bg-orange-600 hover:bg-orange-700 text-white px-6"
               >
@@ -996,14 +956,10 @@ export function WritingInterface() {
       <FilterDialog
         open={showFilterDialog}
         onOpenChange={setShowFilterDialog}
-        title="Writing Filters"
-        description="Filter writing prompts by your preferences"
         categories={filterCategories}
         selectedFilters={filters}
         onFiltersChange={setFilters}
         onApply={() => setShowFilterDialog(false)}
-        onClearAll={clearAllFilters}
-        searchPlaceholder="Search filters..."
       />
     </div>
   );
