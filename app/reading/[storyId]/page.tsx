@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
-import LiveSpeechToText from "@/components/reading/components/LiveSpeechToText";
+import LiveSpeechToText from "@/components/shared/LiveSpeechToText";
 import AnalysisResults from "@/components/reading/components/AnalysisResults";
 import { getDifficultyColor, isEmpty } from "@/lib/utils";
 import Markdown from "@/components/shared/MarkDown";

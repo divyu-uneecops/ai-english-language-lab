@@ -2,215 +2,204 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
-  Mic,
-  MessageCircle,
-  CheckCircle,
-  Clock,
-} from "lucide-react";
-import Link from "next/link";
-import { PronunciationPractice } from "./pronunciation-practice";
-import { SpeakingExercise } from "./speaking-exercise";
-
-const exercises = [
-  {
-    id: 1,
-    title: "Basic Pronunciation",
-    difficulty: "Beginner",
-    duration: "10 min",
-    description: "Practice common English sounds and word pronunciation.",
-    type: "pronunciation" as const,
-    content: {
-      words: [
-        { word: "hello", phonetic: "/həˈloʊ/", audio: "hello.mp3" },
-        { word: "world", phonetic: "/wɜːrld/", audio: "world.mp3" },
-        { word: "beautiful", phonetic: "/ˈbjuːtɪfəl/", audio: "beautiful.mp3" },
-        {
-          word: "pronunciation",
-          phonetic: "/prəˌnʌnsiˈeɪʃən/",
-          audio: "pronunciation.mp3",
-        },
-        { word: "language", phonetic: "/ˈlæŋɡwɪdʒ/", audio: "language.mp3" },
-      ],
-    },
-  },
-  {
-    id: 2,
-    title: "Story Reading Aloud",
-    difficulty: "Intermediate",
-    duration: "15 min",
-    description:
-      "Read a short story aloud and practice fluency and expression.",
-    type: "reading" as const,
-    content: {
-      title: "The Morning Walk",
-      text: `Every morning, Sarah takes a peaceful walk through the neighborhood park. She enjoys listening to the birds singing in the tall oak trees and watching the sunrise paint the sky in beautiful colors.
-
-The fresh morning air fills her lungs as she walks along the winding path. Other early risers wave and smile as they pass by, creating a sense of community and connection.
-
-This daily routine helps Sarah start her day with a positive mindset and renewed energy for whatever challenges lie ahead.`,
-      focusPoints: [
-        "Clear pronunciation of each word",
-        "Natural pauses between sentences",
-        "Expressive tone that matches the content",
-        "Proper stress on important words",
-      ],
-    },
-  },
-  {
-    id: 3,
-    title: "Conversation Practice",
-    difficulty: "Advanced",
-    duration: "20 min",
-    description: "Practice natural conversation flow and responses.",
-    type: "conversation" as const,
-    content: {
-      scenarios: [
-        {
-          situation: "Introducing yourself at a job interview",
-          prompt:
-            "Tell me about yourself and why you're interested in this position.",
-          tips: [
-            "Speak clearly and confidently",
-            "Use professional language",
-            "Maintain good pace",
-          ],
-        },
-        {
-          situation: "Ordering food at a restaurant",
-          prompt:
-            "You're at a restaurant. Order your meal and ask about ingredients.",
-          tips: [
-            "Be polite and clear",
-            "Ask follow-up questions",
-            "Use appropriate intonation",
-          ],
-        },
-        {
-          situation: "Giving directions to a tourist",
-          prompt: "A tourist asks you for directions to the nearest museum.",
-          tips: [
-            "Speak slowly and clearly",
-            "Use simple, direct language",
-            "Be helpful and friendly",
-          ],
-        },
-      ],
-    },
-  },
-];
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Star, Target, Trophy, Mic } from "lucide-react";
+import { SpeakingTopicComponent } from "./speaking-topic-component";
 
 export function SpeakingInterface() {
-  const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
-  const [completedExercises, setCompletedExercises] = useState<number[]>([]);
+  const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
+  const [selectedLevel, setSelectedLevel] = useState<
+    "beginner" | "intermediate" | "advanced" | null
+  >(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<
+    "easy" | "medium" | "hard" | null
+  >(null);
+  const [showDifficultyDialog, setShowDifficultyDialog] =
+    useState<boolean>(false);
+  const [showTopicComponent, setShowTopicComponent] = useState<boolean>(false);
 
-  const currentExercise = selectedExercise
-    ? exercises.find((e) => e.id === selectedExercise)
-    : null;
-
-  const handleExerciseComplete = (exerciseId: number) => {
-    setCompletedExercises((prev) => [...prev, exerciseId]);
+  const applyLevel = (level: "beginner" | "intermediate" | "advanced") => {
+    setSelectedLevel(level);
+    setShowLevelDialog(false);
+    setShowDifficultyDialog(true);
   };
 
-  if (selectedExercise && currentExercise) {
-    return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div
-            onClick={() => {
-              setSelectedExercise(null);
-            }}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Exercises
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{currentExercise.difficulty}</Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {currentExercise.duration}
-            </Badge>
-          </div>
-        </div>
+  const applyDifficulty = (difficulty: "easy" | "medium" | "hard") => {
+    setSelectedDifficulty(difficulty);
+    setShowDifficultyDialog(false);
+    setShowTopicComponent(true);
+  };
 
-        <div>
-          <div>
-            {currentExercise.type === "pronunciation" ? (
-              <PronunciationPractice
-                exercise={currentExercise}
-                onComplete={() => handleExerciseComplete(currentExercise.id)}
-              />
-            ) : (
-              <SpeakingExercise
-                exercise={currentExercise}
-                onComplete={() => handleExerciseComplete(currentExercise.id)}
-              />
-            )}
-          </div>
-        </div>
-      </div>
+  const handleBackToSelection = () => {
+    setShowTopicComponent(false);
+    setSelectedLevel(null);
+    setSelectedDifficulty(null);
+    setShowLevelDialog(true);
+  };
+
+  // Show topic component if level and difficulty are selected
+  if (showTopicComponent && selectedLevel && selectedDifficulty) {
+    return (
+      <SpeakingTopicComponent
+        level={selectedLevel}
+        difficulty={selectedDifficulty}
+        onBack={handleBackToSelection}
+      />
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/">
-          <div className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      {/* Level Selection Dialog */}
+      <Dialog open={showLevelDialog} onOpenChange={() => {}}>
+        <DialogContent
+          className="sm:max-w-lg p-0 overflow-hidden rounded-2xl shadow-2xl border-0 [&>button]:hidden"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
+                <Mic className="h-4 w-4" />
+                Speaking Practice
+              </div>
+              <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
+                Choose Your Speaking Level
+              </DialogTitle>
+              <DialogDescription className="text-white/90 text-sm mt-1">
+                Pick a level to get a random topic at that difficulty
+              </DialogDescription>
+            </div>
           </div>
-        </Link>{" "}
-      </div>
+          <div className="p-6 bg-white">
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                onClick={() => applyLevel("beginner")}
+              >
+                <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                  <Star className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">Beginner</div>
+                  <div className="text-xs text-gray-600">
+                    Simple topics, basic vocabulary
+                  </div>
+                </div>
+              </button>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">
-          Choose a Speaking Exercise
-        </h2>
-        <p className="text-muted-foreground">
-          Select an exercise below to practice your speaking skills. You can
-          record yourself, get feedback, and ask our AI assistant for help.
-        </p>
-      </div>
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                onClick={() => applyLevel("intermediate")}
+              >
+                <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                  <Target className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">
+                    Intermediate
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Balanced topics with moderate complexity
+                  </div>
+                </div>
+              </button>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {exercises.map((exercise) => (
-          <Card
-            key={exercise.id}
-            className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-secondary/20"
-            onClick={() => setSelectedExercise(exercise.id)}
-          >
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{exercise.title}</CardTitle>
-                {completedExercises.includes(exercise.id) && (
-                  <CheckCircle className="h-5 w-5 text-secondary" />
-                )}
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                onClick={() => applyLevel("advanced")}
+              >
+                <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">Advanced</div>
+                  <div className="text-xs text-gray-600">
+                    Complex topics, sophisticated vocabulary
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Difficulty Selection Dialog */}
+      <Dialog open={showDifficultyDialog} onOpenChange={() => {}}>
+        <DialogContent
+          className="sm:max-w-lg p-0 overflow-hidden rounded-2xl shadow-2xl border-0 [&>button]:hidden"
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
+                <Target className="h-4 w-4" />
+                Difficulty Selection
               </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary">{exercise.difficulty}</Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {exercise.duration}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                {exercise.description}
-              </p>
-              <Button variant="secondary" className="w-full">
-                <Mic className="h-4 w-4 mr-2" />
-                Start Practice
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
+                Choose Difficulty Level
+              </DialogTitle>
+              <DialogDescription className="text-white/90 text-sm mt-1">
+                Select the difficulty for your {selectedLevel} speaking practice
+              </DialogDescription>
+            </div>
+          </div>
+          <div className="p-6 bg-white">
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                onClick={() => applyDifficulty("easy")}
+              >
+                <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                  <Star className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">Easy</div>
+                  <div className="text-xs text-gray-600">
+                    Simple vocabulary and straightforward topics
+                  </div>
+                </div>
+              </button>
+
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                onClick={() => applyDifficulty("medium")}
+              >
+                <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                  <Target className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">Medium</div>
+                  <div className="text-xs text-gray-600">
+                    Moderate complexity with some challenging aspects
+                  </div>
+                </div>
+              </button>
+
+              <button
+                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                onClick={() => applyDifficulty("hard")}
+              >
+                <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-900">Hard</div>
+                  <div className="text-xs text-gray-600">
+                    Complex vocabulary and advanced topics
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

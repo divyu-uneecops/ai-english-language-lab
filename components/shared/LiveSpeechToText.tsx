@@ -21,10 +21,18 @@ interface LiveSpeechToTextProps {
   onChunksUpdate?: (
     chunks: { text: string; startTime: number; endTime: number }[]
   ) => void;
+  placeholderText?: string;
+  listeningText?: string;
+  readyText?: string;
+  clickToStartText?: string;
 }
 
 export default function LiveSpeechToText({
   onChunksUpdate,
+  placeholderText = "Start reading the story aloud",
+  listeningText = "Listening...",
+  readyText = "Ready to practice",
+  clickToStartText = "Click the microphone to begin",
 }: LiveSpeechToTextProps) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
@@ -258,11 +266,9 @@ export default function LiveSpeechToText({
                   </div>
                   <div className="space-y-2">
                     <p className="text-gray-900 font-semibold text-lg">
-                      Listening...
+                      {listeningText}
                     </p>
-                    <p className="text-gray-500 text-sm">
-                      Start reading the story aloud
-                    </p>
+                    <p className="text-gray-500 text-sm">{placeholderText}</p>
                   </div>
                 </div>
               ) : (
@@ -277,10 +283,10 @@ export default function LiveSpeechToText({
                   </div>
                   <div className="space-y-2">
                     <p className="text-gray-900 font-semibold text-lg group-hover:text-blue-600 transition-colors">
-                      Ready to practice
+                      {readyText}
                     </p>
                     <p className="text-gray-500 text-sm group-hover:text-blue-500 transition-colors">
-                      Click the microphone to begin
+                      {clickToStartText}
                     </p>
                   </div>
                 </div>
