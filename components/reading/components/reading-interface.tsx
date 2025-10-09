@@ -16,7 +16,6 @@ import {
   CheckCircle,
   Clock,
   ChevronRight,
-  ChevronDown,
   Loader2,
   Star,
   Filter,
@@ -29,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { readingService } from "@/services/readingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import Markdown from "@/components/shared/MarkDown";
+import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
 
 // Internal Story interface
 interface Story {
@@ -62,21 +62,95 @@ export function ReadingInterface() {
   >(null);
   const [showDifficultyDialog, setShowDifficultyDialog] =
     useState<boolean>(false);
-  const [filters, setFilters] = useState({
-    status: {
-      solved: false,
-      unsolved: false,
+  const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
+  const filterCategories: FilterCategory[] = [
+    {
+      key: "status",
+      label: "Progress Status",
+      icon: <CheckCircle className="h-5 w-5" />,
+      type: "checkbox",
+      multiSelect: true,
+      options: [
+        {
+          key: "solved",
+          label: "Solved",
+        },
+        {
+          key: "unsolved",
+          label: "Unsolved",
+        },
+      ],
     },
-    level: {
-      beginner: false,
-      intermediate: false,
-      advanced: false,
+    {
+      key: "level",
+      label: "Skill Level & Difficulty",
+      icon: <Brain className="h-5 w-5" />,
+      type: "checkbox",
+      multiSelect: true,
+      options: [
+        {
+          key: "beginner",
+          label: "Beginner",
+          icon: <Star className="h-4 w-4" />,
+          children: [
+            {
+              key: "beginner.easy",
+              label: "Easy",
+            },
+            {
+              key: "beginner.medium",
+              label: "Medium",
+            },
+            {
+              key: "beginner.hard",
+              label: "Hard",
+            },
+          ],
+        },
+        {
+          key: "intermediate",
+          label: "Intermediate",
+          icon: <Target className="h-4 w-4" />,
+          children: [
+            {
+              key: "intermediate.easy",
+              label: "Easy",
+            },
+            {
+              key: "intermediate.medium",
+              label: "Medium",
+            },
+            {
+              key: "intermediate.hard",
+              label: "Hard",
+            },
+          ],
+        },
+        {
+          key: "advanced",
+          label: "Advanced",
+          icon: <Trophy className="h-4 w-4" />,
+          children: [
+            {
+              key: "advanced.easy",
+              label: "Easy",
+            },
+            {
+              key: "advanced.medium",
+              label: "Medium",
+            },
+            {
+              key: "advanced.hard",
+              label: "Hard",
+            },
+          ],
+        },
+      ],
     },
-    difficulty: {
-      easy: false,
-      medium: false,
-      hard: false,
-    },
+  ];
+  const [filters, setFilters] = useState<Record<string, string[]>>({
+    status: [],
+    level: [],
   });
 
   const [pagination, setPagination] = useState({
@@ -89,31 +163,47 @@ export function ReadingInterface() {
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Filter collapse/expand state
-  const [filterExpanded, setFilterExpanded] = useState({
-    status: true, // Status filter expanded by default
-    level: false, // Level filter collapsed by default
-    difficulty: false, // Difficulty filter collapsed by default
-  });
-
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
-    const selectedStatus = Object.entries(filters.status)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([status, _]) => status);
-    const selectedLevels = Object.entries(filters.level)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([level, _]) => level);
-    const selectedDifficulties = Object.entries(filters.difficulty)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([difficulty, _]) => difficulty);
+    const params: Record<string, string> = {};
 
-    return {
-      level: selectedLevels.length > 0 ? selectedLevels : undefined,
-      difficulty:
-        selectedDifficulties.length > 0 ? selectedDifficulties : undefined,
-      status: selectedStatus.length > 0 ? selectedStatus : undefined,
-    };
+    // Add status filter
+    if (filters.status.length > 0) {
+      params.status = filters.status.join(",");
+    }
+
+    // Add level-difficulty filter
+    if (filters.level.length > 0) {
+      const levelDifficultyMap: Record<string, string[]> = {};
+
+      filters.level.forEach((levelDiff) => {
+        const [level, difficulty] = levelDiff.split(".");
+        if (!levelDifficultyMap[`level.${level}`]) {
+          levelDifficultyMap[`level.${level}`] = [];
+        }
+        levelDifficultyMap[`level.${level}`].push(difficulty);
+      });
+
+      // Convert to comma-separated strings
+      Object.entries(levelDifficultyMap).forEach(([key, difficulties]) => {
+        params[key] = difficulties.join(",");
+      });
+    }
+
+    return params;
+  };
+
+  // Helper function to check if any filters are active
+  const hasActiveFilters = () => {
+    return Object.values(filters).some((filterArray) => filterArray.length > 0);
+  };
+
+  // Helper function to get count of active filters
+  const getActiveFiltersCount = () => {
+    return Object.values(filters).reduce(
+      (total, filterArray) => total + filterArray.length,
+      0
+    );
   };
 
   // Fetch stories from API
@@ -127,14 +217,12 @@ export function ReadingInterface() {
           setError(null);
         }
 
-        const { level, difficulty, status } = getSelectedFilters();
+        const selectedFilters = getSelectedFilters();
 
         const params = {
           page: isLoadMore ? pagination.currentPage + 1 : 1,
           page_size: pagination.pageSize,
-          level: level,
-          difficulty: difficulty,
-          status: status,
+          ...selectedFilters, // Spread all filters (level-difficulty, status)
         };
         const paginatedData: PaginatedResponse =
           await readingService.fetchStories(params);
@@ -187,13 +275,12 @@ export function ReadingInterface() {
 
     try {
       setLoadingMore(true);
-      const { level, difficulty } = getSelectedFilters();
+      const selectedFilters = getSelectedFilters();
 
       const params = {
         page: pagination.currentPage + 1,
         page_size: pagination.pageSize,
-        level: level,
-        difficulty: difficulty,
+        ...selectedFilters, // Spread all filters
       };
       const paginatedData: PaginatedResponse =
         await readingService.fetchStories(params);
@@ -268,474 +355,230 @@ export function ReadingInterface() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex gap-8">
-          {/* Left Section - User Progress Stats and Filters */}
-          <div className="w-80 space-y-6">
-            {/* Header Section */}
-            <div className="mb-8">
-              <div className="space-y-2 mb-6">
-                {/* Breadcrumb Navigation */}
-                <nav className="flex items-center space-x-2 text-sm text-gray-500">
-                  <Link
-                    href="/dashboard"
-                    className="hover:text-orange-600 transition-colors font-medium"
-                  >
-                    Dashboard
-                  </Link>
-                  <ChevronRight className="h-4 w-4" />
-                  <span className="text-gray-900 font-semibold">Reading</span>
-                </nav>
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2 mb-6">
+            {/* Breadcrumb Navigation */}
+            <nav className="flex items-center space-x-2 text-sm text-gray-500">
+              <Link
+                href="/dashboard"
+                className="hover:text-orange-600 transition-colors font-medium"
+              >
+                Dashboard
+              </Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className="text-gray-900 font-semibold">Reading</span>
+            </nav>
 
-                {/* Page Title */}
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Reading Practice
-                </h1>
+            {/* Page Title */}
+            <h1 className="text-2xl font-bold text-gray-900">
+              Reading Practice
+            </h1>
+          </div>
+          <Button
+            onClick={() => setShowFilterDialog(true)}
+            variant="outline"
+            className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+            {hasActiveFilters() && (
+              <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {getActiveFiltersCount()}
+              </Badge>
+            )}
+          </Button>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="space-y-6">
+          {/* Loading State - Enhanced */}
+          {loading && (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Loading stories...
+                </h3>
+                <p className="text-gray-600">
+                  Please wait while we fetch the content
+                </p>
               </div>
             </div>
-            {/* Enhanced Filters */}
-            <Card className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
-                  <Filter className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Filters</h3>
-              </div>
+          )}
 
-              {/* Status Filter */}
-              <div>
-                <h4 className="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  STATUS
-                </h4>
-                <div className="space-y-3">
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                    <input
-                      type="checkbox"
-                      checked={filters?.status?.solved}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          status: {
-                            ...filters?.status,
-                            solved: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                        Solved
-                      </span>
-                    </div>
-                  </label>
-                  <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-orange-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-orange-200">
-                    <input
-                      type="checkbox"
-                      checked={filters?.status?.unsolved}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          status: {
-                            ...filters?.status,
-                            unsolved: e?.target?.checked,
-                          },
-                        })
-                      }
-                      className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
-                    />
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 group-hover:text-orange-700">
-                        Unsolved
-                      </span>
-                    </div>
-                  </label>
+          {/* Error State - Enhanced */}
+          {error && (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
+                <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <MessageCircle className="h-8 w-8 text-red-500" />
                 </div>
-              </div>
-
-              {/* Level Filter */}
-              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Unable to load stories
+                </h3>
+                <p className="text-gray-600 mb-6">{error}</p>
                 <button
-                  onClick={() =>
-                    setFilterExpanded((prev) => ({
-                      ...prev,
-                      level: !prev.level,
-                    }))
-                  }
-                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-blue-600 transition-colors"
+                  onClick={() => window?.location?.reload()}
+                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  <div className="flex items-center gap-2">
-                    <Brain className="h-4 w-4 text-blue-500" />
-                    LEVEL
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded.level ? "rotate-180" : ""
-                    }`}
-                  />
+                  Try Again
                 </button>
-                {filterExpanded.level && (
-                  <div className="space-y-3">
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.level?.beginner}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              beginner: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          Beginner
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                      <input
-                        type="checkbox"
-                        checked={filters.level.intermediate}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              intermediate: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                          Intermediate
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.level?.advanced}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            level: {
-                              ...filters?.level,
-                              advanced: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                          Advanced
-                        </span>
-                      </div>
-                    </label>
-                  </div>
-                )}
               </div>
+            </div>
+          )}
 
-              {/* Difficulty Filter */}
-              <div>
-                <button
-                  onClick={() =>
-                    setFilterExpanded((prev) => ({
-                      ...prev,
-                      difficulty: !prev.difficulty,
-                    }))
-                  }
-                  className="w-full text-left text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide flex items-center justify-between hover:text-red-600 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4 text-red-500" />
-                    DIFFICULTY
-                  </div>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      filterExpanded.difficulty ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {filterExpanded.difficulty && (
-                  <div className="space-y-3">
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-green-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-green-200">
-                      <input
-                        type="checkbox"
-                        checked={filters.difficulty.easy}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              easy: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700">
-                          Easy
-                        </span>
+          {/* Stories List - Similar to coding challenges */}
+          {!loading && !error && (
+            <div
+              ref={scrollContainerRef}
+              className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2"
+            >
+              <div className="space-y-4">
+                {stories?.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+                      <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                        <BookOpen className="h-8 w-8 text-gray-500" />
                       </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-yellow-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-yellow-200">
-                      <input
-                        type="checkbox"
-                        checked={filters.difficulty.medium}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              medium: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-yellow-700">
-                          Medium
-                        </span>
-                      </div>
-                    </label>
-                    <label className="group flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 transition-all duration-200 cursor-pointer border border-transparent hover:border-red-200">
-                      <input
-                        type="checkbox"
-                        checked={filters?.difficulty?.hard}
-                        onChange={(e) =>
-                          setFilters({
-                            ...filters,
-                            difficulty: {
-                              ...filters?.difficulty,
-                              hard: e?.target?.checked,
-                            },
-                          })
-                        }
-                        className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-red-700">
-                          Hard
-                        </span>
-                      </div>
-                    </label>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        No stories available
+                      </h3>
+                      <p className="text-gray-600">
+                        Check back later for new reading materials
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-            </Card>
-          </div>
+                ) : (
+                  stories.map((story) => (
+                    <Card
+                      key={story?.passage_id}
+                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
+                      onClick={() =>
+                        router.push(`/reading/${story?.passage_id}`)
+                      }
+                    >
+                      {/* Gradient overlay for visual appeal */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-          {/* Right Section - Header and Story Cards */}
-          <div className="flex-1">
-            {/* Main Content Area */}
-            {/* Loading State - Enhanced */}
-            {loading && (
-              <div className="flex items-center justify-center py-16">
-                <div className="text-center bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-                  <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Loading stories...
-                  </h3>
-                  <p className="text-gray-600">
-                    Please wait while we fetch the content
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Error State - Enhanced */}
-            {error && (
-              <div className="text-center py-16">
-                <div className="max-w-md mx-auto bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20">
-                  <div className="p-4 bg-gradient-to-r from-red-100 to-pink-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <MessageCircle className="h-8 w-8 text-red-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Unable to load stories
-                  </h3>
-                  <p className="text-gray-600 mb-6">{error}</p>
-                  <button
-                    onClick={() => window?.location?.reload()}
-                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Stories List - Similar to coding challenges */}
-            {!loading && !error && (
-              <div
-                ref={scrollContainerRef}
-                className="h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pr-2 mt-10"
-              >
-                <div className="space-y-4">
-                  {stories?.length === 0 ? (
-                    <div className="text-center py-16">
-                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
-                        <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                          <BookOpen className="h-8 w-8 text-gray-500" />
+                      <div className="relative p-6">
+                        {/* Header with star and badges */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                              <Star className="h-4 w-4 text-yellow-600" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                  story?.level
+                                )} shadow-sm`}
+                              >
+                                {story?.level}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                  story?.difficulty
+                                )} shadow-sm`}
+                              >
+                                {story?.difficulty}
+                              </Badge>
+                            </div>
+                          </div>
+                          {/* Solved status badge - moved to right side */}
+                          {story?.solved && (
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
+                              >
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Solved
+                              </Badge>
+                            </div>
+                          )}
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          No stories available
+
+                        {/* Story title */}
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                          {story?.title}
                         </h3>
-                        <p className="text-gray-600">
-                          Check back later for new reading materials
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    stories.map((story) => (
-                      <Card
-                        key={story?.passage_id}
-                        className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 hover:scale-[1.02]"
-                        onClick={() =>
-                          router.push(`/reading/${story?.passage_id}`)
-                        }
-                      >
-                        {/* Gradient overlay for visual appeal */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                        <div className="relative p-6">
-                          {/* Header with star and badges */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                                <Star className="h-4 w-4 text-yellow-600" />
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                    story?.level
-                                  )} shadow-sm`}
-                                >
-                                  {story?.level}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                    story?.difficulty
-                                  )} shadow-sm`}
-                                >
-                                  {story?.difficulty}
-                                </Badge>
-                              </div>
+                        <Markdown
+                          passage={story?.passage}
+                          className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed"
+                        />
+
+                        {/* Stats and metadata */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                              <Trophy className="h-3 w-3 text-yellow-500" />
+                              <span className="font-medium">Max Score: 10</span>
                             </div>
-                            {/* Solved status badge - moved to right side */}
-                            {story?.solved && (
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
-                                >
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Solved
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
 
-                          {/* Story title */}
-                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                            {story?.title}
-                          </h3>
-
-                          <Markdown
-                            passage={story?.passage}
-                            className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed"
-                          />
-
-                          {/* Stats and metadata */}
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                                <Trophy className="h-3 w-3 text-yellow-500" />
-                                <span className="font-medium">
-                                  Max Score: 10
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                                <Clock className="h-3 w-3 text-orange-500" />
-                                <span className="font-medium">
-                                  {story?.readTime || "5 Min"}
-                                </span>
-                              </div>
+                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                              <Clock className="h-3 w-3 text-orange-500" />
+                              <span className="font-medium">
+                                {story?.readTime || "5 Min"}
+                              </span>
                             </div>
-                          </div>
-
-                          {/* Action button */}
-                          <div className="flex justify-end">
-                            <Button
-                              size="sm"
-                              className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
-                                story?.solved
-                                  ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                              }`}
-                            >
-                              {story?.solved ? "Read Again" : "Start Reading"}
-                              <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
                           </div>
                         </div>
-                      </Card>
-                    ))
-                  )}
 
-                  {/* Infinite Scroll Loading Indicator */}
-                  {loadingMore && (
-                    <div className="mt-4 flex items-center justify-center">
-                      <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
-                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                        {/* Action button */}
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
+                              story?.solved
+                                ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                            }`}
+                          >
+                            {story?.solved ? "Read Again" : "Start Reading"}
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
+
+                {/* Infinite Scroll Loading Indicator */}
+                {loadingMore && (
+                  <div className="mt-4 flex items-center justify-center">
+                    <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                      <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Loading more stories...
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* End of results indicator */}
+                {!loading && !error && !hasMore && stories.length > 0 && (
+                  <div className="mt-4 flex items-center justify-center">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
                         <span className="text-sm font-medium text-gray-700">
-                          Loading more stories...
+                          You've reached the end! No more stories to load.
                         </span>
                       </div>
                     </div>
-                  )}
-
-                  {/* End of results indicator */}
-                  {!loading && !error && !hasMore && stories.length > 0 && (
-                    <div className="mt-4 flex items-center justify-center">
-                      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/20">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-gray-700">
-                            You've reached the end! No more stories to load.
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -918,6 +761,16 @@ export function ReadingInterface() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Reusable Filter Dialog */}
+      <FilterDialog
+        open={showFilterDialog}
+        onOpenChange={setShowFilterDialog}
+        categories={filterCategories}
+        selectedFilters={filters}
+        onFiltersChange={setFilters}
+        onApply={() => setShowFilterDialog(false)}
+      />
     </div>
   );
 }
