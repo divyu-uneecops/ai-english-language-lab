@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   ArrowLeft,
   XCircle,
@@ -311,10 +312,12 @@ export default function StoryPage() {
     setSpeechChunks([]);
   };
 
-  const handlePracticeMore = () => {
-    setShowAnalysisResults(false);
+  const handleCloseAnalysis = () => {
     router.push("/reading");
-    // You can implement navigation logic here
+  };
+
+  const handleRetryReading = () => {
+    setShowAnalysisResults(false);
   };
 
   if (loading) {
@@ -522,20 +525,20 @@ export default function StoryPage() {
         </div>
       </div>
 
-      {/* Analysis Results Modal Overlay */}
-      {showAnalysisResults && analysisResult && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
+      {/* Analysis Results Dialog */}
+      <Dialog open={showAnalysisResults} onOpenChange={setShowAnalysisResults}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+          <div className="overflow-y-auto max-h-[90vh]">
+            {analysisResult && (
               <AnalysisResults
                 result={analysisResult}
-                onRetry={handleRetryAnalysis}
-                onPracticeMore={handlePracticeMore}
+                onClose={handleCloseAnalysis}
+                onRetry={handleRetryReading}
               />
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Analysis Error Modal */}
       {analysisError && (

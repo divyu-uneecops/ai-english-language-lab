@@ -25,8 +25,8 @@ import { AnalysisResultsProps } from "../interfaces";
 
 export default function AnalysisResults({
   result,
+  onClose,
   onRetry,
-  onPracticeMore,
 }: AnalysisResultsProps) {
   const [activeTab, setActiveTab] = useState("accuracy");
 
@@ -276,11 +276,11 @@ export default function AnalysisResults({
             Try Again
           </Button>
           <Button
-            onClick={onPracticeMore}
+            onClick={onClose}
             className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg hover:scale-105"
           >
             <BookOpenCheck className="h-4 w-4 mr-2" />
-            Practice More
+            Continue Learning
           </Button>
         </div>
       </div>

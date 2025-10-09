@@ -34,7 +34,6 @@ interface SpeakingEvaluationResultsProps {
     };
     detailed_feedback: string;
     example_response: string;
-    transcription?: string;
   };
   onClose: () => void;
   onRevise: () => void;
@@ -56,14 +55,14 @@ export function SpeakingEvaluationResults({
 
   const renderFeedbackItems = (feedbackItems: string[]) => {
     return (
-      <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+      <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 scrollbar-track-transparent">
         {feedbackItems?.map((item, index) => (
           <div
             key={index}
             className="flex items-start gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
           >
-            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full flex items-center justify-center mt-0.5">
-              <span className="text-xs font-bold text-blue-700">
+            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center mt-0.5">
+              <span className="text-xs font-bold text-orange-700">
                 {index + 1}
               </span>
             </div>
@@ -78,16 +77,16 @@ export function SpeakingEvaluationResults({
   const displayScore = Math.round(evaluation?.overall_score);
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden">
+    <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 overflow-hidden">
       <div className="h-full max-w-6xl mx-auto px-4 py-4 flex flex-col">
         {/* Ultra-Compact Header */}
         <Card className="relative overflow-hidden glass-card border-0 shadow-lg mb-3 flex-shrink-0">
           <div className="relative p-4">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center justify-between">
               {/* Left: Title and Overall Score */}
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg">
-                  <Mic className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
+                  <Mic className="h-5 w-5 text-orange-600" />
                 </div>
                 <div>
                   <h1 className="text-lg font-bold text-gray-900">
@@ -114,8 +113,8 @@ export function SpeakingEvaluationResults({
 
               {/* Right: Individual Scores */}
               <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                  <Volume2 className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                  <Volume2 className="h-4 w-4 text-orange-600" />
                   <div>
                     <p className="text-xs text-gray-600">Fluency</p>
                     <p
@@ -127,8 +126,8 @@ export function SpeakingEvaluationResults({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                  <Mic className="h-4 w-4 text-purple-600" />
+                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                  <Mic className="h-4 w-4 text-orange-600" />
                   <div>
                     <p className="text-xs text-gray-600">Pronunciation</p>
                     <p
@@ -140,8 +139,8 @@ export function SpeakingEvaluationResults({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-                  <Target className="h-4 w-4 text-green-600" />
+                <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                  <Target className="h-4 w-4 text-orange-600" />
                   <div>
                     <p className="text-xs text-gray-600">Relevance</p>
                     <p
@@ -164,8 +163,8 @@ export function SpeakingEvaluationResults({
           <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
             <div className="p-4 flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-1.5 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg">
-                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                <div className="p-1.5 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
+                  <MessageSquare className="h-4 w-4 text-orange-600" />
                 </div>
                 <h2 className="text-base font-bold text-gray-900">
                   Detailed Analysis
@@ -187,8 +186,8 @@ export function SpeakingEvaluationResults({
           <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
             <div className="p-4 flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-1.5 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg">
-                  <Star className="h-4 w-4 text-blue-600" />
+                <div className="p-1.5 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
+                  <Star className="h-4 w-4 text-orange-600" />
                 </div>
                 <h2 className="text-base font-bold text-gray-900">
                   Personalized Feedback
@@ -206,7 +205,9 @@ export function SpeakingEvaluationResults({
                     className="text-xs font-medium capitalize py-2"
                   >
                     <div className="flex items-center gap-1">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div className="p-0.5 rounded from-green-100 to-green-200 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                      </div>
                       <span className="hidden sm:inline">Strengths</span>
                     </div>
                   </TabsTrigger>
@@ -215,7 +216,9 @@ export function SpeakingEvaluationResults({
                     className="text-xs font-medium capitalize py-2"
                   >
                     <div className="flex items-center gap-1">
-                      <TrendingUp className="h-4 w-4 text-blue-600" />
+                      <div className="p-0.5 rounded from-blue-100 to-blue-200 text-blue-600">
+                        <TrendingUp className="h-4 w-4" />
+                      </div>
                       <span className="hidden sm:inline">Improvements</span>
                     </div>
                   </TabsTrigger>
@@ -224,7 +227,9 @@ export function SpeakingEvaluationResults({
                     className="text-xs font-medium capitalize py-2"
                   >
                     <div className="flex items-center gap-1">
-                      <FileText className="h-4 w-4 text-purple-600" />
+                      <div className="p-0.5 rounded from-purple-100 to-purple-200 text-purple-600">
+                        <FileText className="h-4 w-4" />
+                      </div>
                       <span className="hidden sm:inline">Example</span>
                     </div>
                   </TabsTrigger>
@@ -268,7 +273,7 @@ export function SpeakingEvaluationResults({
                   <TabsContent value="example" className="mt-0 h-full">
                     <div className="h-full flex flex-col overflow-hidden">
                       <div className="flex-1 min-h-0 overflow-y-auto">
-                        <div className="bg-gradient-to-br from-purple-50/50 to-purple-100/30 backdrop-blur-sm p-4 rounded-lg border border-purple-200/50">
+                        <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
                           <h4 className="text-sm font-semibold text-gray-900 mb-2">
                             Example Response
                           </h4>
@@ -277,17 +282,6 @@ export function SpeakingEvaluationResults({
                               "No example available."}
                           </p>
                         </div>
-
-                        {evaluation?.transcription && (
-                          <div className="mt-4 bg-gradient-to-br from-blue-50/50 to-blue-100/30 backdrop-blur-sm p-4 rounded-lg border border-blue-200/50">
-                            <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                              Your Transcription
-                            </h4>
-                            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                              {evaluation.transcription}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </TabsContent>
@@ -302,14 +296,14 @@ export function SpeakingEvaluationResults({
           <Button
             onClick={onRevise}
             variant="outline"
-            className="flex-1 h-10 text-sm font-semibold border-2 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all duration-300 rounded-lg shadow-lg hover:shadow-xl"
+            className="flex-1 h-10 text-sm font-semibold border-2 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-all duration-300 rounded-lg shadow-lg hover:shadow-xl"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Practice Again
           </Button>
           <Button
             onClick={onClose}
-            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg hover:scale-105"
+            className="flex-1 h-10 text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 rounded-lg hover:scale-105"
           >
             <BookOpenCheck className="h-4 w-4 mr-2" />
             Continue Learning

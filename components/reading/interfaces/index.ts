@@ -20,6 +20,6 @@ export interface AnalysisResult {
 
 export interface AnalysisResultsProps {
   result: AnalysisResult | null;
+  onClose: () => void;
   onRetry: () => void;
-  onPracticeMore: () => void;
 }

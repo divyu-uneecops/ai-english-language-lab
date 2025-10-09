@@ -84,7 +84,7 @@ export function SpeakingTopicComponent({
                 Speaking
               </span>
               <span>/</span>
-              <span className="text-gray-900 font-medium">{topic.title}</span>
+              <span className="text-gray-900 font-medium">{topic?.title}</span>
             </nav>
           </div>
           <div className="flex items-center space-x-3">
