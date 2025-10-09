@@ -16,14 +16,20 @@ export interface SpeakingTopic {
   difficulty: string;
   level: string;
   solved: boolean;
-  evaluation_data?: {
-    your_answer: string;
-    score: number;
-    feedback: {
-      strengths: string[];
-      areas_for_improvement: string[];
-    };
+  evaluation_data?: SpeakingEvaluationData;
+}
+
+export interface SpeakingEvaluationData {
+  fluency_score: number;
+  pronunciation_score: number;
+  content_relevance_score: number;
+  overall_score: number;
+  feedback: {
+    strengths: string[];
+    areas_for_improvement: string[];
   };
+  detailed_feedback: string;
+  example_response: string;
 }
 
 export interface SpeakingTopicComponentProps {

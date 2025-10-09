@@ -10,7 +10,10 @@ export const speakingService = {
     serverInterfaceService.get(`/speaking/topics/${topicId}`),
 
   // Submit speech for evaluation (if applicable in the future)
-  submitForEvaluation: async (transcription: string, topicId: string) =>
+  submitForEvaluation: async (
+    transcription: Array<{ text: string; startTime: number; endTime: number }>,
+    topicId: string
+  ) =>
     serverInterfaceService.post("/speaking/verify", {
       transcription,
       topic_id: topicId,

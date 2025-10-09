@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Mic } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Mic, Loader2, Sparkles } from "lucide-react";
 import LiveSpeechToText from "@/components/shared/LiveSpeechToText";
-import { getDifficultyColor, getLevelColor } from "@/lib/utils";
-import { SpeakingTopicComponentProps } from "../types/index";
+import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
+import {
+  SpeakingTopicComponentProps,
+  SpeakingEvaluationData,
+} from "../types/index";
+import { speakingService } from "@/services/speakingService";
+import { SpeakingEvaluationResults } from "./evaluation-results";
 
 export function SpeakingTopicComponent({
   topic,
@@ -14,6 +21,54 @@ export function SpeakingTopicComponent({
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState<SpeakingEvaluationData | null>(
+    null
+  );
+  const [showEvaluation, setShowEvaluation] = useState(false);
+
+  useEffect(() => {
+    if (!isEmpty(topic)) {
+      if (topic?.solved && topic?.evaluation_data) {
+        setShowEvaluation(true);
+        setEvaluation(topic?.evaluation_data);
+      }
+    }
+  }, [topic]);
+
+  const handleSubmitForEvaluation = async () => {
+    if (speechChunks?.length === 0) {
+      alert("Please speak something before submitting for evaluation");
+      return;
+    }
+
+    setIsEvaluating(true);
+
+    try {
+      const evaluationData = await speakingService.submitForEvaluation(
+        speechChunks,
+        topic?.topic_id
+      );
+      // Add transcription to evaluation data
+      setEvaluation(evaluationData);
+      setShowEvaluation(true);
+    } catch (error) {
+      alert(
+        "An error occurred while evaluating your speech. Please try again."
+      );
+    } finally {
+      setIsEvaluating(false);
+    }
+  };
+
+  const handleCloseEvaluation = () => {
+    onBack();
+  };
+
+  const handlePracticeAgain = () => {
+    setShowEvaluation(false);
+    setSpeechChunks([]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -58,7 +113,7 @@ export function SpeakingTopicComponent({
         {/* Left Panel - Topic & Tips */}
         <div className="flex-1 bg-white border-r border-gray-200 flex flex-col">
           {/* Left Panel Header */}
-          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+          <div className="bg-gray-50 border-b border-gray-200 px-6 h-16 flex items-center">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
@@ -107,29 +162,63 @@ export function SpeakingTopicComponent({
         {/* Right Panel - Speech Practice */}
         <div className="w-1/2 bg-white flex flex-col">
           {/* Right Panel Header */}
-          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-1 h-6 bg-green-500 rounded-full"></div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Live Speech Recognition
-                </h2>
-              </div>
+          <div className="bg-gray-50 border-b border-gray-200 px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Live Speech Recognition
+              </h2>
             </div>
+
+            <Button
+              size="sm"
+              onClick={handleSubmitForEvaluation}
+              disabled={isEvaluating || speechChunks.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+            >
+              {isEvaluating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Evaluating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Get AI Feedback
+                </>
+              )}
+            </Button>
           </div>
 
           {/* Speech Practice Content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <LiveSpeechToText
-              onChunksUpdate={setSpeechChunks}
-              placeholderText="Start speaking about your topic"
-              listeningText="Listening to your speech..."
-              readyText="Ready to speak"
-              clickToStartText="Click the microphone to start speaking"
-            />
+          <div className="flex-1 overflow-hidden flex flex-col p-6 space-y-4">
+            <div className="flex-1 overflow-hidden">
+              <LiveSpeechToText
+                onChunksUpdate={setSpeechChunks}
+                placeholderText="Start speaking about your topic"
+                listeningText="Listening to your speech..."
+                readyText="Ready to speak"
+                clickToStartText="Click the microphone to start speaking"
+              />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Evaluation Results Dialog */}
+      <Dialog open={showEvaluation} onOpenChange={setShowEvaluation}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+          <div className="overflow-y-auto max-h-[90vh]">
+            {evaluation && (
+              <SpeakingEvaluationResults
+                evaluation={evaluation}
+                onClose={handleCloseEvaluation}
+                onRevise={handlePracticeAgain}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
