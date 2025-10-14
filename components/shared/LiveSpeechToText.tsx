@@ -123,8 +123,6 @@ export default function LiveSpeechToText({
       });
 
       socket.on("message", (message: any) => {
-        console.log("Received message:", message);
-
         // Handle the Sarvam API response format
         if (message.data && typeof message.data === "object") {
           const response: SarvamResponse = message.data;
@@ -164,17 +162,17 @@ export default function LiveSpeechToText({
 
   const stopListening = () => {
     // Clean up audio processing
-    if (scriptProcessorRef.current) {
-      scriptProcessorRef.current.disconnect();
+    if (scriptProcessorRef?.current) {
+      scriptProcessorRef?.current?.disconnect();
       scriptProcessorRef.current = null;
     }
 
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
+    if (audioContextRef?.current) {
+      audioContextRef?.current?.close();
       audioContextRef.current = null;
     }
 
-    if (streamRef.current) {
+    if (streamRef?.current) {
       streamRef.current
         .getTracks()
         .forEach((track: MediaStreamTrack) => track.stop());
@@ -182,7 +180,7 @@ export default function LiveSpeechToText({
     }
 
     if (wsRef.current) {
-      wsRef.current.close();
+      wsRef?.current?.close();
     }
 
     setListening(false);
