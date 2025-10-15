@@ -32,15 +32,14 @@ import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
 
 export function SpeakingInterface() {
   const router = useRouter();
-  const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
+  const [showLevelDifficultyDialog, setShowLevelDifficultyDialog] =
+    useState<boolean>(true);
   const [selectedLevel, setSelectedLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "ai" | null
   >(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "easy" | "medium" | "hard" | null
   >(null);
-  const [showDifficultyDialog, setShowDifficultyDialog] =
-    useState<boolean>(false);
 
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
   const filterCategories: FilterCategory[] = [
@@ -320,24 +319,22 @@ export function SpeakingInterface() {
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [hasMore, loadingMore, speakingTopics?.length]);
 
-  // Open level selection dialog on first mount
+  // Open level & difficulty selection dialog on first mount
   useEffect(() => {
-    setShowLevelDialog(true);
+    setShowLevelDifficultyDialog(true);
   }, []);
 
-  const applyLevel = (
+  const handleLevelClick = (
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
     setSelectedLevel(level);
-    setShowLevelDialog(false);
-
-    // Always show difficulty dialog (now contains all inputs)
-    setShowDifficultyDialog(true);
   };
 
-  const applyDifficulty = (difficulty: "easy" | "medium" | "hard") => {
+  const handleDifficultySelection = (
+    difficulty: "easy" | "medium" | "hard"
+  ) => {
     setSelectedDifficulty(difficulty);
-    setShowDifficultyDialog(false);
+    setShowLevelDifficultyDialog(false);
   };
 
   const handleTopicSelection = (topic: SpeakingTopic) => {
@@ -560,180 +557,198 @@ export function SpeakingInterface() {
         </div>
       </div>
 
-      {/* Level Selection Dialog */}
-      <Dialog open={showLevelDialog} onOpenChange={setShowLevelDialog}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
+      {/* Combined Level & Difficulty Selection Dialog */}
+      <Dialog
+        open={showLevelDifficultyDialog}
+        onOpenChange={setShowLevelDifficultyDialog}
+      >
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
           <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
             <div className="relative z-10 text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
                 <Mic className="h-4 w-4" />
-                Speaking Practice
+                Speaking Practice Setup
               </div>
               <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Choose Your Speaking Level
+                Choose Your Level & Difficulty
               </DialogTitle>
               <DialogDescription className="text-white/90 text-sm mt-1">
-                Pick a level to get speaking exercises at that difficulty
+                {!selectedLevel
+                  ? "First, select your speaking level"
+                  : "Now, choose the difficulty for your practice"}
               </DialogDescription>
             </div>
           </div>
+
           <div className="p-6 bg-white">
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                onClick={() => applyLevel("beginner")}
-              >
-                <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                  <Star className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Beginner</div>
-                  <div className="text-xs text-gray-600">
-                    Simple topics, basic vocabulary
-                  </div>
-                </div>
-              </button>
+            {/* Level Selection */}
+            {!selectedLevel && (
+              <div className="h-full flex flex-col">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Select Level
+                </h3>
+                <div className="grid grid-cols-1 gap-3 flex-1">
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                    onClick={() => handleLevelClick("beginner")}
+                  >
+                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                      <Star className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Beginner
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Simple topics, basic vocabulary
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600" />
+                  </button>
 
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                onClick={() => applyLevel("intermediate")}
-              >
-                <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                  <Target className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">
-                    Intermediate
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Balanced topics with moderate complexity
-                  </div>
-                </div>
-              </button>
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                    onClick={() => handleLevelClick("intermediate")}
+                  >
+                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                      <Target className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Intermediate
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Balanced topics with moderate complexity
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-600" />
+                  </button>
 
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                onClick={() => applyLevel("advanced")}
-              >
-                <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                  <Trophy className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Advanced</div>
-                  <div className="text-xs text-gray-600">
-                    Complex topics, sophisticated vocabulary
-                  </div>
-                </div>
-              </button>
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                    onClick={() => handleLevelClick("advanced")}
+                  >
+                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Advanced
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Complex topics, sophisticated vocabulary
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-red-600" />
+                  </button>
 
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
-                onClick={() => applyLevel("ai")}
-              >
-                <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
-                  <Brain className="h-5 w-5" />
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
+                    onClick={() => handleLevelClick("ai")}
+                  >
+                    <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
+                      <Brain className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Let AI Decide
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        AI selects a suitable level and speaking topic
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                  </button>
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">
-                    Let AI Decide
+              </div>
+            )}
+
+            {/* Difficulty Selection */}
+            {selectedLevel && (
+              <div className="h-full flex flex-col">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Select Difficulty
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Level:{" "}
+                      <span className="font-semibold capitalize text-gray-700">
+                        {selectedLevel}
+                      </span>
+                    </p>
                   </div>
-                  <div className="text-xs text-gray-600">
-                    AI selects a suitable level and speaking topic
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedLevel(null)}
+                    className="text-xs text-gray-600 hover:text-gray-900"
+                  >
+                    Change Level
+                  </Button>
                 </div>
-              </button>
-            </div>
+
+                <div className="grid grid-cols-1 gap-3 flex-1">
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                    onClick={() => handleDifficultySelection("easy")}
+                  >
+                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                      <Star className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Easy</div>
+                      <div className="text-xs text-gray-600">
+                        Simple vocabulary and short sentences
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                    onClick={() => handleDifficultySelection("medium")}
+                  >
+                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                      <Target className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Medium</div>
+                      <div className="text-xs text-gray-600">
+                        Moderate complexity with some challenging words
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                    onClick={() => handleDifficultySelection("hard")}
+                  >
+                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Hard</div>
+                      <div className="text-xs text-gray-600">
+                        Complex vocabulary and advanced structures
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-5 flex items-center justify-center gap-4">
               <Button
                 variant="ghost"
                 className="text-gray-600 hover:text-gray-900"
-                onClick={() => setShowLevelDialog(false)}
+                onClick={() => {
+                  setSelectedLevel(null);
+                  setSelectedDifficulty(null);
+                  setShowLevelDifficultyDialog(false);
+                }}
               >
                 Skip for now
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Difficulty Selection Dialog */}
-      <Dialog
-        open={showDifficultyDialog}
-        onOpenChange={setShowDifficultyDialog}
-      >
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
-          <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
-            <div className="relative z-10 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
-                <Target className="h-4 w-4" />
-                Difficulty Selection
-              </div>
-              <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Choose Difficulty Level
-              </DialogTitle>
-              <DialogDescription className="text-white/90 text-sm mt-1">
-                Select the difficulty for your {selectedLevel} reading practice
-              </DialogDescription>
-            </div>
-          </div>
-          <div className="p-6 bg-white">
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                onClick={() => applyDifficulty("easy")}
-              >
-                <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                  <Star className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Easy</div>
-                  <div className="text-xs text-gray-600">
-                    Simple vocabulary and short sentences
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                onClick={() => applyDifficulty("medium")}
-              >
-                <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                  <Target className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Medium</div>
-                  <div className="text-xs text-gray-600">
-                    Moderate complexity with some challenging words
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                onClick={() => applyDifficulty("hard")}
-              >
-                <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                  <Trophy className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Hard</div>
-                  <div className="text-xs text-gray-600">
-                    Complex vocabulary and advanced structures
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            <div className="mt-5 flex items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setShowDifficultyDialog(false)}
-              >
-                Back to Level Selection
               </Button>
             </div>
           </div>
