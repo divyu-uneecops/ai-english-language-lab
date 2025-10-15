@@ -18,4 +18,8 @@ export const speakingService = {
       transcription,
       topic_id: topicId,
     }),
+
+  // Fetch evaluation history for a specific topic
+  fetchEvaluationHistory: async (topicId: string) =>
+    serverInterfaceService.get(`/speaking/topics/${topicId}/history`),
 };

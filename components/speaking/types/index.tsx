@@ -32,6 +32,13 @@ export interface SpeakingEvaluationData {
   example_response: string;
 }
 
+export interface EvaluationHistoryItem extends SpeakingEvaluationData {
+  submission_id: string;
+  submitted_at: string;
+  transcription?: string;
+  duration?: number;
+}
+
 export interface SpeakingTopicComponentProps {
   topic: SpeakingTopic;
   onBack: () => void;
