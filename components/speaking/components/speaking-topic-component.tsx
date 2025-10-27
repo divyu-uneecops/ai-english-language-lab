@@ -196,8 +196,8 @@ export function SpeakingTopicComponent({
             onValueChange={setActiveTab}
             className="flex-1 flex flex-col"
           >
-            <div className="bg-gray-50 border-b border-gray-200 px-6">
-              <TabsList className="bg-transparent h-12 p-0 gap-6">
+            <div className="bg-gray-50 border-b border-gray-200 px-6 h-16 flex items-center">
+              <TabsList className="bg-transparent h-auto p-0 gap-6">
                 <TabsTrigger
                   value="topic"
                   className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-blue-600 rounded-none px-0 pb-3 pt-3 font-medium text-gray-600 data-[state=active]:text-gray-900"
