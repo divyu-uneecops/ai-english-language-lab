@@ -18,7 +18,7 @@ import { readingService } from "@/services/readingService";
 import { writingService } from "@/services/writingService";
 import { speakingService } from "@/services/speakingService";
 import ReadingEvaluationResult from "@/components/shared/components/ReadingEvaluationResult";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SpeakingEvaluationResults } from "@/components/shared/components/SpeakingEvaluationResults";
 import { WritingEvaluationResults } from "@/components/shared/components/WritingEvaluationResults";
 
@@ -82,7 +82,9 @@ interface SpeakingSubmission {
 
 export default function SubmissionsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("reading");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as string) || "reading";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [readingSubmissions, setReadingSubmissions] = useState<
     ReadingSubmission[]
   >([]);

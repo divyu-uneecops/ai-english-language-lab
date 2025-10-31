@@ -375,18 +375,8 @@ export function ReadingInterface() {
     };
   };
 
-  const openReadingSubmissions = async () => {
-    setShowReadingSubmissionsDialog(true);
-    setIsReadingSubmissionsLoading(true);
-    try {
-      const submissions = await readingService.fetchAllSubmissions();
-      setReadingSubmissions(submissions || []);
-    } catch (e) {
-      console.error("Failed to load reading submissions", e);
-      setReadingSubmissions([]);
-    } finally {
-      setIsReadingSubmissionsLoading(false);
-    }
+  const openReadingSubmissions = () => {
+    router.push("/reading/submissions");
   };
 
   const handleLevelClick = (
