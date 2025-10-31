@@ -15,7 +15,6 @@ export interface SpeakingTopic {
   description: string;
   difficulty: string;
   level: string;
-  evaluation_data?: SpeakingEvaluationData;
 }
 
 export interface SpeakingEvaluationData {
