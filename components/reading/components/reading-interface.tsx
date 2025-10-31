@@ -66,11 +66,6 @@ export function ReadingInterface() {
     "easy" | "medium" | "hard" | null
   >(null);
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
-  const [showReadingSubmissionsDialog, setShowReadingSubmissionsDialog] =
-    useState<boolean>(false);
-  const [readingSubmissions, setReadingSubmissions] = useState<any[]>([]);
-  const [isReadingSubmissionsLoading, setIsReadingSubmissionsLoading] =
-    useState<boolean>(false);
   const filterCategories: FilterCategory[] = [
     {
       key: "status",
@@ -177,6 +172,28 @@ export function ReadingInterface() {
     fetchStories();
   }, [filters]);
 
+  // Scroll detection for infinite scroll within container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Load more when scrolled to within 100px of bottom
+      if (
+        scrollTop + clientHeight >= scrollHeight - 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
+        loadMoreStories();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingMore, stories.length]);
+
   const fetchStories = async (aiDecide = false) => {
     // Set loading state FIRST to ensure UI updates immediately
     setLoading(true);
@@ -227,10 +244,8 @@ export function ReadingInterface() {
       }
     } catch (err: any) {
       if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
-        console.log("Canceled ✅");
         return;
       }
-      console.error("Error fetching stories:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch stories");
     } finally {
       setLoading(false);
@@ -315,65 +330,10 @@ export function ReadingInterface() {
     }
   };
 
-  // Scroll detection for infinite scroll within container
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-
-      // Load more when scrolled to within 100px of bottom
-      if (
-        scrollTop + clientHeight >= scrollHeight - 100 &&
-        hasMore &&
-        !loadingMore
-      ) {
-        loadMoreStories();
-      }
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll);
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loadingMore, stories.length]);
-
   // Open level selection dialog on first mount
   useEffect(() => {
     setShowLevelDifficultyDialog(true);
   }, []);
-
-  const getRelativeTime = (dateString: string) => {
-    const localDate = new Date(dateString);
-    const formatted = localDate.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-    return formatted;
-  };
-
-  const getScoreStatus = (score: number) => {
-    if (score >= 7)
-      return {
-        icon: CheckCircle,
-        color: "text-green-600",
-        bg: "bg-green-50",
-        label: "Excellent",
-      };
-    if (score >= 5)
-      return {
-        icon: CheckCircle,
-        color: "text-blue-600",
-        bg: "bg-blue-50",
-        label: "Good",
-      };
-    return {
-      icon: CheckCircle,
-      color: "text-yellow-600",
-      bg: "bg-yellow-50",
-      label: "Needs Practice",
-    };
-  };
 
   const openReadingSubmissions = () => {
     router.push("/reading/submissions");
@@ -403,7 +363,6 @@ export function ReadingInterface() {
         level: [...prev.level, levelDifficultyKey],
       }));
     }
-    fetchStories();
   };
 
   return (
@@ -857,89 +816,6 @@ export function ReadingInterface() {
                 Skip for now
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Reading Submissions Dialog */}
-      <Dialog
-        open={showReadingSubmissionsDialog}
-        onOpenChange={setShowReadingSubmissionsDialog}
-      >
-        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
-          <div className="p-6 bg-white">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-orange-600" />
-                <h3 className="text-lg font-bold text-gray-900">
-                  Reading Submissions
-                </h3>
-              </div>
-            </div>
-
-            {isReadingSubmissionsLoading ? (
-              <div className="flex items-center justify-center h-40">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-              </div>
-            ) : readingSubmissions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                <BookOpen className="h-8 w-8 mb-2 text-gray-400" />
-                <p className="text-sm">No reading submissions yet</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600">
-                  <div className="col-span-4">Passage</div>
-                  <div className="col-span-3">Status</div>
-                  <div className="col-span-3">Submitted</div>
-                  <div className="col-span-2">Score</div>
-                </div>
-
-                <div className="divide-y divide-gray-100">
-                  {readingSubmissions.map((submission: any, index: number) => {
-                    const status = getScoreStatus(
-                      submission?.evaluation_data?.overall_score
-                    );
-                    const StatusIcon = status.icon as any;
-                    return (
-                      <div
-                        key={`reading-sub-${index}`}
-                        className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="col-span-4 flex items-center">
-                          <span className="text-sm font-medium text-gray-900 truncate">
-                            {submission?.title || "Untitled Passage"}
-                          </span>
-                        </div>
-                        <div className="col-span-3 flex items-center gap-2">
-                          <div className={`p-1 rounded ${status.bg}`}>
-                            <StatusIcon className={`h-4 w-4 ${status.color}`} />
-                          </div>
-                          <span
-                            className={`text-sm font-medium ${status.color}`}
-                          >
-                            {status.label}
-                          </span>
-                        </div>
-                        <div className="col-span-3 flex items-center">
-                          <span className="text-sm text-gray-600">
-                            {getRelativeTime(submission?.submitted_at)}
-                          </span>
-                        </div>
-                        <div className="col-span-2 flex items-center">
-                          <span className={`text-sm font-bold ${status.color}`}>
-                            {Math.round(
-                              submission?.evaluation_data?.overall_score || 0
-                            )}
-                            /10
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>

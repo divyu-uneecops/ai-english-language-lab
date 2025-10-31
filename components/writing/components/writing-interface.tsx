@@ -24,6 +24,7 @@ import {
   PenTool,
   Loader2,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -386,6 +387,10 @@ export function WritingInterface() {
     router.push(`/writing/${prompt?.topic_id}`);
   };
 
+  const openWritingSubmissions = () => {
+    router.push("/writing/submissions");
+  };
+
   return (
     <div className="bg-gradient-to-br from-yellow-50 via-white to-orange-50">
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -409,19 +414,46 @@ export function WritingInterface() {
               Writing Practice
             </h1>
           </div>
-          <Button
-            onClick={() => setShowFilterDialog(true)}
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            {hasActiveFilters() && (
-              <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {getActiveFiltersCount()}
-              </Badge>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={openWritingSubmissions}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 group cursor-pointer"
+            >
+              <div className="relative">
+                <FileText className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                View Submissions
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+            </Button>
+
+            <Button
+              onClick={() => setShowFilterDialog(true)}
+              variant="ghost"
+              size="sm"
+              className="group flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 cursor-pointer"
+            >
+              <div className="relative">
+                <Filter className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                Filters
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+              {hasActiveFilters() && (
+                <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {getActiveFiltersCount()}
+                </Badge>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Main Content Area */}

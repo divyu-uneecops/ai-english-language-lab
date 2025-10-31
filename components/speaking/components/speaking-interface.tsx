@@ -22,6 +22,7 @@ import {
   Mic,
   Loader2,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -148,6 +149,38 @@ export function SpeakingInterface() {
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Fetch speaking topics from API
+  useEffect(() => {
+    fetchSpeakingTopics();
+  }, [filters]);
+
+  // Scroll detection for infinite scroll within container
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Load more when scrolled to within 100px of bottom
+      if (
+        scrollTop + clientHeight >= scrollHeight - 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
+        loadMoreTopics();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingMore, speakingTopics?.length]);
+
+  // Open level & difficulty selection dialog on first mount
+  useEffect(() => {
+    setShowLevelDifficultyDialog(true);
+  }, []);
+
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
     const params: Record<string, string> = {};
@@ -191,72 +224,52 @@ export function SpeakingInterface() {
     );
   };
 
-  // Fetch speaking topics from API
-  useEffect(() => {
-    const fetchSpeakingTopics = async (isLoadMore = false) => {
-      try {
-        if (isLoadMore) {
-          setLoadingMore(true);
-        } else {
-          setLoading(true);
-          setError(null);
-        }
+  const fetchSpeakingTopics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const selectedFilters = getSelectedFilters();
+      const selectedFilters = getSelectedFilters();
 
-        const params = {
-          page: isLoadMore ? pagination?.currentPage + 1 : 1,
-          page_size: pagination?.pageSize,
-          ...selectedFilters, // Spread all filters (level-difficulty, status, category)
-        };
+      const params = {
+        page: 1,
+        page_size: pagination?.pageSize,
+        ...selectedFilters, // Spread all filters (level-difficulty, status, category)
+      };
 
-        const paginatedData: PaginatedResponse =
-          await speakingService.fetchTopics(params);
+      const paginatedData: PaginatedResponse =
+        await speakingService.fetchTopics(params);
 
-        // Transform the API data to match our interface
-        const transformedTopics: SpeakingTopic[] = paginatedData?.results || [];
+      // Transform the API data to match our interface
+      const transformedTopics: SpeakingTopic[] = paginatedData?.results || [];
 
-        if (isLoadMore) {
-          // Append new topics to existing ones
-          setSpeakingTopics((prev) => [...prev, ...transformedTopics]);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: prev.currentPage + 1,
-          }));
-        } else {
-          // Replace topics for initial load or filter change
-          setSpeakingTopics(transformedTopics);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: 1,
-            total: paginatedData?.total || 0,
-            totalPages: Math.ceil(
-              (paginatedData?.total || 0) / pagination.pageSize
-            ),
-          }));
-        }
+      // Replace topics for initial load or filter change
+      setSpeakingTopics(transformedTopics);
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: 1,
+        total: paginatedData?.total || 0,
+        totalPages: Math.ceil(
+          (paginatedData?.total || 0) / pagination.pageSize
+        ),
+      }));
 
-        // Check if there are more topics to load
-        const totalLoaded = isLoadMore
-          ? speakingTopics?.length + transformedTopics?.length
-          : transformedTopics?.length;
-        setHasMore(totalLoaded < (paginatedData?.total || 0));
-      } catch (err: any) {
-        if (err?.response) {
-          // If using axios
-          setError(
-            err?.response?.data?.message ||
-              "Failed to load topics. Please try again."
-          );
-        }
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
+      // Check if there are more topics to load
+      const totalLoaded = transformedTopics?.length;
+      setHasMore(totalLoaded < (paginatedData?.total || 0));
+    } catch (err: any) {
+      if (err?.response) {
+        // If using axios
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load topics. Please try again."
+        );
       }
-    };
-
-    fetchSpeakingTopics();
-  }, [filters]);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   // Load more topics function
   const loadMoreTopics = async () => {
@@ -300,33 +313,6 @@ export function SpeakingInterface() {
     }
   };
 
-  // Scroll detection for infinite scroll within container
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-
-      // Load more when scrolled to within 100px of bottom
-      if (
-        scrollTop + clientHeight >= scrollHeight - 100 &&
-        hasMore &&
-        !loadingMore
-      ) {
-        loadMoreTopics();
-      }
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll);
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loadingMore, speakingTopics?.length]);
-
-  // Open level & difficulty selection dialog on first mount
-  useEffect(() => {
-    setShowLevelDifficultyDialog(true);
-  }, []);
-
   const handleLevelClick = (
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
@@ -342,6 +328,10 @@ export function SpeakingInterface() {
 
   const handleTopicSelection = (topic: SpeakingTopic) => {
     router.push(`/speaking/${topic?.topic_id}`);
+  };
+
+  const openSpeakingSubmissions = () => {
+    router.push("/speaking/submissions");
   };
 
   return (
@@ -367,19 +357,46 @@ export function SpeakingInterface() {
               Speaking Practice
             </h1>
           </div>
-          <Button
-            onClick={() => setShowFilterDialog(true)}
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            {hasActiveFilters() && (
-              <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {getActiveFiltersCount()}
-              </Badge>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={openSpeakingSubmissions}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 group cursor-pointer"
+            >
+              <div className="relative">
+                <FileText className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                View Submissions
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+            </Button>
+
+            <Button
+              onClick={() => setShowFilterDialog(true)}
+              variant="ghost"
+              size="sm"
+              className="group flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 cursor-pointer"
+            >
+              <div className="relative">
+                <Filter className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                Filters
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+              {hasActiveFilters() && (
+                <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {getActiveFiltersCount()}
+                </Badge>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Main Content Area */}
