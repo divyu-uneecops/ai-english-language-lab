@@ -22,6 +22,7 @@ import {
   Trophy,
   Target,
   Brain,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -65,6 +66,11 @@ export function ReadingInterface() {
     "easy" | "medium" | "hard" | null
   >(null);
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
+  const [showReadingSubmissionsDialog, setShowReadingSubmissionsDialog] =
+    useState<boolean>(false);
+  const [readingSubmissions, setReadingSubmissions] = useState<any[]>([]);
+  const [isReadingSubmissionsLoading, setIsReadingSubmissionsLoading] =
+    useState<boolean>(false);
   const filterCategories: FilterCategory[] = [
     {
       key: "status",
@@ -336,6 +342,53 @@ export function ReadingInterface() {
     setShowLevelDifficultyDialog(true);
   }, []);
 
+  const getRelativeTime = (dateString: string) => {
+    const localDate = new Date(dateString);
+    const formatted = localDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return formatted;
+  };
+
+  const getScoreStatus = (score: number) => {
+    if (score >= 7)
+      return {
+        icon: CheckCircle,
+        color: "text-green-600",
+        bg: "bg-green-50",
+        label: "Excellent",
+      };
+    if (score >= 5)
+      return {
+        icon: CheckCircle,
+        color: "text-blue-600",
+        bg: "bg-blue-50",
+        label: "Good",
+      };
+    return {
+      icon: CheckCircle,
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+      label: "Needs Practice",
+    };
+  };
+
+  const openReadingSubmissions = async () => {
+    setShowReadingSubmissionsDialog(true);
+    setIsReadingSubmissionsLoading(true);
+    try {
+      const submissions = await readingService.fetchAllSubmissions();
+      setReadingSubmissions(submissions || []);
+    } catch (e) {
+      console.error("Failed to load reading submissions", e);
+      setReadingSubmissions([]);
+    } finally {
+      setIsReadingSubmissionsLoading(false);
+    }
+  };
+
   const handleLevelClick = (
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
@@ -386,19 +439,46 @@ export function ReadingInterface() {
               Reading Practice
             </h1>
           </div>
-          <Button
-            onClick={() => setShowFilterDialog(true)}
-            variant="outline"
-            className="flex items-center gap-2 px-4 py-2 bg-white border-gray-200 hover:border-orange-300 transition-all duration-200 shadow-sm hover:shadow-md"
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-            {hasActiveFilters() && (
-              <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                {getActiveFiltersCount()}
-              </Badge>
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={openReadingSubmissions}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 group cursor-pointer"
+            >
+              <div className="relative">
+                <FileText className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                View Submissions
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+            </Button>
+
+            <Button
+              onClick={() => setShowFilterDialog(true)}
+              variant="ghost"
+              size="sm"
+              className="group flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 cursor-pointer"
+            >
+              <div className="relative">
+                <Filter className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              </div>
+              <span className="relative">
+                Filters
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+              {hasActiveFilters() && (
+                <Badge className="ml-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {getActiveFiltersCount()}
+                </Badge>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -787,6 +867,89 @@ export function ReadingInterface() {
                 Skip for now
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reading Submissions Dialog */}
+      <Dialog
+        open={showReadingSubmissionsDialog}
+        onOpenChange={setShowReadingSubmissionsDialog}
+      >
+        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
+          <div className="p-6 bg-white">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-orange-600" />
+                <h3 className="text-lg font-bold text-gray-900">
+                  Reading Submissions
+                </h3>
+              </div>
+            </div>
+
+            {isReadingSubmissionsLoading ? (
+              <div className="flex items-center justify-center h-40">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              </div>
+            ) : readingSubmissions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                <BookOpen className="h-8 w-8 mb-2 text-gray-400" />
+                <p className="text-sm">No reading submissions yet</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-600">
+                  <div className="col-span-4">Passage</div>
+                  <div className="col-span-3">Status</div>
+                  <div className="col-span-3">Submitted</div>
+                  <div className="col-span-2">Score</div>
+                </div>
+
+                <div className="divide-y divide-gray-100">
+                  {readingSubmissions.map((submission: any, index: number) => {
+                    const status = getScoreStatus(
+                      submission?.evaluation_data?.overall_score
+                    );
+                    const StatusIcon = status.icon as any;
+                    return (
+                      <div
+                        key={`reading-sub-${index}`}
+                        className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="col-span-4 flex items-center">
+                          <span className="text-sm font-medium text-gray-900 truncate">
+                            {submission?.title || "Untitled Passage"}
+                          </span>
+                        </div>
+                        <div className="col-span-3 flex items-center gap-2">
+                          <div className={`p-1 rounded ${status.bg}`}>
+                            <StatusIcon className={`h-4 w-4 ${status.color}`} />
+                          </div>
+                          <span
+                            className={`text-sm font-medium ${status.color}`}
+                          >
+                            {status.label}
+                          </span>
+                        </div>
+                        <div className="col-span-3 flex items-center">
+                          <span className="text-sm text-gray-600">
+                            {getRelativeTime(submission?.submitted_at)}
+                          </span>
+                        </div>
+                        <div className="col-span-2 flex items-center">
+                          <span className={`text-sm font-bold ${status.color}`}>
+                            {Math.round(
+                              submission?.evaluation_data?.overall_score || 0
+                            )}
+                            /10
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
