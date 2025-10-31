@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +29,6 @@ import { useRouter } from "next/navigation";
 import { writingService } from "@/services/writingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import { PaginatedResponse, WritingPrompt } from "../types";
-import { writingTypeOptions } from "../constants";
 import {
   FilterDialog,
   FilterCategory,
@@ -39,19 +36,15 @@ import {
 
 export function WritingInterface() {
   const router = useRouter();
-  const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
+  const [showLevelDifficultyDialog, setShowLevelDifficultyDialog] =
+    useState<boolean>(true);
   const [selectedLevel, setSelectedLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "ai" | null
   >(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<
     "easy" | "medium" | "hard" | null
   >(null);
-  const [showDifficultyDialog, setShowDifficultyDialog] =
-    useState<boolean>(false);
-  const [selectedWritingType, setSelectedWritingType] = useState<string | null>(
-    null
-  );
-  // const [topicContext, setTopicContext] = useState<string>("");
+  // Combined dialog like Reading
 
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
   const filterCategories: FilterCategory[] = [
@@ -366,21 +359,31 @@ export function WritingInterface() {
 
   // Open level selection dialog on first mount
   useEffect(() => {
-    setShowLevelDialog(true);
+    setShowLevelDifficultyDialog(true);
   }, []);
 
-  const applyLevel = (
+  const handleLevelClick = (
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
     setSelectedLevel(level);
-    setShowLevelDialog(false);
-
-    // Always show difficulty dialog (now contains all inputs)
-    setShowDifficultyDialog(true);
+    if (level === "ai") {
+      setShowLevelDifficultyDialog(false);
+    }
   };
 
-  const applyDifficulty = () => {
-    setShowDifficultyDialog(false);
+  const handleDifficultySelection = (
+    difficulty: "easy" | "medium" | "hard"
+  ) => {
+    setSelectedDifficulty(difficulty);
+    setShowLevelDifficultyDialog(false);
+
+    if (selectedLevel) {
+      const levelDifficultyKey = `${selectedLevel}.${difficulty}`;
+      setFilters((prev) => ({
+        ...prev,
+        level: [...prev.level, levelDifficultyKey],
+      }));
+    }
   };
 
   const handlePromptSelection = (prompt: WritingPrompt) => {
@@ -676,108 +679,10 @@ export function WritingInterface() {
         </div>
       </div>
 
-      {/* Level Selection Dialog */}
-      <Dialog open={showLevelDialog} onOpenChange={setShowLevelDialog}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
-          <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#fff,_transparent_50%)]"></div>
-            <div className="relative z-10 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
-                <PenTool className="h-4 w-4" />
-                Writing Practice
-              </div>
-              <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Choose Your Writing Level
-              </DialogTitle>
-              <DialogDescription className="text-white/90 text-sm mt-1">
-                Pick a level to get writing exercises at that difficulty
-              </DialogDescription>
-            </div>
-          </div>
-          <div className="p-6 bg-white">
-            <div className="grid grid-cols-1 gap-3">
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                onClick={() => applyLevel("beginner")}
-              >
-                <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                  <Star className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Beginner</div>
-                  <div className="text-xs text-gray-600">
-                    Simple prompts, basic vocabulary
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                onClick={() => applyLevel("intermediate")}
-              >
-                <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                  <Target className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">
-                    Intermediate
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Balanced challenge and creativity
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                onClick={() => applyLevel("advanced")}
-              >
-                <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                  <Trophy className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">Advanced</div>
-                  <div className="text-xs text-gray-600">
-                    Complex topics, sophisticated writing
-                  </div>
-                </div>
-              </button>
-
-              <button
-                className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
-                onClick={() => applyLevel("ai")}
-              >
-                <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
-                  <Brain className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">
-                    Let AI Decide
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    AI selects a suitable level and writing prompt
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            <div className="mt-5 flex items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-gray-600 hover:text-gray-900"
-                onClick={() => setShowLevelDialog(false)}
-              >
-                Skip for now
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Writing Configuration Dialog */}
+      {/* Combined Level & Difficulty Selection Dialog */}
       <Dialog
-        open={showDifficultyDialog}
-        onOpenChange={setShowDifficultyDialog}
+        open={showLevelDifficultyDialog}
+        onOpenChange={setShowLevelDifficultyDialog}
       >
         <DialogContent className="sm:max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border-0">
           <div className="relative p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
@@ -785,200 +690,186 @@ export function WritingInterface() {
             <div className="relative z-10 text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold mb-3">
                 <PenTool className="h-4 w-4" />
-                Writing Configuration
+                Writing Practice Setup
               </div>
               <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Configure Your Writing Practice
+                Choose Your Level & Difficulty
               </DialogTitle>
               <DialogDescription className="text-white/90 text-sm mt-1">
-                Set up your writing exercise with difficulty, type, and topic
+                {!selectedLevel
+                  ? "First, select your writing level"
+                  : "Now, choose the difficulty for your practice"}
               </DialogDescription>
             </div>
           </div>
           <div className="p-6 bg-white">
-            <div className="space-y-6">
-              {/* Writing Type Selection */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-900 mb-3 block">
-                  Writing Type
-                </Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {writingTypeOptions?.map((type) => {
-                    const IconComponent = type?.icon;
-                    return (
-                      <button
-                        key={type?.id}
-                        className={`group w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                          selectedWritingType === type?.id
-                            ? "border-orange-300 bg-orange-50"
-                            : "border-gray-200 hover:border-orange-300 hover:bg-gray-50"
-                        }`}
-                        onClick={() => setSelectedWritingType(type?.id)}
-                      >
-                        <div
-                          className={`p-2 rounded-lg ${type.color} text-white group-hover:scale-110 transition-transform`}
-                        >
-                          <IconComponent className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900 text-sm">
-                            {type?.title}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Difficulty Selection */}
-              <div>
-                <Label className="text-sm font-semibold text-gray-900 mb-3 block">
-                  Difficulty Level
-                </Label>
-                <div className="grid grid-cols-3 gap-3">
+            {/* Level Selection */}
+            {!selectedLevel && (
+              <div className="h-full flex flex-col">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Select Level
+                </h3>
+                <div className="grid grid-cols-1 gap-3 flex-1">
                   <button
-                    className={`group w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      selectedDifficulty === "easy"
-                        ? "border-green-300 bg-green-50"
-                        : "border-gray-200 hover:border-green-300 hover:bg-gray-50"
-                    }`}
-                    onClick={() => setSelectedDifficulty("easy")}
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                    onClick={() => handleLevelClick("beginner")}
                   >
                     <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                      <Star className="h-4 w-4" />
+                      <Star className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 text-sm">
-                        Easy
+                      <div className="font-semibold text-gray-900">
+                        Beginner
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Simple prompts, basic vocabulary
                       </div>
                     </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600" />
                   </button>
 
                   <button
-                    className={`group w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      selectedDifficulty === "medium"
-                        ? "border-yellow-300 bg-yellow-50"
-                        : "border-gray-200 hover:border-yellow-300 hover:bg-gray-50"
-                    }`}
-                    onClick={() => setSelectedDifficulty("medium")}
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                    onClick={() => handleLevelClick("intermediate")}
                   >
                     <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                      <Target className="h-4 w-4" />
+                      <Target className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 text-sm">
-                        Medium
+                      <div className="font-semibold text-gray-900">
+                        Intermediate
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Balanced challenge and creativity
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-600" />
+                  </button>
+
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                    onClick={() => handleLevelClick("advanced")}
+                  >
+                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Advanced
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Complex topics, sophisticated writing
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-red-600" />
+                  </button>
+
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
+                    onClick={() => handleLevelClick("ai")}
+                  >
+                    <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
+                      <Brain className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        Let AI Decide
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        AI selects a suitable level and writing prompt
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Difficulty Selection */}
+            {selectedLevel && selectedLevel !== "ai" && (
+              <div className="h-full flex flex-col">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Select Difficulty
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Level:{" "}
+                      <span className="font-semibold capitalize text-gray-700">
+                        {selectedLevel}
+                      </span>
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedLevel(null)}
+                    className="text-xs text-gray-600 hover:text-gray-900"
+                  >
+                    Change Level
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 flex-1">
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                    onClick={() => handleDifficultySelection("easy")}
+                  >
+                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                      <Star className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Easy</div>
+                      <div className="text-xs text-gray-600">
+                        Simple vocabulary and short sentences
                       </div>
                     </div>
                   </button>
 
                   <button
-                    className={`group w-full text-left flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                      selectedDifficulty === "hard"
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-200 hover:border-red-300 hover:bg-gray-50"
-                    }`}
-                    onClick={() => setSelectedDifficulty("hard")}
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                    onClick={() => handleDifficultySelection("medium")}
                   >
-                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                      <Trophy className="h-4 w-4" />
+                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                      <Target className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-gray-900 text-sm">
-                        Hard
+                      <div className="font-semibold text-gray-900">Medium</div>
+                      <div className="text-xs text-gray-600">
+                        Moderate complexity with some challenging words
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                    onClick={() => handleDifficultySelection("hard")}
+                  >
+                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                      <Trophy className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Hard</div>
+                      <div className="text-xs text-gray-600">
+                        Complex vocabulary and advanced structures
                       </div>
                     </div>
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* Topic Context Input */}
-              {/* <div>
-                <Label
-                  htmlFor="topic-context"
-                  className="text-sm font-semibold text-gray-900 mb-3 block"
-                >
-                  Topic Context
-                </Label>
-                <Input
-                  id="topic-context"
-                  type="text"
-                  placeholder={
-                    selectedWritingType === "letter"
-                      ? "e.g., I want to write a letter to my best friend about a new hobby..."
-                      : selectedWritingType === "article"
-                      ? "e.g., I want to write an article about a school sports day..."
-                      : selectedWritingType === "notice"
-                      ? "e.g., I want to write a notice about upcoming school holidays..."
-                      : selectedWritingType === "essay"
-                      ? "e.g., I want to write an essay about environmental issues..."
-                      : "Enter what you want to write about..."
-                  }
-                  value={topicContext}
-                  onChange={(e) => setTopicContext(e?.target?.value)}
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  {selectedWritingType === "letter" && (
-                    <>
-                      Examples: "I want to write a letter to my best friend
-                      about a new hobby I started", "I want to write a cover
-                      letter for my dream job application"
-                    </>
-                  )}
-                  {selectedWritingType === "article" && (
-                    <>
-                      Examples: "I want to write an article about a recent
-                      school sports day", "I want to write an article about
-                      climate change and its impact on my community"
-                    </>
-                  )}
-                  {selectedWritingType === "notice" && (
-                    <>
-                      Examples: "I want to write a notice about upcoming school
-                      holidays", "I want to write a notice about a community
-                      cleanup drive"
-                    </>
-                  )}
-                  {selectedWritingType === "essay" && (
-                    <>
-                      Examples: "I want to write an essay about environmental
-                      issues", "I want to write an essay about the impact of
-                      social media on teenagers"
-                    </>
-                  )}
-                </p>
-              </div> */}
-            </div>
-
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-5 flex items-center justify-center gap-4">
               <Button
                 variant="ghost"
                 className="text-gray-600 hover:text-gray-900"
-                onClick={() => setShowDifficultyDialog(false)}
-              >
-                Back to Level Selection
-              </Button>
-
-              <Button
                 onClick={() => {
-                  if (
-                    selectedWritingType &&
-                    selectedDifficulty
-                    // topicContext.trim()
-                  ) {
-                    applyDifficulty();
-                  }
+                  setSelectedLevel(null);
+                  setSelectedDifficulty(null);
+                  setShowLevelDifficultyDialog(false);
                 }}
-                disabled={
-                  !selectedWritingType || !selectedDifficulty
-                  // !topicContext.trim()
-                }
-                className="bg-orange-600 hover:bg-orange-700 text-white px-6"
               >
-                View Prompts
-                <ChevronRight className="h-4 w-4 ml-1" />
+                Skip for now
               </Button>
             </div>
           </div>

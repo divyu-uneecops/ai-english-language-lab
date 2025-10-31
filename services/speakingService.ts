@@ -2,8 +2,8 @@ import serverInterfaceService from "./serverInterfaceService";
 
 export const speakingService = {
   // Fetch speaking topics with filters and pagination
-  fetchTopics: async (params?: Record<string, any>) =>
-    serverInterfaceService.get(`/speaking/topics`, params),
+  fetchTopics: async (params?: Record<string, any>, signal?: AbortSignal) =>
+    serverInterfaceService.get(`/speaking/topics`, params, signal),
 
   // Fetch a single speaking topic by ID
   fetchTopicById: async (topicId: string) =>

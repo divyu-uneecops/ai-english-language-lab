@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Clock,
   ChevronRight,
   CheckCircle,
   Star,
@@ -27,7 +26,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { speakingService } from "@/services/speakingService";
-import { getDifficultyColor, getLevelColor } from "@/lib/utils";
+import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import { PaginatedResponse, SpeakingTopic } from "../types";
 import {
   FilterDialog,
@@ -148,6 +147,7 @@ export function SpeakingInterface() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
 
   // Fetch speaking topics from API
   useEffect(() => {
@@ -180,6 +180,73 @@ export function SpeakingInterface() {
   useEffect(() => {
     setShowLevelDifficultyDialog(true);
   }, []);
+
+  const fetchSpeakingTopics = async (aiDecide = false) => {
+    try {
+      // Cancel previous request if active
+      controllerRef.current?.abort();
+
+      // Create a new one
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      setLoading(true);
+      setError(null);
+
+      const selectedFilters = getSelectedFilters();
+
+      const params = {
+        page: 1,
+        page_size: pagination?.pageSize,
+        // ai_decide: aiDecide,
+        ...selectedFilters, // Spread all filters (level-difficulty, status, category)
+      };
+
+      if (aiDecide) {
+        const response = await speakingService.fetchTopics(
+          params,
+          controller.signal
+        );
+
+        if (isEmpty(response?.topic_id)) {
+          return;
+        }
+
+        router.push(`/speaking/${response?.topic_id}`);
+      } else {
+        const paginatedData: PaginatedResponse =
+          await speakingService.fetchTopics(params, controller.signal);
+
+        // Transform the API data to match our interface
+        const transformedTopics: SpeakingTopic[] = paginatedData?.results || [];
+
+        // Replace topics for initial load or filter change
+        setSpeakingTopics(transformedTopics);
+        setPagination((prev) => ({
+          ...prev,
+          currentPage: 1,
+          total: paginatedData?.total || 0,
+          totalPages: Math.ceil(
+            (paginatedData?.total || 0) / pagination.pageSize
+          ),
+        }));
+
+        // Check if there are more topics to load
+        const totalLoaded = transformedTopics?.length;
+        setHasMore(totalLoaded < (paginatedData?.total || 0));
+      }
+    } catch (err: any) {
+      if (err?.response) {
+        // If using axios
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load topics. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
@@ -222,53 +289,6 @@ export function SpeakingInterface() {
       (total, filterArray) => total + filterArray.length,
       0
     );
-  };
-
-  const fetchSpeakingTopics = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const selectedFilters = getSelectedFilters();
-
-      const params = {
-        page: 1,
-        page_size: pagination?.pageSize,
-        ...selectedFilters, // Spread all filters (level-difficulty, status, category)
-      };
-
-      const paginatedData: PaginatedResponse =
-        await speakingService.fetchTopics(params);
-
-      // Transform the API data to match our interface
-      const transformedTopics: SpeakingTopic[] = paginatedData?.results || [];
-
-      // Replace topics for initial load or filter change
-      setSpeakingTopics(transformedTopics);
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: 1,
-        total: paginatedData?.total || 0,
-        totalPages: Math.ceil(
-          (paginatedData?.total || 0) / pagination.pageSize
-        ),
-      }));
-
-      // Check if there are more topics to load
-      const totalLoaded = transformedTopics?.length;
-      setHasMore(totalLoaded < (paginatedData?.total || 0));
-    } catch (err: any) {
-      if (err?.response) {
-        // If using axios
-        setError(
-          err?.response?.data?.message ||
-            "Failed to load topics. Please try again."
-        );
-      }
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
   };
 
   // Load more topics function
@@ -317,6 +337,12 @@ export function SpeakingInterface() {
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
     setSelectedLevel(level);
+
+    // For AI, immediately fetch and navigate, no difficulty step
+    if (level === "ai") {
+      setShowLevelDifficultyDialog(false);
+      // fetchSpeakingTopics(true);
+    }
   };
 
   const handleDifficultySelection = (
@@ -324,6 +350,14 @@ export function SpeakingInterface() {
   ) => {
     setSelectedDifficulty(difficulty);
     setShowLevelDifficultyDialog(false);
+
+    if (selectedLevel) {
+      const levelDifficultyKey = `${selectedLevel}.${difficulty}`;
+      setFilters((prev) => ({
+        ...prev,
+        level: [...prev.level, levelDifficultyKey],
+      }));
+    }
   };
 
   const handleTopicSelection = (topic: SpeakingTopic) => {
@@ -498,18 +532,6 @@ export function SpeakingInterface() {
                               </Badge>
                             </div>
                           </div>
-                          {/* Solved status badge - moved to right side */}
-                          {topic?.solved && (
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
-                              >
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Solved
-                              </Badge>
-                            </div>
-                          )}
                         </div>
 
                         {/* Topic title */}
@@ -526,15 +548,9 @@ export function SpeakingInterface() {
                         <div className="flex justify-end">
                           <Button
                             size="sm"
-                            className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
-                              topic?.solved
-                                ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                            }`}
+                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
                           >
-                            {topic?.solved
-                              ? "Practice Again"
-                              : "Start Speaking"}
+                            Start Speaking
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
                         </div>

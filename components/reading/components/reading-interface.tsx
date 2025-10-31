@@ -33,24 +33,7 @@ import {
   FilterDialog,
   FilterCategory,
 } from "@/components/shared/components/FilterDialog";
-
-// Internal Story interface
-interface Story {
-  passage_id: string;
-  title: string;
-  level: string;
-  difficulty: string;
-  readTime?: string;
-  passage: string;
-  solved: boolean;
-}
-
-interface PaginatedResponse {
-  page: number;
-  page_size: number;
-  total: number;
-  results: Story[];
-}
+import { PaginatedResponse, Story } from "../interfaces";
 
 export function ReadingInterface() {
   const router = useRouter();
@@ -194,6 +177,11 @@ export function ReadingInterface() {
     return () => scrollContainer.removeEventListener("scroll", handleScroll);
   }, [hasMore, loadingMore, stories.length]);
 
+  // Open level selection dialog on first mount
+  useEffect(() => {
+    setShowLevelDifficultyDialog(true);
+  }, []);
+
   const fetchStories = async (aiDecide = false) => {
     // Set loading state FIRST to ensure UI updates immediately
     setLoading(true);
@@ -216,14 +204,17 @@ export function ReadingInterface() {
         ai_decide: aiDecide,
         ...selectedFilters, // Spread all filters (level-difficulty, status)
       };
-      const paginatedData = await readingService.fetchStories(
-        params,
-        controller.signal
-      );
 
       if (aiDecide) {
+        const paginatedData = await readingService.fetchStories(
+          params,
+          controller.signal
+        );
+
         router.push(`/reading/${paginatedData?.passage_id}`);
       } else {
+        const paginatedData: PaginatedResponse =
+          await readingService.fetchStories(params, controller.signal);
         // Transform the API data to match our interface
         const transformedStories: Story[] = paginatedData?.results;
 
@@ -329,11 +320,6 @@ export function ReadingInterface() {
       setLoadingMore(false);
     }
   };
-
-  // Open level selection dialog on first mount
-  useEffect(() => {
-    setShowLevelDifficultyDialog(true);
-  }, []);
 
   const openReadingSubmissions = () => {
     router.push("/reading/submissions");

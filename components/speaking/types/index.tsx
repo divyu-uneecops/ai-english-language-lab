@@ -15,7 +15,6 @@ export interface SpeakingTopic {
   description: string;
   difficulty: string;
   level: string;
-  solved: boolean;
   evaluation_data?: SpeakingEvaluationData;
 }
 
