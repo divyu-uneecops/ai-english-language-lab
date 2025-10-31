@@ -21,23 +21,7 @@ import {
   Target,
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
-
-interface SpeakingEvaluationResultsProps {
-  evaluation: {
-    fluency_score: number;
-    pronunciation_score: number;
-    content_relevance_score: number;
-    overall_score: number;
-    feedback: {
-      strengths: string[];
-      areas_for_improvement: string[];
-    };
-    detailed_feedback: string;
-    example_response: string;
-  };
-  onClose: () => void;
-  onRevise: () => void;
-}
+import { SpeakingEvaluationResultsProps } from "../interfaces";
 
 export function SpeakingEvaluationResults({
   evaluation,

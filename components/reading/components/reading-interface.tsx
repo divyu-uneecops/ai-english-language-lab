@@ -27,8 +27,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { readingService } from "@/services/readingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
-import Markdown from "@/components/shared/MarkDown";
-import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
+import Markdown from "@/components/shared/components/MarkDown";
+import {
+  FilterDialog,
+  FilterCategory,
+} from "@/components/shared/components/FilterDialog";
 
 // Internal Story interface
 interface Story {
@@ -51,7 +54,7 @@ interface PaginatedResponse {
 export function ReadingInterface() {
   const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLevelDialog, setShowLevelDialog] = useState<boolean>(true);
   const [selectedLevel, setSelectedLevel] = useState<
@@ -162,6 +165,72 @@ export function ReadingInterface() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+
+  // Fetch stories from API
+  useEffect(() => {
+    fetchStories();
+  }, [filters]);
+
+  const fetchStories = async (aiDecide = false) => {
+    // Set loading state FIRST to ensure UI updates immediately
+    setLoading(true);
+    setError(null);
+    setStories([]);
+
+    try {
+      // Cancel previous request if active
+      controllerRef.current?.abort();
+
+      // Create a new one
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      const selectedFilters = getSelectedFilters();
+
+      const params = {
+        page: 1,
+        page_size: pagination.pageSize,
+        ai_decide: aiDecide,
+        ...selectedFilters, // Spread all filters (level-difficulty, status)
+      };
+      const paginatedData = await readingService.fetchStories(
+        params,
+        controller.signal
+      );
+
+      if (aiDecide) {
+        router.push(`/reading/${paginatedData?.passage_id}`);
+      } else {
+        // Transform the API data to match our interface
+        const transformedStories: Story[] = paginatedData?.results;
+
+        // Replace stories for initial load or filter change
+        setStories(transformedStories);
+        setPagination((prev) => ({
+          ...prev,
+          currentPage: 1,
+          total: paginatedData?.total || 0,
+          totalPages: Math.ceil(
+            (paginatedData?.total || 0) / pagination.pageSize
+          ),
+        }));
+
+        // Check if there are more stories to load
+        const totalLoaded = transformedStories.length;
+        setHasMore(totalLoaded < (paginatedData?.total || 0));
+      }
+    } catch (err: any) {
+      if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+        console.log("Canceled ✅");
+        return;
+      }
+      console.error("Error fetching stories:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch stories");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
@@ -205,69 +274,6 @@ export function ReadingInterface() {
       0
     );
   };
-
-  // Fetch stories from API
-  useEffect(() => {
-    const fetchStories = async (isLoadMore = false) => {
-      try {
-        if (isLoadMore) {
-          setLoadingMore(true);
-        } else {
-          setLoading(true);
-          setError(null);
-        }
-
-        const selectedFilters = getSelectedFilters();
-
-        const params = {
-          page: isLoadMore ? pagination.currentPage + 1 : 1,
-          page_size: pagination.pageSize,
-          ...selectedFilters, // Spread all filters (level-difficulty, status)
-        };
-        const paginatedData: PaginatedResponse =
-          await readingService.fetchStories(params);
-
-        // Transform the API data to match our interface
-        const transformedStories: Story[] = paginatedData?.results;
-
-        if (isLoadMore) {
-          // Append new stories to existing ones
-          setStories((prev) => [...prev, ...transformedStories]);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: prev.currentPage + 1,
-          }));
-        } else {
-          // Replace stories for initial load or filter change
-          setStories(transformedStories);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: 1,
-            total: paginatedData?.total || 0,
-            totalPages: Math.ceil(
-              (paginatedData?.total || 0) / pagination.pageSize
-            ),
-          }));
-        }
-
-        // Check if there are more stories to load
-        const totalLoaded = isLoadMore
-          ? stories.length + transformedStories.length
-          : transformedStories.length;
-        setHasMore(totalLoaded < (paginatedData?.total || 0));
-      } catch (err) {
-        console.error("Error fetching stories:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch stories"
-        );
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    };
-
-    fetchStories();
-  }, [filters]);
 
   // Load more stories function
   const loadMoreStories = async () => {
@@ -339,7 +345,7 @@ export function ReadingInterface() {
 
     // If level is "ai", skip difficulty selection
     if (level === "ai") {
-      router.push(`/reading/77d9d2b4-0037-4821-ac61-6c96457615b9`);
+      fetchStories(true);
     } else {
       // Show difficulty selection for other levels
       setShowDifficultyDialog(true);
@@ -349,7 +355,16 @@ export function ReadingInterface() {
   const applyDifficulty = (difficulty: "easy" | "medium" | "hard") => {
     setSelectedDifficulty(difficulty);
     setShowDifficultyDialog(false);
-    router.push(`/reading/77d9d2b4-0037-4821-ac61-6c96457615b9`);
+
+    // Add level and difficulty to filters
+    if (selectedLevel) {
+      const levelDifficultyKey = `${selectedLevel}.${difficulty}`;
+      setFilters((prev) => ({
+        ...prev,
+        level: [...prev.level, levelDifficultyKey],
+      }));
+    }
+    fetchStories();
   };
 
   return (

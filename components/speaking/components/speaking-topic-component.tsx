@@ -13,7 +13,7 @@ import {
   XCircle,
   Clock,
 } from "lucide-react";
-import LiveSpeechToText from "@/components/shared/LiveSpeechToText";
+import LiveSpeechToText from "@/components/shared/components/LiveSpeechToText";
 import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import {
   SpeakingTopicComponentProps,
@@ -21,7 +21,7 @@ import {
   EvaluationHistoryItem,
 } from "../types/index";
 import { speakingService } from "@/services/speakingService";
-import { SpeakingEvaluationResults } from "./evaluation-results";
+import { SpeakingEvaluationResults } from "../../shared/components/SpeakingEvaluationResults";
 
 export function SpeakingTopicComponent({
   topic,

@@ -21,13 +21,13 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
-import { AnalysisResultsProps } from "../interfaces";
+import { ReadingEvaluationResultProps } from "../interfaces/index";
 
-export default function AnalysisResults({
+export default function ReadingEvaluationResult({
   result,
   onClose,
   onRetry,
-}: AnalysisResultsProps) {
+}: ReadingEvaluationResultProps) {
   const [activeTab, setActiveTab] = useState("accuracy");
 
   const getScoreIcon = (score: number) => {
@@ -37,7 +37,7 @@ export default function AnalysisResults({
     return <XCircle className="h-4 w-4" />;
   };
 
-  const overallRating = getOverallRating(result?.score || 0);
+  const overallRating = getOverallRating(result?.overall_score || 0);
 
   const renderFeedbackItems = (feedbackItems: string[]) => {
     return (
@@ -108,16 +108,16 @@ export default function AnalysisResults({
                   <div className="flex items-center gap-2 mt-1">
                     <div
                       className={`text-2xl font-black ${getScoreColor(
-                        result?.score || 0
+                        result?.overall_score || 0
                       )}`}
                     >
-                      {result?.score || 0}/10
+                      {result?.overall_score || 0}/10
                     </div>
                     <Badge
                       variant="outline"
                       className={`text-xs font-bold px-3 py-1 rounded-full ${overallRating?.bg} ${overallRating?.color} border-2`}
                     >
-                      {getScoreIcon(result?.score || 0)}
+                      {getScoreIcon(result?.overall_score || 0)}
                       <span className="ml-1">{overallRating?.text}</span>
                     </Badge>
                   </div>

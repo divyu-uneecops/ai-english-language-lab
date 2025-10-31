@@ -138,6 +138,23 @@ export default function EnglishLearningDashboard() {
                 </div>
               )}
             </div>
+            <Link href="/submissions">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 group cursor-pointer"
+              >
+                <div className="relative">
+                  <FileText className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+                  <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </div>
+                <span className="relative">
+                  View Submissions
+                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+                </span>
+                <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+              </Button>
+            </Link>
           </div>
         </div>
 

@@ -1,19 +1,11 @@
 import serverInterfaceService from "./serverInterfaceService";
 
 export const readingService = {
-  fetchStories: (params?: Record<string, any>) => {
-    return serverInterfaceService.get(`/reading/passages`, params);
+  fetchStories: (params?: Record<string, any>, signal?: AbortSignal) => {
+    return serverInterfaceService.get(`/reading/passages`, params, signal);
   },
   fetchStoryById: (storyId: string) =>
     serverInterfaceService.get(`/reading/passages/${storyId}`),
-  verifyAnswers: (
-    storyId: string,
-    answers: Array<{ question_id: string; answer: string }>
-  ) =>
-    serverInterfaceService.post("/reading/verify", {
-      story_id: storyId,
-      answers: answers,
-    }),
   evaluateReading: (
     passageId: string,
     audioData: Array<{ text: string; startTime: number; endTime: number }>
@@ -22,4 +14,9 @@ export const readingService = {
       passage_id: passageId,
       audio_data: audioData,
     }),
+  fetchEvaluationHistory: (passageId: string) =>
+    serverInterfaceService.get(`/reading/passages/${passageId}/submissions`),
+  // Fetch all submissions for the user
+  fetchAllSubmissions: () =>
+    serverInterfaceService.get(`/reading/passages/submissions`),
 };

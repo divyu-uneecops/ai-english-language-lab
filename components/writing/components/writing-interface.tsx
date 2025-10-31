@@ -31,7 +31,10 @@ import { writingService } from "@/services/writingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import { PaginatedResponse, WritingPrompt } from "../types";
 import { writingTypeOptions } from "../constants";
-import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
+import {
+  FilterDialog,
+  FilterCategory,
+} from "@/components/shared/components/FilterDialog";
 
 export function WritingInterface() {
   const router = useRouter();

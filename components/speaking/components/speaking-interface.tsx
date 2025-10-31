@@ -28,7 +28,10 @@ import { useRouter } from "next/navigation";
 import { speakingService } from "@/services/speakingService";
 import { getDifficultyColor, getLevelColor } from "@/lib/utils";
 import { PaginatedResponse, SpeakingTopic } from "../types";
-import { FilterDialog, FilterCategory } from "@/components/shared/FilterDialog";
+import {
+  FilterDialog,
+  FilterCategory,
+} from "@/components/shared/components/FilterDialog";
 
 export function SpeakingInterface() {
   const router = useRouter();

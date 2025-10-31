@@ -1,9 +1,14 @@
 import api from "./api"; // import the axios instance we made
 
 class ServerInterfaceService {
-  async get<T = any>(url: string, params?: Record<string, any>) {
+  async get<T = any>(
+    url: string,
+    params?: Record<string, any>,
+    signal?: AbortSignal
+  ) {
     const { data } = await api.get<T>(url, {
       params,
+      signal,
     });
     return data;
   }

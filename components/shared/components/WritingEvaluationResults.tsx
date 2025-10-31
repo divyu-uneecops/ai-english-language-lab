@@ -18,13 +18,13 @@ import {
   FileText,
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
-import { EvaluationResultsProps } from "../types";
+import { WritingEvaluationResultsProps } from "../interfaces";
 
-export function EvaluationResults({
+export function WritingEvaluationResults({
   evaluation,
   onClose,
   onRevise,
-}: EvaluationResultsProps) {
+}: WritingEvaluationResultsProps) {
   const [activeTab, setActiveTab] = useState("strengths");
 
   const getScoreIcon = (score: number) => {
@@ -54,8 +54,8 @@ export function EvaluationResults({
     );
   };
 
-  const overallRating = getOverallRating(evaluation?.score || 0);
-  const displayScore = Math.round(evaluation?.score);
+  const overallRating = getOverallRating(evaluation?.overall_score || 0);
+  const displayScore = Math.round(evaluation?.overall_score);
 
   return (
     <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 overflow-hidden">
@@ -76,7 +76,7 @@ export function EvaluationResults({
                   <div className="flex items-center gap-2 mt-1">
                     <div
                       className={`text-2xl font-black ${getScoreColor(
-                        evaluation?.score || 0
+                        evaluation?.overall_score || 0
                       )}`}
                     >
                       {displayScore}/10
@@ -85,7 +85,7 @@ export function EvaluationResults({
                       variant="outline"
                       className={`text-xs font-bold px-3 py-1 rounded-full ${overallRating?.bg} ${overallRating?.color} border-2`}
                     >
-                      {getScoreIcon(evaluation?.score || 0)}
+                      {getScoreIcon(evaluation?.overall_score || 0)}
                       <span className="ml-1">{overallRating?.text}</span>
                     </Badge>
                   </div>
