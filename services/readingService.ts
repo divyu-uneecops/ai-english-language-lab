@@ -14,8 +14,6 @@ export const readingService = {
       passage_id: passageId,
       audio_data: audioData,
     }),
-  fetchEvaluationHistory: (passageId: string) =>
-    serverInterfaceService.get(`/reading/passages/${passageId}/submissions`),
   // Fetch all submissions for the user
   fetchAllSubmissions: () =>
     serverInterfaceService.get(`/reading/passages/submissions`),
