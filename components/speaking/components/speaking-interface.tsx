@@ -182,6 +182,9 @@ export function SpeakingInterface() {
   }, []);
 
   const fetchSpeakingTopics = async (aiDecide = false) => {
+    setLoading(true);
+    setError(null);
+
     try {
       // Cancel previous request if active
       controllerRef.current?.abort();
@@ -189,9 +192,6 @@ export function SpeakingInterface() {
       // Create a new one
       const controller = new AbortController();
       controllerRef.current = controller;
-
-      setLoading(true);
-      setError(null);
 
       const selectedFilters = getSelectedFilters();
 
