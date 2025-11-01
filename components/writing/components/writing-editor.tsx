@@ -9,6 +9,7 @@ import { Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { writingService } from "@/services/writingService";
 import { getDifficultyColor, isEmpty } from "@/lib/utils";
 import { WritingEditorProps } from "../types";
+import { WritingEvaluationResults } from "@/components/shared/components/WritingEvaluationResults";
 
 export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   const [content, setContent] = useState("");
@@ -17,7 +18,7 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<{
     your_answer: string;
-    score: number;
+    overall_score: number;
     feedback: {
       strengths: string[];
       areas_for_improvement: string[];
@@ -228,6 +229,21 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
           </div>
         </div>
       </div>
+
+      {/* Evaluation Results Dialog */}
+      <Dialog open={showEvaluation} onOpenChange={setShowEvaluation}>
+        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+          <div className="overflow-y-auto max-h-[90vh]">
+            {evaluation && (
+              <WritingEvaluationResults
+                evaluation={evaluation}
+                onClose={handleCloseEvaluation}
+                onRevise={handleReviseWriting}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
