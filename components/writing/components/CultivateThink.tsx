@@ -13,7 +13,7 @@ export function CultivateThink() {
         {
           title: "Basic Reading Skills",
           description:
-            "Learn to read simple stories with pictures\nBuild foundational vocabulary with everyday words",
+            "Learn to read simple stories\nBuild foundational vocabulary with everyday words",
           icon: "A",
           bgColor: "from-green-400 to-green-600",
           iconType: "number",
@@ -45,8 +45,7 @@ export function CultivateThink() {
       skills: [
         {
           title: "Reading Comprehension",
-          description:
-            "Read engaging stories and understand key ideas\nAnswer comprehension questions to test understanding",
+          description: "Read engaging stories and understand key ideas",
           icon: "B",
           bgColor: "from-orange-400 to-orange-600",
           iconType: "number",
