@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
-import { Suspense } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -28,7 +27,7 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <AuthProvider>
           <Navigation />
-          <Suspense fallback={null}>{children}</Suspense>
+          {children}
           <Footer />
         </AuthProvider>
 
