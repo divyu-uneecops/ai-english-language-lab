@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
-import { EvaluationResults } from "./evaluation-results";
 import { writingService } from "@/services/writingService";
 import { getDifficultyColor, isEmpty } from "@/lib/utils";
 import { WritingEditorProps } from "../types";
@@ -26,15 +25,6 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
     example_answer: string;
   } | null>(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
-
-  useEffect(() => {
-    if (!isEmpty(prompt)) {
-      if (prompt?.solved) {
-        setShowEvaluation(true);
-        setEvaluation(prompt?.evaluation_data || null);
-      }
-    }
-  }, [prompt]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -238,21 +228,6 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
           </div>
         </div>
       </div>
-
-      {/* Evaluation Results Dialog */}
-      <Dialog open={showEvaluation} onOpenChange={setShowEvaluation}>
-        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
-          <div className="overflow-y-auto max-h-[90vh]">
-            {evaluation && (
-              <EvaluationResults
-                evaluation={evaluation}
-                onClose={handleCloseEvaluation}
-                onRevise={handleReviseWriting}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
