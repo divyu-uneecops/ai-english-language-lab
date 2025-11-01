@@ -14,6 +14,7 @@ import {
   Loader2,
   ArrowLeft,
 } from "lucide-react";
+import { isEmpty } from "@/lib/utils";
 
 interface WritingSubmission {
   topic_id: string;
@@ -227,9 +228,12 @@ export default function WritingSubmissionsPage() {
               <WritingEvaluationResults
                 evaluation={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/writing")}
-                onRevise={() =>
-                  router.push(`/writing/${selectedSubmission?.topic_id}`)
-                }
+                onRevise={() => {
+                  if (isEmpty(selectedSubmission?.topic_id)) {
+                    return;
+                  }
+                  router.push(`/writing/${selectedSubmission?.topic_id}`);
+                }}
               />
             )}
           </div>

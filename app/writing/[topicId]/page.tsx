@@ -17,16 +17,6 @@ interface WritingPrompt {
   difficulty: string;
   level: string;
   guidelines: string[];
-  solved: boolean;
-  evaluation_data?: {
-    your_answer: string;
-    score: number;
-    feedback: {
-      strengths: string[];
-      areas_for_improvement: string[];
-    };
-    example_answer: string;
-  };
 }
 
 export default function WritingTopicPage() {
