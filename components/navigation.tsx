@@ -2,24 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  BookOpen,
-  Mic,
-  MessageCircle,
-  TrendingUp,
-  User,
-  LogOut,
-  PenTool,
-  Menu,
-  X,
-  Sparkles,
-  Sun,
-  Moon,
-  Zap,
-  Bell,
-  Search,
-} from "lucide-react";
-import { useTheme } from "next-themes";
+import { BookOpen, User, LogOut, Menu, X, Zap, Search } from "lucide-react";
+
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -28,35 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navigation() {
   const { user, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
-  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
-    <>
-      {user && (
-        <Link
-          href="/progress"
-          onClick={() => mobile && setMobileMenuOpen(false)}
-        >
-          <Button
-            variant="ghost"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group ${
-              mobile ? "w-full justify-start" : ""
-            }`}
-          >
-            <TrendingUp className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-            <span className="font-medium">Progress</span>
-          </Button>
-        </Link>
-      )}
-    </>
-  );
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-slate-700 shadow-sm">
@@ -87,22 +47,6 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-2">
-            {/* <NavLinks /> */}
-
-            {/* Theme Toggle */}
-            {/* <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="ml-2 p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
-              ) : (
-                <Moon className="h-5 w-5 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
-              )}
-            </Button> */}
-
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger>
@@ -168,42 +112,10 @@ export function Navigation() {
           </div>
         </div>
 
-        {/* Search Bar */}
-        {searchOpen && (
-          <div className="lg:hidden mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search modules, lessons..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 animate-in slide-in-from-top-2 duration-300">
             <div className="flex flex-col space-y-2 p-4 md:p-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              <NavLinks mobile />
-
-              {/* Mobile Theme Toggle */}
-              <Button
-                variant="ghost"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="w-full justify-start px-4 py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:text-[#FF7B3A] dark:hover:text-[#FFB347] hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 group min-h-[48px]"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4 mr-3 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
-                ) : (
-                  <Moon className="h-4 w-4 mr-3 group-hover:scale-110 group-hover:rotate-180 transition-all duration-500" />
-                )}
-                <span className="font-medium">
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </span>
-              </Button>
-
               {user && (
                 <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
                   <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-orange-50 dark:bg-slate-800 mb-3">
