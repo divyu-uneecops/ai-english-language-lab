@@ -175,6 +175,38 @@ export function WritingInterface() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+
+  // Fetch writing topics from API
+  useEffect(() => {
+    fetchWritingTopics();
+  }, [filters]);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+
+      // Load more when scrolled to within 100px of bottom
+      if (
+        scrollTop + clientHeight >= scrollHeight - 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
+        loadMorePrompts();
+      }
+    };
+
+    scrollContainer.addEventListener("scroll", handleScroll);
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loadingMore, writingPrompts?.length]);
+
+  // Open level selection dialog on first mount
+  useEffect(() => {
+    setShowLevelDifficultyDialog(true);
+  }, []);
 
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
@@ -224,73 +256,58 @@ export function WritingInterface() {
     );
   };
 
-  // Fetch writing topics from API
-  useEffect(() => {
-    const fetchWritingTopics = async (isLoadMore = false) => {
-      try {
-        if (isLoadMore) {
-          setLoadingMore(true);
-        } else {
-          setLoading(true);
-          setError(null);
-        }
+  const fetchWritingTopics = async (aiDecide = false) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Cancel previous request if active
+      controllerRef.current?.abort();
 
-        const selectedFilters = getSelectedFilters();
+      // Create a new one
+      const controller = new AbortController();
+      controllerRef.current = controller;
 
-        const params = {
-          page: isLoadMore ? pagination?.currentPage + 1 : 1,
-          page_size: pagination?.pageSize,
-          ...selectedFilters, // Spread all filters (level-difficulty, status, category)
-        };
+      const selectedFilters = getSelectedFilters();
 
-        const paginatedData: PaginatedResponse =
-          await writingService.fetchTopics(params);
+      const params = {
+        page: 1,
+        page_size: pagination?.pageSize,
+        ...selectedFilters, // Spread all filters (level-difficulty, status, category)
+      };
 
-        // Transform the API data to match our interface
-        const transformedPrompts: WritingPrompt[] =
-          paginatedData?.results || [];
+      const paginatedData: PaginatedResponse = await writingService.fetchTopics(
+        params
+      );
 
-        if (isLoadMore) {
-          // Append new prompts to existing ones
-          setWritingPrompts((prev) => [...prev, ...transformedPrompts]);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: prev.currentPage + 1,
-          }));
-        } else {
-          // Replace prompts for initial load or filter change
-          setWritingPrompts(transformedPrompts);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: 1,
-            total: paginatedData?.total || 0,
-            totalPages: Math.ceil(
-              (paginatedData?.total || 0) / pagination.pageSize
-            ),
-          }));
-        }
+      // Transform the API data to match our interface
+      const transformedPrompts: WritingPrompt[] = paginatedData?.results || [];
 
-        // Check if there are more prompts to load
-        const totalLoaded = isLoadMore
-          ? writingPrompts?.length + transformedPrompts?.length
-          : transformedPrompts?.length;
-        setHasMore(totalLoaded < (paginatedData?.total || 0));
-      } catch (err: any) {
-        if (err?.response) {
-          // If using axios
-          setError(
-            err?.response?.data?.message ||
-              "Failed to load story. Please try again."
-          );
-        }
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
+      // Replace prompts for initial load or filter change
+      setWritingPrompts(transformedPrompts);
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: 1,
+        total: paginatedData?.total || 0,
+        totalPages: Math.ceil(
+          (paginatedData?.total || 0) / pagination.pageSize
+        ),
+      }));
+
+      // Check if there are more prompts to load
+      const totalLoaded = transformedPrompts?.length;
+      setHasMore(totalLoaded < (paginatedData?.total || 0));
+    } catch (err: any) {
+      if (err?.response) {
+        // If using axios
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load story. Please try again."
+        );
       }
-    };
-
-    fetchWritingTopics();
-  }, [filters]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Load more prompts function
   const loadMorePrompts = async () => {
@@ -336,31 +353,6 @@ export function WritingInterface() {
   };
 
   // Scroll detection for infinite scroll within container
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-
-      // Load more when scrolled to within 100px of bottom
-      if (
-        scrollTop + clientHeight >= scrollHeight - 100 &&
-        hasMore &&
-        !loadingMore
-      ) {
-        loadMorePrompts();
-      }
-    };
-
-    scrollContainer.addEventListener("scroll", handleScroll);
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
-  }, [hasMore, loadingMore, writingPrompts?.length]);
-
-  // Open level selection dialog on first mount
-  useEffect(() => {
-    setShowLevelDifficultyDialog(true);
-  }, []);
 
   const handleLevelClick = (
     level: "beginner" | "intermediate" | "advanced" | "ai"
