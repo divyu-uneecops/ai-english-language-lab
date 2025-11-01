@@ -6,7 +6,6 @@ export interface Story {
   difficulty: string;
   readTime?: string;
   passage: string;
-  solved: boolean;
 }
 
 export interface PaginatedResponse {

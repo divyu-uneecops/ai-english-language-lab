@@ -201,7 +201,7 @@ export function ReadingInterface() {
       const params = {
         page: 1,
         page_size: pagination.pageSize,
-        ai_decide: aiDecide,
+        // ai_decide: aiDecide,
         ...selectedFilters, // Spread all filters (level-difficulty, status)
       };
 
@@ -332,7 +332,7 @@ export function ReadingInterface() {
     // For AI, immediately fetch and navigate, no difficulty step
     if (level === "ai") {
       setShowLevelDifficultyDialog(false);
-      fetchStories(true);
+      // fetchStories(true);
     }
   };
 
@@ -517,18 +517,6 @@ export function ReadingInterface() {
                               </Badge>
                             </div>
                           </div>
-                          {/* Solved status badge - moved to right side */}
-                          {story?.solved && (
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700 border-green-200 shadow-sm"
-                              >
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Solved
-                              </Badge>
-                            </div>
-                          )}
                         </div>
 
                         {/* Story title */}
@@ -562,13 +550,11 @@ export function ReadingInterface() {
                         <div className="flex justify-end">
                           <Button
                             size="sm"
-                            className={`px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${
-                              story?.solved
-                                ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                            }`}
+                            className={
+                              "px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                            }
                           >
-                            {story?.solved ? "Read Again" : "Start Reading"}
+                            Start Reading
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
                         </div>
