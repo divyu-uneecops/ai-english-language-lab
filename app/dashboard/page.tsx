@@ -1,35 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
-  Clock,
-  Trophy,
   Star,
   Target,
   TrendingUp,
-  Play,
-  Lock,
   ChevronRight,
   CheckCircle,
-  Award,
-  Users,
-  Brain,
-  Zap,
-  Globe,
   FileText,
   Mic,
-  Volume2,
-  MessageCircle,
   PenTool,
   BookMarked,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  dashboardService,
+  type DashboardSubmissionCounts,
+} from "@/services/dashboardService";
 
 export default function EnglishLearningDashboard() {
   const { user } = useAuth();
@@ -40,6 +30,14 @@ export default function EnglishLearningDashboard() {
     streak: 7,
     completedModules: 12,
   });
+
+  const [submissionCounts, setSubmissionCounts] =
+    useState<DashboardSubmissionCounts>({
+      reading: 0,
+      writing: 0,
+      speaking: 0,
+    });
+  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(true);
 
   const [continuePracticing] = useState([
     {
@@ -52,6 +50,7 @@ export default function EnglishLearningDashboard() {
       completed: 8,
       total: 12,
       href: "/reading",
+      type: "reading",
     },
     {
       id: 2,
@@ -63,6 +62,7 @@ export default function EnglishLearningDashboard() {
       completed: 3,
       total: 8,
       href: "/speaking",
+      type: "speaking",
     },
     {
       id: 3,
@@ -74,6 +74,7 @@ export default function EnglishLearningDashboard() {
       completed: 1,
       total: 5,
       href: "/writing",
+      type: "writing",
     },
     {
       id: 4,
@@ -85,20 +86,35 @@ export default function EnglishLearningDashboard() {
       completed: 6,
       total: 10,
       href: "/vocabulary",
-    },
-    {
-      id: 5,
-      title: "AI Chat Practice",
-      progress: 0,
-      pointsNeeded: 20,
-      icon: <MessageCircle className="h-6 w-6" />,
-      color: "blue",
-      completed: 0,
-      total: 3,
-      href: "#",
-      locked: true,
+      type: "vocabulary",
     },
   ]);
+
+  useEffect(() => {
+    fetchSubmissionCounts();
+  }, []);
+
+  const fetchSubmissionCounts = async () => {
+    setIsLoadingSubmissions(true);
+    try {
+      const counts = await dashboardService.fetchSubmissions();
+
+      setSubmissionCounts({
+        reading: counts?.reading ?? 0,
+        writing: counts?.writing ?? 0,
+        speaking: counts?.speaking ?? 0,
+      });
+    } catch (error) {
+      console.error("Error fetching submission counts:", error);
+      setSubmissionCounts({
+        reading: 0,
+        writing: 0,
+        speaking: 0,
+      });
+    } finally {
+      setIsLoadingSubmissions(false);
+    }
+  };
 
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return "bg-green-500";
@@ -248,83 +264,60 @@ export default function EnglishLearningDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {continuePracticing.map((item, index) => (
-              <Link key={item.id} href={item.href}>
-                <div className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 hover:border-orange-200/50 cursor-pointer hover:scale-[1.02]">
-                  {/* Enhanced Header */}
-                  <div className="relative z-10 flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div
-                          className={`p-4 rounded-2xl ${getSkillColor(
-                            item.color
-                          )} bg-opacity-10 group-hover:scale-110 transition-all duration-300`}
-                        >
-                          {item.icon}
+            {continuePracticing.map((item, index) => {
+              const getSubmissionText = () => {
+                if (isLoadingSubmissions) return "Loading...";
+                if (item.type === "vocabulary")
+                  return `${item.completed} completed`;
+                const count =
+                  submissionCounts[
+                    item.type as keyof typeof submissionCounts
+                  ] || 0;
+                return `${count} submission${count !== 1 ? "s" : ""}`;
+              };
+
+              return (
+                <Link key={item.id} href={item.href}>
+                  <div className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 hover:border-orange-200/50 cursor-pointer hover:scale-[1.02]">
+                    {/* Enhanced Header */}
+                    <div className="relative z-10 flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div
+                            className={`p-4 rounded-2xl ${getSkillColor(
+                              item.color
+                            )} bg-opacity-10 group-hover:scale-110 transition-all duration-300`}
+                          >
+                            {item.icon}
+                          </div>
+                          <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
-                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-xl group-hover:text-orange-600 transition-colors mb-1">
+                            {item.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <FileText className="h-3.5 w-3.5 text-gray-500" />
+                            <span
+                              className={`text-sm ${
+                                isLoadingSubmissions
+                                  ? "text-gray-400"
+                                  : "text-gray-600"
+                              }`}
+                            >
+                              {getSubmissionText()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 text-xl group-hover:text-orange-600 transition-colors mb-1">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {item.completed}/{item.total} lessons completed
-                        </p>
-                      </div>
-                    </div>
-                    <div className="p-2 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
-                      <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
-                    </div>
-                  </div>
-
-                  {/* Enhanced Progress Section */}
-                  <div className="relative z-10 mb-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-semibold text-gray-700">
-                        Progress
-                      </span>
-                      <span className="text-lg font-bold text-gray-900">
-                        {item.progress}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
-                      <div
-                        className={`h-3 rounded-full transition-all duration-700 ease-out relative ${getProgressColor(
-                          item.progress
-                        )}`}
-                        style={{ width: `${item.progress}%` }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+                      <div className="p-2 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
+                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
                       </div>
                     </div>
                   </div>
-
-                  {/* Enhanced Footer */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                        <span className="text-xs font-medium text-gray-600">
-                          {item.locked
-                            ? `Unlock at ${item.pointsNeeded} points`
-                            : `${Math.max(
-                                0,
-                                item.pointsNeeded -
-                                  Math.floor(item.progress * 0.1)
-                              )} points to next level`}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="px-3 py-1 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
-                      <span className="text-xs font-semibold text-gray-600 group-hover:text-orange-600">
-                        {item.progress > 0 ? "In Progress" : "Not Started"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
