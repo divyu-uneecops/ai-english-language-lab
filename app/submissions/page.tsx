@@ -21,6 +21,7 @@ import ReadingEvaluationResult from "@/components/shared/components/ReadingEvalu
 import { useRouter, useSearchParams } from "next/navigation";
 import { SpeakingEvaluationResults } from "@/components/shared/components/SpeakingEvaluationResults";
 import { WritingEvaluationResults } from "@/components/shared/components/WritingEvaluationResults";
+import { isEmpty } from "@/lib/utils";
 
 interface ReadingSubmission {
   passage_id: string;
@@ -82,8 +83,7 @@ interface SpeakingSubmission {
 
 export default function SubmissionsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as string) || "reading";
+  const initialTab = "reading";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [readingSubmissions, setReadingSubmissions] = useState<
     ReadingSubmission[]
@@ -233,7 +233,7 @@ export default function SubmissionsPage() {
                     <StatusIcon className={`h-4 w-4 ${status?.color}`} />
                   </div>
                   <span className={`text-sm font-medium ${status?.color}`}>
-                    {status.label}
+                    {status?.label}
                   </span>
                 </div>
 
@@ -551,9 +551,12 @@ export default function SubmissionsPage() {
               <ReadingEvaluationResult
                 result={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/reading")}
-                onRetry={() =>
-                  router.push(`/reading/${selectedSubmission?.passage_id}`)
-                }
+                onRetry={() => {
+                  if (isEmpty(selectedSubmission?.passage_id)) {
+                    return;
+                  }
+                  router.push(`/reading/${selectedSubmission?.passage_id}`);
+                }}
               />
             )}
 
@@ -561,9 +564,13 @@ export default function SubmissionsPage() {
               <SpeakingEvaluationResults
                 evaluation={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/speaking")}
-                onRevise={() =>
-                  router.push(`/speaking/${selectedSubmission?.topic_id}`)
-                }
+                onRevise={() => {
+                  if (isEmpty(selectedSubmission?.topic_id)) {
+                    return;
+                  }
+
+                  router.push(`/speaking/${selectedSubmission?.topic_id}`);
+                }}
               />
             )}
 
@@ -571,9 +578,12 @@ export default function SubmissionsPage() {
               <WritingEvaluationResults
                 evaluation={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/writing")}
-                onRevise={() =>
-                  router.push(`/writing/${selectedSubmission?.topic_id}`)
-                }
+                onRevise={() => {
+                  if (selectedSubmission?.topic_id) {
+                    return;
+                  }
+                  router.push(`/writing/${selectedSubmission?.topic_id}`);
+                }}
               />
             )}
           </div>

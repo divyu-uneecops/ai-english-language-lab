@@ -8,6 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { speakingService } from "@/services/speakingService";
 import { SpeakingEvaluationResults } from "@/components/shared/components/SpeakingEvaluationResults";
 import { Mic, CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
+import { isEmpty } from "@/lib/utils";
 
 interface SpeakingSubmission {
   topic_id: string;
@@ -90,6 +91,11 @@ export default function SpeakingSubmissionsPage() {
     setShowDetailsDialog(true);
   };
 
+  const handleRetry = () => {
+    if (isEmpty(selectedSubmission?.topic_id)) return;
+    router.push(`/reading/${selectedSubmission?.topic_id}`);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
@@ -124,7 +130,7 @@ export default function SpeakingSubmissionsPage() {
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
               </div>
-            ) : speakingSubmissions.length === 0 ? (
+            ) : speakingSubmissions?.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                 <div className="text-center">
                   <div className="mb-3 text-gray-400">
@@ -153,11 +159,11 @@ export default function SpeakingSubmissionsPage() {
                 </div>
 
                 <div className="divide-y divide-gray-100">
-                  {speakingSubmissions.map((submission, index) => {
+                  {speakingSubmissions?.map((submission, index) => {
                     const status = getScoreStatus(
                       submission?.evaluation_data?.overall_score
                     );
-                    const StatusIcon = status.icon;
+                    const StatusIcon = status?.icon;
                     return (
                       <div
                         key={`speaking-${index}`}
@@ -181,7 +187,7 @@ export default function SpeakingSubmissionsPage() {
                           <span
                             className={`text-sm font-medium ${status?.color}`}
                           >
-                            {status.label}
+                            {status?.label}
                           </span>
                         </div>
 
@@ -224,9 +230,7 @@ export default function SpeakingSubmissionsPage() {
               <SpeakingEvaluationResults
                 evaluation={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/speaking")}
-                onRevise={() =>
-                  router.push(`/speaking/${selectedSubmission?.topic_id}`)
-                }
+                onRevise={handleRetry}
               />
             )}
           </div>
