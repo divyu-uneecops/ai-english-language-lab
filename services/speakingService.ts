@@ -19,10 +19,6 @@ export const speakingService = {
       topic_id: topicId,
     }),
 
-  // Fetch evaluation history for a specific topic
-  fetchEvaluationHistory: async (topicId: string) =>
-    serverInterfaceService.get(`/speaking/topics/${topicId}/history`),
-
   // Fetch all submissions for the user
   fetchAllSubmissions: async () =>
     serverInterfaceService.get(`/speaking/topics/submissions`),
