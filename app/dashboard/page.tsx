@@ -25,8 +25,6 @@ export default function EnglishLearningDashboard() {
   const { user } = useAuth();
 
   const [userStats] = useState({
-    totalPoints: 127,
-    level: "Intermediate",
     streak: 7,
     completedModules: 12,
   });
@@ -116,13 +114,6 @@ export default function EnglishLearningDashboard() {
     }
   };
 
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) return "bg-green-500";
-    if (progress >= 60) return "bg-blue-500";
-    if (progress >= 40) return "bg-yellow-500";
-    return "bg-gray-300";
-  };
-
   const getSkillColor = (color: string) => {
     const colors = {
       orange: "text-orange-600",
@@ -190,51 +181,14 @@ export default function EnglishLearningDashboard() {
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold mb-2">
-                        {userStats.totalPoints >= 35 ? (
-                          "🌟 First Star Achieved! 🌟"
-                        ) : (
-                          <>
-                            <span className="text-yellow-300 font-bold text-3xl">
-                              {35 - userStats.totalPoints}
-                            </span>{" "}
-                            <span className="text-lg">
-                              points to your first star
-                            </span>
-                          </>
-                        )}
+                        🌟 First Star Achieved! 🌟
                       </h2>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="w-full max-w-md mx-auto lg:mx-0">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-orange-100">Progress</span>
-                      <span className="text-sm font-bold text-yellow-300">
-                        {userStats.totalPoints}/35
-                      </span>
-                    </div>
-                    <div className="w-full bg-white/20 rounded-full h-3">
-                      <div
-                        className="bg-gradient-to-r from-yellow-300 to-yellow-400 h-3 rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${Math.min(
-                            (userStats.totalPoints / 35) * 100,
-                            100
-                          )}%`,
-                        }}
-                      ></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-white/10 rounded-xl p-4 text-center">
-                    <Target className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">{userStats.level}</p>
-                    <p className="text-xs text-orange-100">Level</p>
-                  </div>
+                <div className="flex items-center gap-4">
                   <div className="bg-white/10 rounded-xl p-4 text-center">
                     <TrendingUp className="h-5 w-5 text-white mx-auto mb-2" />
                     <p className="text-lg font-bold">{userStats.streak}</p>
