@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   BookOpen,
   Star,
-  Target,
   TrendingUp,
   ChevronRight,
   CheckCircle,
@@ -41,48 +40,32 @@ export default function EnglishLearningDashboard() {
     {
       id: 1,
       title: "Reading Practice",
-      progress: 75,
-      pointsNeeded: 15,
       icon: <BookOpen className="h-6 w-6" />,
       color: "orange",
-      completed: 8,
-      total: 12,
       href: "/reading",
       type: "reading",
     },
     {
       id: 2,
       title: "Speaking Practice",
-      progress: 45,
-      pointsNeeded: 25,
       icon: <Mic className="h-6 w-6" />,
       color: "pink",
-      completed: 3,
-      total: 8,
       href: "/speaking",
       type: "speaking",
     },
     {
       id: 3,
       title: "Writing Practice",
-      progress: 20,
-      pointsNeeded: 30,
       icon: <PenTool className="h-6 w-6" />,
       color: "yellow",
-      completed: 1,
-      total: 5,
       href: "/writing",
       type: "writing",
     },
     {
       id: 4,
       title: "Vocabulary Practice",
-      progress: 60,
-      pointsNeeded: 20,
       icon: <BookMarked className="h-6 w-6" />,
       color: "purple",
-      completed: 6,
-      total: 10,
       href: "/vocabulary",
       type: "vocabulary",
     },
@@ -103,7 +86,6 @@ export default function EnglishLearningDashboard() {
         speaking: counts?.speaking ?? 0,
       });
     } catch (error) {
-      console.error("Error fetching submission counts:", error);
       setSubmissionCounts({
         reading: 0,
         writing: 0,
@@ -139,7 +121,7 @@ export default function EnglishLearningDashboard() {
                 <div className="flex items-center gap-4 group">
                   <div>
                     <h1 className="text-sm text-gray-600">
-                      Welcome back, {user.name || user.email?.split("@")[0]}
+                      Welcome back, {user?.name || user?.email?.split("@")[0]}
                     </h1>
                   </div>
                 </div>
@@ -191,13 +173,13 @@ export default function EnglishLearningDashboard() {
                 <div className="flex items-center gap-4">
                   <div className="bg-white/10 rounded-xl p-4 text-center">
                     <TrendingUp className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">{userStats.streak}</p>
+                    <p className="text-lg font-bold">{userStats?.streak}</p>
                     <p className="text-xs text-orange-100">Streak</p>
                   </div>
                   <div className="bg-white/10 rounded-xl p-4 text-center">
                     <CheckCircle className="h-5 w-5 text-white mx-auto mb-2" />
                     <p className="text-lg font-bold">
-                      {userStats.completedModules}
+                      {userStats?.completedModules}
                     </p>
                     <p className="text-xs text-orange-100">Done</p>
                   </div>
@@ -218,11 +200,10 @@ export default function EnglishLearningDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {continuePracticing.map((item, index) => {
+            {continuePracticing?.map((item: any, index: number) => {
               const getSubmissionText = () => {
                 if (isLoadingSubmissions) return "Loading...";
-                if (item.type === "vocabulary")
-                  return `${item.completed} completed`;
+                if (item.type === "vocabulary") return `10 completed`;
                 const count =
                   submissionCounts[
                     item.type as keyof typeof submissionCounts
@@ -239,16 +220,16 @@ export default function EnglishLearningDashboard() {
                         <div className="relative">
                           <div
                             className={`p-4 rounded-2xl ${getSkillColor(
-                              item.color
+                              item?.color
                             )} bg-opacity-10 group-hover:scale-110 transition-all duration-300`}
                           >
-                            {item.icon}
+                            {item?.icon}
                           </div>
                           <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
                         <div>
                           <h3 className="font-bold text-gray-900 text-xl group-hover:text-orange-600 transition-colors mb-1">
-                            {item.title}
+                            {item?.title}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <FileText className="h-3.5 w-3.5 text-gray-500" />

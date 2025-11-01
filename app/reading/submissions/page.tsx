@@ -14,6 +14,7 @@ import {
   Loader2,
   ArrowLeft,
 } from "lucide-react";
+import { isEmpty } from "@/lib/utils";
 
 interface ReadingSubmission {
   passage_id: string;
@@ -103,6 +104,11 @@ export default function ReadingSubmissionsPage() {
     setShowDetailsDialog(true);
   };
 
+  const handleRetry = () => {
+    if (isEmpty(selectedSubmission?.passage_id)) return;
+    router.push(`/reading/${selectedSubmission?.passage_id}`);
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50">
@@ -166,11 +172,11 @@ export default function ReadingSubmissionsPage() {
                 </div>
 
                 <div className="divide-y divide-gray-100">
-                  {readingSubmissions.map((submission, index) => {
+                  {readingSubmissions?.map((submission, index) => {
                     const status = getScoreStatus(
                       submission?.evaluation_data?.overall_score
                     );
-                    const StatusIcon = status.icon;
+                    const StatusIcon = status?.icon;
                     return (
                       <div
                         key={`reading-${index}`}
@@ -194,7 +200,7 @@ export default function ReadingSubmissionsPage() {
                           <span
                             className={`text-sm font-medium ${status?.color}`}
                           >
-                            {status.label}
+                            {status?.label}
                           </span>
                         </div>
 
@@ -211,7 +217,7 @@ export default function ReadingSubmissionsPage() {
                             className={`text-sm font-bold ${status?.color}`}
                           >
                             {Math.round(
-                              submission?.evaluation_data?.overall_score
+                              submission?.evaluation_data?.overall_score || 0
                             )}
                             /10
                           </span>
@@ -237,9 +243,7 @@ export default function ReadingSubmissionsPage() {
               <ReadingEvaluationResult
                 result={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/reading")}
-                onRetry={() =>
-                  router.push(`/reading/${selectedSubmission?.passage_id}`)
-                }
+                onRetry={handleRetry}
               />
             )}
           </div>
