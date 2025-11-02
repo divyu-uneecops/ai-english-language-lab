@@ -249,7 +249,7 @@ export default function SubmissionsPage() {
                   <span className={`text-sm font-bold ${status?.color}`}>
                     {submission?.evaluation_data?.overall_score}/10
                   </span>
-                  <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
+                  <button className=" text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
                   </button>
                 </div>
@@ -344,7 +344,7 @@ export default function SubmissionsPage() {
                   <span className={`text-sm font-bold ${status?.color}`}>
                     {submission?.evaluation_data?.overall_score}/10
                   </span>
-                  <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
+                  <button className=" text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
                   </button>
                 </div>
@@ -439,7 +439,7 @@ export default function SubmissionsPage() {
                   <span className={`text-sm font-bold ${status?.color}`}>
                     {submission?.evaluation_data?.overall_score}/10
                   </span>
-                  <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
+                  <button className=" text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
                   </button>
                 </div>
