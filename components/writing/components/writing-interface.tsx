@@ -355,24 +355,18 @@ export function WritingInterface() {
 
       const transformedPrompts: WritingPrompt[] = paginatedData?.results || [];
 
-      // Append new prompts to existing ones
+      // Append new prompts to existing ones and check if there are more to load
       setWritingPrompts((prev) => [...prev, ...transformedPrompts]);
+
       setPagination((prev) => ({
         ...prev,
         currentPage: prev?.currentPage + 1,
       }));
 
-      // Check if there are more prompts to load
       const totalLoaded = writingPrompts?.length + transformedPrompts?.length;
       setHasMore(totalLoaded < (paginatedData?.total || 0));
-    } catch (err: any) {
-      if (err?.response) {
-        // If using axios
-        setError(
-          err?.response?.data?.message ||
-            "Failed to load story. Please try again."
-        );
-      }
+    } catch (err) {
+      console.error("Error loading more prompts:", err);
     } finally {
       setLoadingMore(false);
     }
