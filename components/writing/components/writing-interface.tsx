@@ -345,6 +345,7 @@ export function WritingInterface() {
       const params = {
         page: pagination?.currentPage + 1,
         page_size: pagination?.pageSize,
+        aiDecide: false,
         ...selectedFilters, // Spread all filters
       };
 

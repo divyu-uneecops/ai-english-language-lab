@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Target, CheckCircle, Loader2, Sparkles } from "lucide-react";
 import { writingService } from "@/services/writingService";
-import { getDifficultyColor, isEmpty } from "@/lib/utils";
+import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import { WritingEditorProps } from "../types";
 import { WritingEvaluationResults } from "@/components/shared/components/WritingEvaluationResults";
 
@@ -66,6 +66,7 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
 
   const handleReviseWriting = () => {
     setShowEvaluation(false);
+    handleContentChange("");
   };
 
   // Remove the early return for evaluation results - we'll show them in a dialog instead
@@ -96,6 +97,14 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Badge
+                variant="secondary"
+                className={`text-xs font-medium px-3 py-1 capitalize ${getLevelColor(
+                  prompt?.level
+                )}`}
+              >
+                {prompt?.level}
+              </Badge>
               <Badge
                 variant="secondary"
                 className={`text-xs font-medium px-3 py-1 capitalize ${getDifficultyColor(

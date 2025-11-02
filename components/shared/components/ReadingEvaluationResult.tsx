@@ -273,7 +273,7 @@ export default function ReadingEvaluationResult({
             className="flex-1 h-10 text-sm font-semibold border-2 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-all duration-300 rounded-lg shadow-lg hover:shadow-xl"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
-            Try Again
+            Practice Again
           </Button>
           <Button
             onClick={onClose}
