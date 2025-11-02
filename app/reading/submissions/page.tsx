@@ -216,9 +216,7 @@ export default function ReadingSubmissionsPage() {
                           <span
                             className={`text-sm font-bold ${status?.color}`}
                           >
-                            {Math.round(
-                              submission?.evaluation_data?.overall_score || 0
-                            )}
+                            {submission?.evaluation_data?.overall_score || 0}
                             /10
                           </span>
                           <button className="text-blue-600 text-xs font-medium transition-opacity">
