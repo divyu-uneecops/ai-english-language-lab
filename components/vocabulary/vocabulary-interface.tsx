@@ -6,6 +6,7 @@ import { Volume2, RotateCcw } from "lucide-react";
 import { VocabularyCard } from "./vocabulary-card";
 import { vocabularyService } from "@/services/vocabularyService";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface VocabularyItem {
   word: string;
@@ -14,6 +15,7 @@ interface VocabularyItem {
 }
 
 export function VocabularyInterface() {
+  const router = useRouter();
   const [vocabularyData, setVocabularyData] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function VocabularyInterface() {
   }, []);
 
   const handleExerciseComplete = () => {
-    console.log("Vocabulary learning completed!");
+    router.push(`/dashboard`);
   };
 
   return (
