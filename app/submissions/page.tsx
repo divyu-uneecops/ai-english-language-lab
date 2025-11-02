@@ -579,7 +579,7 @@ export default function SubmissionsPage() {
                 evaluation={selectedSubmission?.evaluation_data}
                 onClose={() => router.push("/writing")}
                 onRevise={() => {
-                  if (selectedSubmission?.topic_id) {
+                  if (isEmpty(selectedSubmission?.topic_id)) {
                     return;
                   }
                   router.push(`/writing/${selectedSubmission?.topic_id}`);
