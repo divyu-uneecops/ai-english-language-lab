@@ -93,7 +93,7 @@ export default function SpeakingSubmissionsPage() {
 
   const handleRetry = () => {
     if (isEmpty(selectedSubmission?.topic_id)) return;
-    router.push(`/reading/${selectedSubmission?.topic_id}`);
+    router.push(`/speaking/${selectedSubmission?.topic_id}`);
   };
 
   return (
