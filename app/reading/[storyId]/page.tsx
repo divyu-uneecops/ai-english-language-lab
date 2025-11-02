@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
 import LiveSpeechToText from "@/components/shared/components/LiveSpeechToText";
-import { getDifficultyColor, isEmpty } from "@/lib/utils";
+import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import Markdown from "@/components/shared/components/MarkDown";
 import ReadingEvaluationResult from "@/components/shared/components/ReadingEvaluationResult";
 
@@ -376,6 +376,14 @@ export default function StoryPage() {
             </nav>
           </div>
           <div className="flex items-center space-x-3">
+            <Badge
+              variant="secondary"
+              className={`text-xs font-medium px-3 py-1 capitalize ${getLevelColor(
+                story?.level
+              )}`}
+            >
+              {story?.level}
+            </Badge>
             <Badge
               variant="secondary"
               className={`text-xs font-medium px-3 py-1 capitalize ${getDifficultyColor(
