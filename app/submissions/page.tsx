@@ -247,7 +247,7 @@ export default function SubmissionsPage() {
                 {/* Overall Score */}
                 <div className="col-span-2 flex items-center justify-between">
                   <span className={`text-sm font-bold ${status?.color}`}>
-                    {Math.round(submission?.evaluation_data?.overall_score)}/10
+                    {submission?.evaluation_data?.overall_score}/10
                   </span>
                   <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
@@ -342,7 +342,7 @@ export default function SubmissionsPage() {
                 {/* Overall Score */}
                 <div className="col-span-2 flex items-center justify-between">
                   <span className={`text-sm font-bold ${status?.color}`}>
-                    {Math.round(submission?.evaluation_data?.overall_score)}/10
+                    {submission?.evaluation_data?.overall_score}/10
                   </span>
                   <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
@@ -437,7 +437,7 @@ export default function SubmissionsPage() {
                 {/* Overall Score */}
                 <div className="col-span-2 flex items-center justify-between">
                   <span className={`text-sm font-bold ${status?.color}`}>
-                    {Math.round(submission?.evaluation_data?.overall_score)}/10
+                    {submission?.evaluation_data?.overall_score}/10
                   </span>
                   <button className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs font-medium transition-opacity">
                     View Details →
