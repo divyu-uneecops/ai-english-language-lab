@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Mic, Loader2, Sparkles } from "lucide-react";
-import LiveSpeechToText from "@/components/shared/components/LiveSpeechToText";
+import LiveSpeechToText, {
+  LiveSpeechToTextRef,
+} from "@/components/shared/components/LiveSpeechToText";
 import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import {
   SpeakingTopicComponentProps,
@@ -26,8 +28,10 @@ export function SpeakingTopicComponent({
     null
   );
   const [showEvaluation, setShowEvaluation] = useState(false);
+  const liveSpeechRef = useRef<LiveSpeechToTextRef>(null);
 
   const handleSubmitForEvaluation = async () => {
+    liveSpeechRef.current?.stopListening();
     if (speechChunks?.length === 0) {
       alert("Please speak something before submitting for evaluation");
       return;
@@ -62,6 +66,7 @@ export function SpeakingTopicComponent({
   const handlePracticeAgain = () => {
     setShowEvaluation(false);
     setSpeechChunks([]);
+    liveSpeechRef.current?.handleRestart();
   };
 
   return (
@@ -178,6 +183,7 @@ export function SpeakingTopicComponent({
           <div className="flex-1 overflow-hidden flex flex-col p-6 space-y-4">
             <div className="flex-1 overflow-hidden">
               <LiveSpeechToText
+                ref={liveSpeechRef}
                 onChunksUpdate={setSpeechChunks}
                 placeholderText="Start speaking about your topic"
                 listeningText="Listening to your speech..."
