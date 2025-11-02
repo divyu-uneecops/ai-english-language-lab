@@ -38,7 +38,7 @@ import { PaginatedResponse, Story } from "../interfaces";
 export function ReadingInterface() {
   const router = useRouter();
   const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLevelDifficultyDialog, setShowLevelDifficultyDialog] =
     useState<boolean>(true);
@@ -150,7 +150,7 @@ export function ReadingInterface() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
-  // Fetch stories from API
+  //Fetch stories from API
   useEffect(() => {
     fetchStories();
   }, [filters]);
@@ -183,19 +183,18 @@ export function ReadingInterface() {
   }, []);
 
   const fetchStories = async (aiDecide = false) => {
+    // Cancel previous request if active
+    controllerRef.current?.abort();
+
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
     // Set loading state FIRST to ensure UI updates immediately
     setLoading(true);
     setError(null);
-    setStories([]);
 
     try {
-      // Cancel previous request if active
-      controllerRef.current?.abort();
-
-      // Create a new one
-      const controller = new AbortController();
-      controllerRef.current = controller;
-
       const selectedFilters = getSelectedFilters();
 
       const params = {
@@ -211,35 +210,51 @@ export function ReadingInterface() {
           controller.signal
         );
 
-        router.push(`/reading/${paginatedData?.passage_id}`);
+        // Only navigate if this is still the active request
+        if (controllerRef.current === controller) {
+          router.push(`/reading/${paginatedData?.passage_id}`);
+        }
       } else {
         const paginatedData: PaginatedResponse =
           await readingService.fetchStories(params, controller.signal);
-        // Transform the API data to match our interface
-        const transformedStories: Story[] = paginatedData?.results;
 
-        // Replace stories for initial load or filter change
-        setStories(transformedStories);
-        setPagination((prev) => ({
-          ...prev,
-          currentPage: 1,
-          total: paginatedData?.total || 0,
-          totalPages: Math.ceil(
-            (paginatedData?.total || 0) / pagination.pageSize
-          ),
-        }));
+        // Only update state if this is still the active request
+        if (controllerRef.current === controller) {
+          // Transform the API data to match our interface
+          const transformedStories: Story[] = paginatedData?.results;
 
-        // Check if there are more stories to load
-        const totalLoaded = transformedStories.length;
-        setHasMore(totalLoaded < (paginatedData?.total || 0));
+          // Replace stories for initial load or filter change
+          setStories(transformedStories);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 1,
+            total: paginatedData?.total || 0,
+            totalPages: Math.ceil(
+              (paginatedData?.total || 0) / pagination.pageSize
+            ),
+          }));
+
+          // Check if there are more stories to load
+          const totalLoaded = transformedStories.length;
+          setHasMore(totalLoaded < (paginatedData?.total || 0));
+        }
       }
     } catch (err: any) {
+      // Ignore cancellation errors
       if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
         return;
       }
-      setError(err instanceof Error ? err.message : "Failed to fetch stories");
+      // Only set error if this is still the active request
+      if (controllerRef.current === controller) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch stories"
+        );
+      }
     } finally {
-      setLoading(false);
+      // Only update loading state if this is still the active request
+      if (controllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   };
 
