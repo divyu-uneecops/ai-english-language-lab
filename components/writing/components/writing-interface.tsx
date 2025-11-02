@@ -257,55 +257,80 @@ export function WritingInterface() {
   };
 
   const fetchWritingTopics = async (aiDecide = false) => {
+    // Cancel previous request if active
+    controllerRef.current?.abort();
+
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    // Set loading state FIRST to ensure UI updates immediately
     setLoading(true);
     setError(null);
     try {
-      // Cancel previous request if active
-      controllerRef.current?.abort();
-
-      // Create a new one
-      const controller = new AbortController();
-      controllerRef.current = controller;
-
       const selectedFilters = getSelectedFilters();
 
       const params = {
         page: 1,
         page_size: pagination?.pageSize,
+        aiDecide: aiDecide,
         ...selectedFilters, // Spread all filters (level-difficulty, status, category)
       };
 
-      const paginatedData: PaginatedResponse = await writingService.fetchTopics(
-        params
-      );
+      if (aiDecide) {
+        const response = await writingService.fetchTopics(
+          params,
+          controller.signal
+        );
 
-      // Transform the API data to match our interface
-      const transformedPrompts: WritingPrompt[] = paginatedData?.results || [];
+        // Only navigate if this is still the active request
+        if (controllerRef.current === controller) {
+          if (response?.topic_id) {
+            router.push(`/writing/${response?.topic_id}`);
+          }
+        }
+      } else {
+        const paginatedData: PaginatedResponse =
+          await writingService.fetchTopics(params, controller.signal);
 
-      // Replace prompts for initial load or filter change
-      setWritingPrompts(transformedPrompts);
-      setPagination((prev) => ({
-        ...prev,
-        currentPage: 1,
-        total: paginatedData?.total || 0,
-        totalPages: Math.ceil(
-          (paginatedData?.total || 0) / pagination.pageSize
-        ),
-      }));
+        // Only navigate if this is still the active request
+        if (controllerRef.current === controller) {
+          // Transform the API data to match our interface
+          const transformedPrompts: WritingPrompt[] =
+            paginatedData?.results || [];
 
-      // Check if there are more prompts to load
-      const totalLoaded = transformedPrompts?.length;
-      setHasMore(totalLoaded < (paginatedData?.total || 0));
+          // Replace prompts for initial load or filter change
+          setWritingPrompts(transformedPrompts);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 1,
+            total: paginatedData?.total || 0,
+            totalPages: Math.ceil(
+              (paginatedData?.total || 0) / pagination.pageSize
+            ),
+          }));
+
+          // Check if there are more prompts to load
+          const totalLoaded = transformedPrompts?.length;
+          setHasMore(totalLoaded < (paginatedData?.total || 0));
+        }
+      }
     } catch (err: any) {
-      if (err?.response) {
-        // If using axios
+      // Ignore cancellation errors
+      if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+        return;
+      }
+      // Only set error if this is still the active request
+      if (controllerRef.current === controller) {
         setError(
-          err?.response?.data?.message ||
-            "Failed to load story. Please try again."
+          err instanceof Error ? err.message : "Failed to fetch stories"
         );
       }
     } finally {
-      setLoading(false);
+      // Only update loading state if this is still the active request
+      if (controllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   };
 
@@ -360,6 +385,7 @@ export function WritingInterface() {
     setSelectedLevel(level);
     if (level === "ai") {
       setShowLevelDifficultyDialog(false);
+      fetchWritingTopics(true);
     }
   };
 
