@@ -203,9 +203,7 @@ export default function SpeakingSubmissionsPage() {
                           <span
                             className={`text-sm font-bold ${status?.color}`}
                           >
-                            {Math.round(
-                              submission?.evaluation_data?.overall_score
-                            )}
+                            {submission?.evaluation_data?.overall_score}
                             /10
                           </span>
                           <button className="text-blue-600 text-xs font-medium transition-opacity">

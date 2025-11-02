@@ -182,23 +182,24 @@ export function SpeakingInterface() {
   }, []);
 
   const fetchSpeakingTopics = async (aiDecide = false) => {
+    // Cancel previous request if active
+    controllerRef.current?.abort();
+
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    // Set loading state FIRST to ensure UI updates immediately
     setLoading(true);
     setError(null);
 
     try {
-      // Cancel previous request if active
-      controllerRef.current?.abort();
-
-      // Create a new one
-      const controller = new AbortController();
-      controllerRef.current = controller;
-
       const selectedFilters = getSelectedFilters();
 
       const params = {
         page: 1,
         page_size: pagination?.pageSize,
-        // ai_decide: aiDecide,
+        aiDecide: aiDecide,
         ...selectedFilters, // Spread all filters (level-difficulty, status, category)
       };
 
@@ -208,43 +209,56 @@ export function SpeakingInterface() {
           controller.signal
         );
 
-        if (isEmpty(response?.topic_id)) {
-          return;
-        }
+        // Only navigate if this is still the active request
+        if (controllerRef.current === controller) {
+          if (isEmpty(response?.topic_id)) {
+            return;
+          }
 
-        router.push(`/speaking/${response?.topic_id}`);
+          router.push(`/speaking/${response?.topic_id}`);
+        }
       } else {
         const paginatedData: PaginatedResponse =
           await speakingService.fetchTopics(params, controller.signal);
 
-        // Transform the API data to match our interface
-        const transformedTopics: SpeakingTopic[] = paginatedData?.results || [];
+        // Only update state if this is still the active request
+        if (controllerRef.current === controller) {
+          // Transform the API data to match our interface
+          const transformedTopics: SpeakingTopic[] =
+            paginatedData?.results || [];
 
-        // Replace topics for initial load or filter change
-        setSpeakingTopics(transformedTopics);
-        setPagination((prev) => ({
-          ...prev,
-          currentPage: 1,
-          total: paginatedData?.total || 0,
-          totalPages: Math.ceil(
-            (paginatedData?.total || 0) / pagination.pageSize
-          ),
-        }));
+          // Replace topics for initial load or filter change
+          setSpeakingTopics(transformedTopics);
+          setPagination((prev) => ({
+            ...prev,
+            currentPage: 1,
+            total: paginatedData?.total || 0,
+            totalPages: Math.ceil(
+              (paginatedData?.total || 0) / pagination.pageSize
+            ),
+          }));
 
-        // Check if there are more topics to load
-        const totalLoaded = transformedTopics?.length;
-        setHasMore(totalLoaded < (paginatedData?.total || 0));
+          // Check if there are more topics to load
+          const totalLoaded = transformedTopics?.length;
+          setHasMore(totalLoaded < (paginatedData?.total || 0));
+        }
       }
     } catch (err: any) {
-      if (err?.response) {
-        // If using axios
+      // Ignore cancellation errors
+      if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+        return;
+      }
+      // Only set error if this is still the active request
+      if (controllerRef.current === controller) {
         setError(
-          err?.response?.data?.message ||
-            "Failed to load topics. Please try again."
+          err instanceof Error ? err.message : "Failed to fetch stories"
         );
       }
     } finally {
-      setLoading(false);
+      // Only update loading state if this is still the active request
+      if (controllerRef.current === controller) {
+        setLoading(false);
+      }
     }
   };
 
@@ -341,7 +355,7 @@ export function SpeakingInterface() {
     // For AI, immediately fetch and navigate, no difficulty step
     if (level === "ai") {
       setShowLevelDifficultyDialog(false);
-      // fetchSpeakingTopics(true);
+      fetchSpeakingTopics(true);
     }
   };
 
