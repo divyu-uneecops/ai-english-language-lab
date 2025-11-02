@@ -200,19 +200,21 @@ export function ReadingInterface() {
       const params = {
         page: 1,
         page_size: pagination.pageSize,
-        // ai_decide: aiDecide,
+        aiDecide: aiDecide,
         ...selectedFilters, // Spread all filters (level-difficulty, status)
       };
 
       if (aiDecide) {
-        const paginatedData = await readingService.fetchStories(
+        const response = await readingService.fetchStories(
           params,
           controller.signal
         );
 
         // Only navigate if this is still the active request
         if (controllerRef.current === controller) {
-          router.push(`/reading/${paginatedData?.passage_id}`);
+          if (response?.passage_id) {
+            router.push(`/reading/${response?.passage_id}`);
+          }
         }
       } else {
         const paginatedData: PaginatedResponse =
@@ -347,7 +349,7 @@ export function ReadingInterface() {
     // For AI, immediately fetch and navigate, no difficulty step
     if (level === "ai") {
       setShowLevelDifficultyDialog(false);
-      // fetchStories(true);
+      fetchStories(true);
     }
   };
 
