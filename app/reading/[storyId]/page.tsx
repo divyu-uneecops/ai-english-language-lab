@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -18,7 +18,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
-import LiveSpeechToText from "@/components/shared/components/LiveSpeechToText";
+import LiveSpeechToText, {
+  LiveSpeechToTextRef,
+} from "@/components/shared/components/LiveSpeechToText";
 import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
 import Markdown from "@/components/shared/components/MarkDown";
 import ReadingEvaluationResult from "@/components/shared/components/ReadingEvaluationResult";
@@ -106,6 +108,7 @@ export default function StoryPage() {
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+  const liveSpeechRef = useRef<LiveSpeechToTextRef>(null);
 
   // Analysis results state
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
@@ -268,6 +271,7 @@ export default function StoryPage() {
   };
 
   const handleSubmitAnalysis = async () => {
+    liveSpeechRef.current?.stopListening();
     if (speechChunks.length === 0) {
       return;
     }
@@ -312,6 +316,9 @@ export default function StoryPage() {
 
   const handleRetryReading = () => {
     setShowAnalysisResults(false);
+    setAnalysisResult(null);
+    setSpeechChunks([]);
+    liveSpeechRef.current?.handleRestart();
   };
 
   if (loading) {
@@ -495,7 +502,10 @@ export default function StoryPage() {
 
           {/* Speech Practice Content */}
           <div className="flex-1 overflow-hidden">
-            <LiveSpeechToText onChunksUpdate={setSpeechChunks} />
+            <LiveSpeechToText
+              ref={liveSpeechRef}
+              onChunksUpdate={setSpeechChunks}
+            />
 
             {/* Speech Chunks Preview */}
             {speechChunks.length > 0 && (
