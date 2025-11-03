@@ -25,7 +25,6 @@ export default function EnglishLearningDashboard() {
 
   const [userStats] = useState({
     streak: 7,
-    completedModules: 12,
   });
 
   const [submissionCounts, setSubmissionCounts] =
@@ -40,7 +39,7 @@ export default function EnglishLearningDashboard() {
     {
       id: 1,
       title: "Reading Practice",
-      icon: <BookOpen className="h-6 w-6" />,
+      icon: <BookOpen className="h-8 w-8" />,
       color: "orange",
       href: "/reading",
       type: "reading",
@@ -48,7 +47,7 @@ export default function EnglishLearningDashboard() {
     {
       id: 2,
       title: "Speaking Practice",
-      icon: <Mic className="h-6 w-6" />,
+      icon: <Mic className="h-8 w-8" />,
       color: "pink",
       href: "/speaking",
       type: "speaking",
@@ -56,7 +55,7 @@ export default function EnglishLearningDashboard() {
     {
       id: 3,
       title: "Writing Practice",
-      icon: <PenTool className="h-6 w-6" />,
+      icon: <PenTool className="h-8 w-8" />,
       color: "yellow",
       href: "/writing",
       type: "writing",
@@ -64,7 +63,7 @@ export default function EnglishLearningDashboard() {
     {
       id: 4,
       title: "Vocabulary Practice",
-      icon: <BookMarked className="h-6 w-6" />,
+      icon: <BookMarked className="h-8 w-8" />,
       color: "purple",
       href: "/vocabulary",
       type: "vocabulary",
@@ -171,17 +170,48 @@ export default function EnglishLearningDashboard() {
 
                 {/* Stats Grid */}
                 <div className="flex items-center gap-4">
-                  <div className="bg-white/10 rounded-xl p-4 text-center">
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
                     <TrendingUp className="h-5 w-5 text-white mx-auto mb-2" />
                     <p className="text-lg font-bold">{userStats?.streak}</p>
                     <p className="text-xs text-orange-100">Streak</p>
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 text-center">
-                    <CheckCircle className="h-5 w-5 text-white mx-auto mb-2" />
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
+                    <BookOpen className="h-5 w-5 text-white mx-auto mb-2" />
                     <p className="text-lg font-bold">
-                      {userStats?.completedModules}
+                      {isLoadingSubmissions ? "..." : submissionCounts?.reading}
                     </p>
-                    <p className="text-xs text-orange-100">Done</p>
+                    <p className="text-xs text-orange-100">{`Submission${
+                      submissionCounts?.reading !== 1 ? "s" : ""
+                    }`}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
+                    <Mic className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">
+                      {isLoadingSubmissions
+                        ? "..."
+                        : submissionCounts?.speaking}
+                    </p>
+                    <p className="text-xs text-orange-100">
+                      {`Submission${
+                        submissionCounts?.speaking !== 1 ? "s" : ""
+                      }`}
+                    </p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
+                    <PenTool className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">
+                      {isLoadingSubmissions ? "..." : submissionCounts?.writing}
+                    </p>
+                    <p className="text-xs text-orange-100">{`Submission${
+                      submissionCounts?.writing !== 1 ? "s" : ""
+                    }`}</p>
+                  </div>
+                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
+                    <BookMarked className="h-5 w-5 text-white mx-auto mb-2" />
+                    <p className="text-lg font-bold">
+                      {isLoadingSubmissions ? "..." : 15}
+                    </p>
+                    <p className="text-xs text-orange-100">Completed</p>
                   </div>
                 </div>
               </div>
@@ -199,55 +229,37 @@ export default function EnglishLearningDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {continuePracticing?.map((item: any, index: number) => {
-              const getSubmissionText = () => {
-                if (isLoadingSubmissions) return "Loading...";
-                if (item.type === "vocabulary") return `15 completed`;
-                const count =
-                  submissionCounts[
-                    item.type as keyof typeof submissionCounts
-                  ] || 0;
-                return `${count} submission${count !== 1 ? "s" : ""}`;
-              };
-
               return (
-                <Link key={item.id} href={item.href}>
-                  <div className="group relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/20 hover:border-orange-200/50 cursor-pointer hover:scale-[1.02]">
-                    {/* Enhanced Header */}
-                    <div className="relative z-10 flex items-start justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div
-                            className={`p-4 rounded-2xl ${getSkillColor(
-                              item?.color
-                            )} bg-opacity-10 group-hover:scale-110 transition-all duration-300`}
-                          >
-                            {item?.icon}
-                          </div>
-                          <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <Link
+                  key={item?.id}
+                  href={item?.href}
+                  className="group cursor-pointer"
+                  aria-label={`Open ${item?.title}`}
+                >
+                  <div
+                    tabIndex={0}
+                    className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg transition-all duration-300 border border-white/20 cursor-pointer min-h-[220px] sm:min-h-[240px] lg:min-h-[260px] hover:shadow-2xl hover:border-orange-200/50 hover:bg-orange-50/40 hover:scale-[1.015] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                  >
+                    {/* Centered Content */}
+                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center gap-4">
+                      <div className="relative">
+                        <div
+                          className={`p-6 rounded-2xl ${getSkillColor(
+                            item?.color
+                          )} bg-opacity-10 transition-transform duration-300 group-hover:scale-110`}
+                        >
+                          {item?.icon}
                         </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 text-xl group-hover:text-orange-600 transition-colors mb-1">
-                            {item?.title}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <FileText className="h-3.5 w-3.5 text-gray-500" />
-                            <span
-                              className={`text-sm ${
-                                isLoadingSubmissions
-                                  ? "text-gray-400"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              {getSubmissionText()}
-                            </span>
-                          </div>
-                        </div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                       </div>
-                      <div className="p-2 bg-gray-100 rounded-full group-hover:bg-orange-100 transition-colors">
-                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-orange-500 transition-colors" />
-                      </div>
+                      <h3 className="font-bold text-gray-900 text-lg sm:text-xl tracking-tight group-hover:text-orange-600 transition-colors">
+                        {item?.title}
+                      </h3>
+                    </div>
+                    <div className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full transition-all duration-300">
+                      <ChevronRight className="h-5 w-5 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-orange-500" />
                     </div>
                   </div>
                 </Link>
