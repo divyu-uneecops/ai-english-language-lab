@@ -70,7 +70,6 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
 
       setTranscript("");
       setChunks([]);
-      setListening(true);
 
       try {
         // Create Speechmatics JWT from API key (client-side for now)
@@ -79,11 +78,25 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
           throw new Error("Missing NEXT_PUBLIC_SPEECHMATICS_API_KEY");
         }
 
-        const jwt = await createSpeechmaticsJWT({
-          type: "rt",
-          apiKey,
-          ttl: 60,
-        });
+        // Start JWT fetch and getUserMedia in parallel
+        const [jwt, stream] = await Promise.all([
+          createSpeechmaticsJWT({
+            type: "rt",
+            apiKey,
+            ttl: 60,
+          }),
+          navigator.mediaDevices.getUserMedia({
+            audio: {
+              sampleRate: 16000,
+              channelCount: 1,
+              echoCancellation: true,
+              noiseSuppression: true,
+            },
+          }),
+        ]);
+        streamRef.current = stream;
+
+        setListening(true);
 
         const client = new RealtimeClient();
         clientRef.current = client;
@@ -142,17 +155,6 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
             sample_rate: 16000,
           },
         });
-
-        // Set up microphone capture and stream PCM16 to Speechmatics
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            sampleRate: 16000,
-            channelCount: 1,
-            echoCancellation: true,
-            noiseSuppression: true,
-          },
-        });
-        streamRef.current = stream;
 
         const audioContext = new AudioContext({ sampleRate: 16000 });
         audioContextRef.current = audioContext;
