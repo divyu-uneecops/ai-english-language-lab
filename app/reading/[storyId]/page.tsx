@@ -124,6 +124,13 @@ export default function StoryPage() {
     }
   }, [storyId]);
 
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+    };
+  }, []);
+
   const fetchStory = async () => {
     try {
       setLoading(true);
@@ -150,13 +157,6 @@ export default function StoryPage() {
     }
   };
 
-  // Cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      stopSpeech();
-    };
-  }, []);
-
   const generateAndPlaySpeech = async (text: string) => {
     if (!story) return;
 
@@ -165,7 +165,7 @@ export default function StoryPage() {
 
       // Stop any existing audio
       if (audioElement) {
-        audioElement.pause();
+        audioElement?.pause();
         audioElement.currentTime = 0;
       }
 
@@ -216,35 +216,19 @@ export default function StoryPage() {
     if (audioElement && !audioElement.paused) {
       audioElement.pause();
       setIsPaused(true);
-    } else if ("speechSynthesis" in window && speechSynthesis.speaking) {
-      speechSynthesis.pause();
-      setIsPaused(true);
     }
   };
 
   const resumeSpeech = () => {
     if (audioElement && audioElement.paused) {
       audioElement.play().then(() => setIsPaused(false));
-    } else if ("speechSynthesis" in window && speechSynthesis.paused) {
-      speechSynthesis.resume();
-      setIsPaused(false);
     }
   };
 
   const stopSpeech = () => {
     if (audioElement) {
-      audioElement.pause();
+      audioElement?.pause();
       audioElement.currentTime = 0;
-    }
-
-    if ("speechSynthesis" in window) {
-      speechSynthesis.cancel();
-    }
-
-    // Clean up URL object
-    if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
-      setAudioUrl(null);
     }
 
     setIsPlaying(false);
@@ -252,7 +236,7 @@ export default function StoryPage() {
     setIsGenerating(false);
   };
 
-  const handleSpeakerClick = () => {
+  const handleSpeakerClick = async () => {
     if (!story) return;
 
     if (isPlaying) {
@@ -262,7 +246,14 @@ export default function StoryPage() {
         pauseSpeech();
       }
     } else {
-      generateAndPlaySpeech(story.passage);
+      if (audioElement) {
+        await audioElement.play();
+        setIsPlaying(true);
+        setIsPaused(false);
+        setIsGenerating(false);
+      } else {
+        generateAndPlaySpeech(story.passage);
+      }
     }
   };
 
@@ -399,10 +390,6 @@ export default function StoryPage() {
             >
               {story?.difficulty}
             </Badge>
-            <div className="flex items-center gap-1 text-sm text-gray-500">
-              <Clock className="h-4 w-4" />
-              <span>5 Min</span>
-            </div>
           </div>
         </div>
       </div>
@@ -506,26 +493,6 @@ export default function StoryPage() {
               ref={liveSpeechRef}
               onChunksUpdate={setSpeechChunks}
             />
-
-            {/* Speech Chunks Preview */}
-            {speechChunks.length > 0 && (
-              <div className="p-4 bg-green-50 border-t border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium text-green-800">
-                    Captured {speechChunks.length} segment(s)
-                  </span>
-                </div>
-                <div className="text-xs text-green-600">
-                  Total duration:{" "}
-                  {speechChunks.length > 0
-                    ? `${speechChunks[speechChunks.length - 1].endTime.toFixed(
-                        1
-                      )}s`
-                    : "0s"}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

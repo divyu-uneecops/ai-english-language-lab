@@ -62,7 +62,7 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
-    "sarvamai": "^0.1.9",
+    "sarvamai": "^0.1.10",
     "sonner": "^1.7.4",
     "svelte": "latest",
     "tailwind-merge": "^2.5.5",

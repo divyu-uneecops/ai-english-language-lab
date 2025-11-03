@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     return new Promise((resolve) => {
-      const audioChunks: Buffer[] = [];
+      const audioChunks: Uint8Array[] = [];
       let closeTimeout: NodeJS.Timeout | null = null;
 
       socket.on("open", () => {
@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
 
         // Configure for English only
         socket.configureConnection({
-          type: "config",
-          data: {
-            speaker: "default", // Use default English voice
-            target_language_code: "en-IN", // English (India)
-          },
+          speaker: "arya",
+          target_language_code: "en-IN", // English (India)
+          pitch: 0.0, // Neutral tone — keeps it natural and comfortable
+          pace: 1.0, // Normal speaking speed (you can go 0.9 for a calmer tone)
+          loudness: 1.0, // Standard volume for clarity
         });
 
         console.log("English TTS configuration sent");
@@ -59,9 +59,11 @@ export async function POST(request: NextRequest) {
 
       socket.on("message", (message) => {
         if (message.type === "audio") {
-          const audioBuffer = Buffer.from(message.data.audio, "base64");
-          audioChunks.push(audioBuffer);
-          console.log(`Received audio chunk of ${audioBuffer.length} bytes`);
+          const audioChunk = new Uint8Array(
+            Buffer.from(message.data.audio, "base64")
+          );
+          audioChunks.push(audioChunk);
+          console.log(`Received audio chunk of ${audioChunk.length} bytes`);
         } else {
           console.log("Received non-audio message:", message);
         }
