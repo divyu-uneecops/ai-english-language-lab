@@ -7,7 +7,8 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { SarvamAIClient } from "sarvamai";
+import { RealtimeClient } from "@speechmatics/real-time-client";
+import { createSpeechmaticsJWT } from "@speechmatics/auth";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, CheckCircle2, RotateCcw } from "lucide-react";
 
@@ -51,12 +52,11 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
   ) => {
     const [transcript, setTranscript] = useState("");
     const [listening, setListening] = useState(false);
-    const lastEndTime = useRef(0);
     const [chunks, setChunks] = useState<
       { text: string; startTime: number; endTime: number }[]
     >([]);
 
-    const wsRef = useRef<any>(null);
+    const clientRef = useRef<RealtimeClient | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
@@ -70,105 +70,117 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
 
       setTranscript("");
       setChunks([]);
-      lastEndTime.current = 0;
       setListening(true);
 
       try {
-        const client = new SarvamAIClient({
-          apiSubscriptionKey: process.env.NEXT_PUBLIC_SARVAM_API_KEY,
+        // Create Speechmatics JWT from API key (client-side for now)
+        const apiKey = process.env.NEXT_PUBLIC_SPEECHMATICS_API_KEY as string;
+        if (!apiKey) {
+          throw new Error("Missing NEXT_PUBLIC_SPEECHMATICS_API_KEY");
+        }
+
+        const jwt = await createSpeechmaticsJWT({
+          type: "rt",
+          apiKey,
+          ttl: 60,
         });
 
-        const socket = await client.speechToTextStreaming.connect({
-          "language-code": "en-IN",
-          high_vad_sensitivity: "true",
-        });
+        const client = new RealtimeClient();
+        clientRef.current = client;
 
-        wsRef.current = socket;
+        // Listen for transcript events
+        client.addEventListener("receiveMessage", ({ data }: any) => {
+          // Final transcripts
+          if (data?.message === "AddTranscript") {
+            // Accumulate words into full string
+            let finalText = "";
+            for (const result of data?.results || []) {
+              const content = result?.alternatives?.[0]?.content || "";
+              if (!content) continue;
+              // Insert space before words (per docs)
+              if (result?.type === "word") finalText += " ";
+              finalText += content;
+            }
 
-        socket.on("open", async () => {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              audio: {
-                sampleRate: 16000,
-                channelCount: 1,
-                echoCancellation: true,
-                noiseSuppression: true,
-              },
-            });
+            const startTime = data?.metadata?.start_time;
+            const endTime = data?.metadata?.end_time;
 
-            streamRef.current = stream;
-
-            const audioContext = new AudioContext({ sampleRate: 16000 });
-            audioContextRef.current = audioContext;
-
-            const source = audioContext.createMediaStreamSource(stream);
-            const processor = audioContext.createScriptProcessor(4096, 1, 1);
-            scriptProcessorRef.current = processor;
-
-            processor.onaudioprocess = (event) => {
-              if (socket.readyState === WebSocket.OPEN) {
-                const inputData = event.inputBuffer.getChannelData(0);
-
-                const int16Data = new Int16Array(inputData.length);
-                for (let i = 0; i < inputData.length; i++) {
-                  int16Data[i] = Math.max(
-                    -32768,
-                    Math.min(32767, inputData[i] * 32768)
-                  );
-                }
-
-                const base64Audio = btoa(
-                  String.fromCharCode(...new Uint8Array(int16Data.buffer))
-                );
-
-                socket.transcribe({
-                  audio: base64Audio,
-                  sample_rate: 16000,
-                  encoding: "audio/wav",
-                });
-              }
-            };
-
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-          } catch (error) {
-            console.error("Error accessing microphone:", error);
-            stopListening();
-          }
-        });
-
-        socket.on("message", (message: any) => {
-          // Handle the Sarvam API response format
-          if (message.data && typeof message.data === "object") {
-            const response: SarvamResponse = message.data;
-
-            const duration = response?.metrics?.audio_duration || 0;
-
-            const startTime = lastEndTime?.current;
-            const endTime = lastEndTime?.current + duration;
-            lastEndTime.current = endTime;
-            // Update transcript
-            if (response.transcript) {
+            if (finalText?.trim()) {
               const newChunk = {
-                text: response?.transcript,
+                text: finalText.trim(),
                 startTime,
                 endTime,
               };
-
               setChunks((prev) => [...prev, newChunk]);
-              setTranscript((prev) => prev + " " + response.transcript);
+              setTranscript((prev) => `${prev} ${finalText}`.trim());
             }
+          }
+
+          if (data?.message === "EndOfTranscript") {
+            // Stream finished
+            setListening(false);
+          }
+
+          if (data?.message === "Error") {
+            console.error("Speechmatics Error:", data);
           }
         });
 
-        socket.on("error", (err: any) => {
-          console.error("WebSocket Error:", err);
+        await client.start(jwt, {
+          transcription_config: {
+            language: "en",
+            operating_point: "enhanced",
+            max_delay: 1.0,
+            enable_partials: true,
+            transcript_filtering_config: {
+              remove_disfluencies: true,
+            },
+          },
+          audio_format: {
+            type: "raw",
+            encoding: "pcm_s16le",
+            sample_rate: 16000,
+          },
         });
 
-        socket.on("close", () => {
-          console.log("WebSocket closed");
-          setListening(false);
+        // Set up microphone capture and stream PCM16 to Speechmatics
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+          },
         });
+        streamRef.current = stream;
+
+        const audioContext = new AudioContext({ sampleRate: 16000 });
+        audioContextRef.current = audioContext;
+
+        const source = audioContext.createMediaStreamSource(stream);
+        const processor = audioContext.createScriptProcessor(4096, 1, 1);
+        scriptProcessorRef.current = processor;
+
+        processor.onaudioprocess = (event) => {
+          if (!clientRef.current) return;
+          const inputData = event.inputBuffer.getChannelData(0);
+          const int16Data = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            int16Data[i] = Math.max(
+              -32768,
+              Math.min(32767, inputData[i] * 32768)
+            );
+          }
+          const bytes = new Uint8Array(int16Data.buffer);
+          try {
+            clientRef.current.sendAudio(bytes);
+          } catch (e) {
+            // Avoid noisy logs if stopping
+          }
+        };
+
+        source.connect(processor);
+        processor.connect(audioContext.destination);
       } catch (error) {
         console.error("Error starting speech recognition:", error);
         setListening(false);
@@ -194,8 +206,10 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
         streamRef.current = null;
       }
 
-      if (wsRef.current) {
-        wsRef?.current?.close();
+      if (clientRef.current) {
+        try {
+          clientRef.current.stopRecognition({ noTimeout: true });
+        } catch (e) {}
       }
 
       setListening(false);
@@ -205,7 +219,6 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
       stopListening();
       setTranscript("");
       setChunks([]);
-      lastEndTime.current = 0;
     };
 
     // Expose handleRestart to parent component via ref
