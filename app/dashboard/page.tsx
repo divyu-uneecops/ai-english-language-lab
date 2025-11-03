@@ -126,7 +126,7 @@ export default function EnglishLearningDashboard() {
                 </div>
               )}
             </div>
-            <Link href="/submissions">
+            <Link href="/submissions" prefetch>
               <Button
                 variant="ghost"
                 size="sm"
@@ -235,6 +235,7 @@ export default function EnglishLearningDashboard() {
                 <Link
                   key={item?.id}
                   href={item?.href}
+                  prefetch
                   className="group cursor-pointer"
                   aria-label={`Open ${item?.title}`}
                 >
