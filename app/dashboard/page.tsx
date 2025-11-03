@@ -203,7 +203,7 @@ export default function EnglishLearningDashboard() {
             {continuePracticing?.map((item: any, index: number) => {
               const getSubmissionText = () => {
                 if (isLoadingSubmissions) return "Loading...";
-                if (item.type === "vocabulary") return `10 completed`;
+                if (item.type === "vocabulary") return `15 completed`;
                 const count =
                   submissionCounts[
                     item.type as keyof typeof submissionCounts
