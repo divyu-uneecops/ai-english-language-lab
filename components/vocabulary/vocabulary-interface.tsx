@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Volume2, RotateCcw } from "lucide-react";
+import {
+  Volume2,
+  RotateCcw,
+  Trophy,
+  Sparkles,
+  CheckCircle2,
+} from "lucide-react";
 import { VocabularyCard } from "./vocabulary-card";
 import { vocabularyService } from "@/services/vocabularyService";
 import Link from "next/link";
@@ -19,6 +25,8 @@ export function VocabularyInterface() {
   const [vocabularyData, setVocabularyData] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const hasPlayedCelebration = useRef(false);
 
   const fetchVocabulary = async () => {
     setLoading(true);
@@ -38,7 +46,33 @@ export function VocabularyInterface() {
     fetchVocabulary();
   }, []);
 
+  useEffect(() => {
+    if (
+      isCompleted &&
+      !hasPlayedCelebration.current &&
+      vocabularyData.length > 0
+    ) {
+      hasPlayedCelebration.current = true;
+      playCelebrationSound();
+    }
+  }, [isCompleted, vocabularyData.length]);
+
+  const playCelebrationSound = () => {
+    // Play a celebratory voice message
+    const wordCount = vocabularyData.length || 15; // Fallback to 15 if somehow empty
+    const celebrationMessage = `Congratulations! Today's goal is completed. You learned ${wordCount} vocabulary words. Great job!`;
+    const utterance = new SpeechSynthesisUtterance(celebrationMessage);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.2;
+    utterance.volume = 1;
+    speechSynthesis.speak(utterance);
+  };
+
   const handleExerciseComplete = () => {
+    setIsCompleted(true);
+  };
+
+  const handleGoToDashboard = () => {
     router.push(`/dashboard`);
   };
 
@@ -89,6 +123,82 @@ export function VocabularyInterface() {
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
+            </div>
+          ) : isCompleted ? (
+            <div className="w-full max-w-2xl mx-auto">
+              <div className="text-center py-12 px-6">
+                {/* Celebration Animation Container */}
+                <div className="relative mb-8">
+                  {/* Animated Trophy Icon */}
+                  <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-yellow-400 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                    <div className="relative w-32 h-32 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-2xl transform animate-bounce">
+                      <Trophy className="h-16 w-16 text-white" />
+                    </div>
+                  </div>
+
+                  {/* Floating Sparkles */}
+                  <div className="absolute top-0 left-1/4">
+                    <Sparkles
+                      className="h-8 w-8 text-yellow-400 animate-pulse"
+                      style={{ animationDelay: "0s" }}
+                    />
+                  </div>
+                  <div className="absolute top-0 right-1/4">
+                    <Sparkles
+                      className="h-8 w-8 text-orange-400 animate-pulse"
+                      style={{ animationDelay: "0.5s" }}
+                    />
+                  </div>
+                  <div className="absolute bottom-0 left-1/3">
+                    <Sparkles
+                      className="h-6 w-6 text-yellow-300 animate-pulse"
+                      style={{ animationDelay: "1s" }}
+                    />
+                  </div>
+                  <div className="absolute bottom-0 right-1/3">
+                    <Sparkles
+                      className="h-6 w-6 text-orange-300 animate-pulse"
+                      style={{ animationDelay: "1.5s" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Achievement Message */}
+                <div className="space-y-4 mb-8">
+                  <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-transparent bg-clip-text">
+                    🎉 Congratulations! 🎉
+                  </h2>
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-700 shadow-lg">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                        Today's Goal is Completed!
+                      </p>
+                    </div>
+                    <p className="text-xl text-gray-700 dark:text-gray-300 font-medium">
+                      You learned{" "}
+                      <span className="font-bold text-green-600 dark:text-green-400">
+                        {vocabularyData.length} Vocabulary
+                      </span>{" "}
+                      words
+                    </p>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">
+                    Keep up the excellent work! Your dedication to learning is
+                    inspiring.
+                  </p>
+                </div>
+
+                {/* Action Button */}
+                <Button
+                  onClick={handleGoToDashboard}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  Go to Dashboard
+                  <Sparkles className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
             </div>
           ) : (
             <VocabularyCard
