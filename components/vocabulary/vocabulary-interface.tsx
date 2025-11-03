@@ -8,6 +8,7 @@ import {
   Trophy,
   Sparkles,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { VocabularyCard } from "./vocabulary-card";
 import { vocabularyService } from "@/services/vocabularyService";
@@ -60,7 +61,7 @@ export function VocabularyInterface() {
   const playCelebrationSound = () => {
     // Play a celebratory voice message
     const wordCount = vocabularyData.length || 15; // Fallback to 15 if somehow empty
-    const celebrationMessage = `Congratulations! Today's goal is completed. You learned ${wordCount} vocabulary words. Great job!`;
+    const celebrationMessage = `Congratulations!`;
     const utterance = new SpeechSynthesisUtterance(celebrationMessage);
     utterance.rate = 0.9;
     utterance.pitch = 1.2;
@@ -101,11 +102,18 @@ export function VocabularyInterface() {
         {/* Content Section */}
         <div className="flex justify-center">
           {loading ? (
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Loading vocabulary...
-              </p>
+            <div className="flex items-center justify-center py-16 w-full">
+              <div className="text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
+                <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Loading vocabulary...
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Please wait while we fetch the content
+                </p>
+              </div>
             </div>
           ) : error ? (
             <div className="text-center">
