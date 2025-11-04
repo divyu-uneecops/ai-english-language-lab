@@ -133,127 +133,114 @@ export default function ReadingEvaluationResult({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
           {/* Left Column: Detailed Scores */}
           <div className="lg:col-span-1">
-            <Card className="glass-card border-0 shadow-lg h-full">
-              <div className="p-4 h-full flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-1.5 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg">
-                    <BarChart3 className="h-4 w-4 text-blue-600" />
+            <div className="p-4 h-full flex flex-col">
+              <div className="space-y-3 flex-1">
+                {/* Accuracy */}
+                <div className="p-3 bg-gradient-to-r from-blue-50/50 to-blue-100/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-3 w-3 text-blue-600" />
+                      <span className="font-semibold text-gray-800 text-sm">
+                        Accuracy
+                      </span>
+                    </div>
+                    <span className="text-base font-bold text-gray-900">
+                      {result?.scoreBreakdown?.accuracy || 0}/4
+                    </span>
                   </div>
-                  <h2 className="text-base font-bold text-gray-900">
-                    Score Breakdown
-                  </h2>
+                  <div className="text-xs text-gray-600">
+                    {result?.detailedMetrics?.accuracy || "Word Recognition"}
+                  </div>
                 </div>
 
-                <div className="space-y-3 flex-1">
-                  {/* Accuracy */}
-                  <div className="p-3 bg-gradient-to-r from-blue-50/50 to-blue-100/30 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-3 w-3 text-blue-600" />
-                        <span className="font-semibold text-gray-800 text-sm">
-                          Accuracy
-                        </span>
-                      </div>
-                      <span className="text-base font-bold text-gray-900">
-                        {result?.scoreBreakdown?.accuracy || 0}/4
+                {/* Fluency */}
+                <div className="p-3 bg-gradient-to-r from-green-50/50 to-green-100/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-3 w-3 text-green-600" />
+                      <span className="font-semibold text-gray-800 text-sm">
+                        Fluency
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      {result?.detailedMetrics?.accuracy || "Word Recognition"}
-                    </div>
+                    <span className="text-base font-bold text-gray-900">
+                      {result?.scoreBreakdown?.fluency || 0}/4
+                    </span>
                   </div>
-
-                  {/* Fluency */}
-                  <div className="p-3 bg-gradient-to-r from-green-50/50 to-green-100/30 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 text-green-600" />
-                        <span className="font-semibold text-gray-800 text-sm">
-                          Fluency
-                        </span>
-                      </div>
-                      <span className="text-base font-bold text-gray-900">
-                        {result?.scoreBreakdown?.fluency || 0}/4
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {result?.detailedMetrics?.fluency || "Reading Speed"}
-                    </div>
+                  <div className="text-xs text-gray-600">
+                    {result?.detailedMetrics?.fluency || "Reading Speed"}
                   </div>
+                </div>
 
-                  {/* Consistency */}
-                  <div className="p-3 bg-gradient-to-r from-purple-50/50 to-purple-100/30 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <Volume2 className="h-3 w-3 text-purple-600" />
-                        <span className="font-semibold text-gray-800 text-sm">
-                          Consistency
-                        </span>
-                      </div>
-                      <span className="text-base font-bold text-gray-900">
-                        {result?.scoreBreakdown?.consistency || 0}/2
+                {/* Consistency */}
+                <div className="p-3 bg-gradient-to-r from-purple-50/50 to-purple-100/30 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Volume2 className="h-3 w-3 text-purple-600" />
+                      <span className="font-semibold text-gray-800 text-sm">
+                        Consistency
                       </span>
                     </div>
-                    <div className="text-xs text-gray-600">
-                      {result?.detailedMetrics?.consistency || "Speech Clarity"}
-                    </div>
+                    <span className="text-base font-bold text-gray-900">
+                      {result?.scoreBreakdown?.consistency || 0}/2
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {result?.detailedMetrics?.consistency || "Speech Clarity"}
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Right Column: Feedback Tabs */}
           <div className="lg:col-span-2">
             {result?.feedback && (
-              <Card className="glass-card border-0 shadow-lg h-full">
-                <div className="p-4 h-full flex flex-col">
-                  <Tabs
-                    value={activeTab}
-                    onValueChange={setActiveTab}
-                    className="w-full flex-1 flex flex-col"
-                  >
-                    <TabsList className="grid w-full grid-cols-4 mb-3 flex-shrink-0">
-                      {Object.keys(result.feedback).map((category) => (
-                        <TabsTrigger
+              <div className="p-4 h-full flex flex-col">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full flex-1 flex flex-col"
+                >
+                  <TabsList className="grid w-full grid-cols-4 mb-3 flex-shrink-0">
+                    {Object.keys(result.feedback).map((category) => (
+                      <TabsTrigger
+                        key={category}
+                        value={category}
+                        className="text-xs font-medium capitalize py-2"
+                      >
+                        <div className="flex items-center gap-1">
+                          <div
+                            className={`p-0.5 rounded ${getCategoryColor(
+                              category
+                            )}`}
+                          >
+                            {getCategoryIcon(category)}
+                          </div>
+                          <span className="hidden sm:inline">{category}</span>
+                        </div>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <div className="flex-1 min-h-0">
+                    {Object.entries(result.feedback).map(
+                      ([category, feedbackItems]) => (
+                        <TabsContent
                           key={category}
                           value={category}
-                          className="text-xs font-medium capitalize py-2"
+                          className="mt-0 h-full"
                         >
-                          <div className="flex items-center gap-1">
-                            <div
-                              className={`p-0.5 rounded ${getCategoryColor(
-                                category
-                              )}`}
-                            >
-                              {getCategoryIcon(category)}
+                          <div className="h-full flex flex-col">
+                            <div className="flex-1 min-h-0">
+                              {renderFeedbackItems(feedbackItems)}
                             </div>
-                            <span className="hidden sm:inline">{category}</span>
                           </div>
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-
-                    <div className="flex-1 min-h-0">
-                      {Object.entries(result.feedback).map(
-                        ([category, feedbackItems]) => (
-                          <TabsContent
-                            key={category}
-                            value={category}
-                            className="mt-0 h-full"
-                          >
-                            <div className="h-full flex flex-col">
-                              <div className="flex-1 min-h-0">
-                                {renderFeedbackItems(feedbackItems)}
-                              </div>
-                            </div>
-                          </TabsContent>
-                        )
-                      )}
-                    </div>
-                  </Tabs>
-                </div>
-              </Card>
+                        </TabsContent>
+                      )
+                    )}
+                  </div>
+                </Tabs>
+              </div>
             )}
           </div>
         </div>

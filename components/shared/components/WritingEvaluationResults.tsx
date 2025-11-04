@@ -101,140 +101,140 @@ export function WritingEvaluationResults({
         <div>
           {/* Right Column: Feedback Tabs */}
           <div>
-            <Card className="glass-card border-0 shadow-lg h-full">
-              <div className="p-4 h-full flex flex-col">
-                <Tabs
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-full flex-1 flex flex-col"
-                >
-                  <TabsList className="grid w-full grid-cols-3 mb-3 flex-shrink-0">
-                    <TabsTrigger
-                      value="strengths"
-                      className="text-xs font-medium capitalize py-2"
-                    >
-                      <div className="flex items-center gap-1">
-                        <div className="p-0.5 rounded from-green-100 to-green-200 text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                        </div>
-                        <span className="hidden sm:inline">Strengths</span>
+            {/* <Card className="glass-card border-0 shadow-lg h-full"> */}
+            <div className="p-4 h-full flex flex-col">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full flex-1 flex flex-col"
+              >
+                <TabsList className="grid w-full grid-cols-3 mb-3 flex-shrink-0">
+                  <TabsTrigger
+                    value="strengths"
+                    className="text-xs font-medium capitalize py-2"
+                  >
+                    <div className="flex items-center gap-1">
+                      <div className="p-0.5 rounded from-green-100 to-green-200 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
                       </div>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="areas_for_improvement"
-                      className="text-xs font-medium capitalize py-2"
-                    >
-                      <div className="flex items-center gap-1">
-                        <div className="p-0.5 rounded from-blue-100 to-blue-200 text-blue-600">
-                          <TrendingUp className="h-4 w-4" />
-                        </div>
-                        <span className="hidden sm:inline">Improvements</span>
+                      <span className="hidden sm:inline">Strengths</span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="areas_for_improvement"
+                    className="text-xs font-medium capitalize py-2"
+                  >
+                    <div className="flex items-center gap-1">
+                      <div className="p-0.5 rounded from-blue-100 to-blue-200 text-blue-600">
+                        <TrendingUp className="h-4 w-4" />
                       </div>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="comparison"
-                      className="text-xs font-medium capitalize py-2"
-                    >
-                      <div className="flex items-center gap-1">
-                        <div className="p-0.5 rounded from-purple-100 to-purple-200 text-purple-600">
-                          <FileText className="h-4 w-4" />
-                        </div>
-                        <span className="hidden sm:inline">Comparison</span>
+                      <span className="hidden sm:inline">Improvements</span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="comparison"
+                    className="text-xs font-medium capitalize py-2"
+                  >
+                    <div className="flex items-center gap-1">
+                      <div className="p-0.5 rounded from-purple-100 to-purple-200 text-purple-600">
+                        <FileText className="h-4 w-4" />
                       </div>
-                    </TabsTrigger>
-                  </TabsList>
+                      <span className="hidden sm:inline">Comparison</span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
 
-                  <div className="flex-1 min-h-0">
-                    <TabsContent value="strengths" className="mt-0 h-full">
-                      <div className="h-full flex flex-col">
-                        <div className="flex-1 min-h-0">
-                          {evaluation?.feedback?.strengths?.length > 0 ? (
-                            renderFeedbackItems(evaluation.feedback.strengths)
-                          ) : (
-                            <div className="text-center text-gray-500 py-8">
-                              No strengths identified yet.
-                            </div>
-                          )}
-                        </div>
+                <div className="flex-1 min-h-0">
+                  <TabsContent value="strengths" className="mt-0 h-full">
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 min-h-0">
+                        {evaluation?.feedback?.strengths?.length > 0 ? (
+                          renderFeedbackItems(evaluation.feedback.strengths)
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            No strengths identified yet.
+                          </div>
+                        )}
                       </div>
-                    </TabsContent>
+                    </div>
+                  </TabsContent>
 
-                    <TabsContent
-                      value="areas_for_improvement"
-                      className="mt-0 h-full"
-                    >
-                      <div className="h-full flex flex-col">
-                        <div className="flex-1 min-h-0">
-                          {evaluation?.feedback?.areas_for_improvement?.length >
-                          0 ? (
-                            renderFeedbackItems(
-                              evaluation.feedback.areas_for_improvement
-                            )
-                          ) : (
-                            <div className="text-center text-gray-500 py-8">
-                              No areas for improvement identified yet.
-                            </div>
-                          )}
-                        </div>
+                  <TabsContent
+                    value="areas_for_improvement"
+                    className="mt-0 h-full"
+                  >
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 min-h-0">
+                        {evaluation?.feedback?.areas_for_improvement?.length >
+                        0 ? (
+                          renderFeedbackItems(
+                            evaluation.feedback.areas_for_improvement
+                          )
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            No areas for improvement identified yet.
+                          </div>
+                        )}
                       </div>
-                    </TabsContent>
+                    </div>
+                  </TabsContent>
 
-                    <TabsContent value="comparison" className="mt-0 h-full">
-                      <div className="h-full flex flex-col">
-                        <div className="flex-1 min-h-0">
-                          <div className="space-y-4">
-                            {/* Comparison Grid */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                              {/* User Writing */}
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <h4 className="text-sm font-semibold text-gray-900">
-                                      Your Writing
-                                    </h4>
-                                  </div>
-                                </div>
-                                <div className="bg-gradient-to-br from-blue-50/50 to-blue-100/30 backdrop-blur-sm p-4 rounded-lg border border-blue-200/50 hover:border-blue-300/50 transition-all duration-200">
-                                  <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
-                                    <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
-                                      {evaluation?.your_answer ||
-                                        "No content written yet."}
-                                    </pre>
-                                  </div>
+                  <TabsContent value="comparison" className="mt-0 h-full">
+                    <div className="h-full flex flex-col">
+                      <div className="flex-1 min-h-0">
+                        <div className="space-y-4">
+                          {/* Comparison Grid */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* User Writing */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <h4 className="text-sm font-semibold text-gray-900">
+                                    Your Writing
+                                  </h4>
                                 </div>
                               </div>
-
-                              {/* Example Answer */}
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    <h4 className="text-sm font-semibold text-gray-900">
-                                      Example Answer
-                                    </h4>
-                                  </div>
+                              <div className="bg-gradient-to-br from-blue-50/50 to-blue-100/30 backdrop-blur-sm p-4 rounded-lg border border-blue-200/50 hover:border-blue-300/50 transition-all duration-200">
+                                <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                                  <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
+                                    {evaluation?.your_answer ||
+                                      "No content written yet."}
+                                  </pre>
                                 </div>
-                                <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
-                                  <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-green-200 scrollbar-track-transparent">
-                                    <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
-                                      {typeof evaluation?.example_answer ===
-                                        "string" && evaluation.example_answer
-                                        ? evaluation.example_answer
-                                        : "No example available."}
-                                    </pre>
-                                  </div>
+                              </div>
+                            </div>
+
+                            {/* Example Answer */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  <h4 className="text-sm font-semibold text-gray-900">
+                                    Example Answer
+                                  </h4>
+                                </div>
+                              </div>
+                              <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
+                                <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-green-200 scrollbar-track-transparent">
+                                  <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-mono">
+                                    {typeof evaluation?.example_answer ===
+                                      "string" && evaluation.example_answer
+                                      ? evaluation.example_answer
+                                      : "No example available."}
+                                  </pre>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </div>
-            </Card>
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+            {/* </Card> */}
           </div>
         </div>
 
