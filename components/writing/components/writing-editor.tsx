@@ -142,6 +142,24 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
                     >
                       <span className="font-medium">Clear All</span>
                     </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSubmitForEvaluation}
+                      disabled={isEvaluating || !content.trim()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isEvaluating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Evaluating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Get AI Feedback
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -153,27 +171,6 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
                   className="min-h-[500px] resize-none border-0 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center justify-end">
-              <Button
-                size="lg"
-                onClick={handleSubmitForEvaluation}
-                disabled={isEvaluating || !content.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8"
-              >
-                {isEvaluating ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Evaluating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Get AI Feedback
-                  </>
-                )}
-              </Button>
             </div>
           </div>
 
