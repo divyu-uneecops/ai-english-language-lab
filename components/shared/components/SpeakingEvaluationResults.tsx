@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { getOverallRating, getScoreColor } from "@/lib/utils";
 import { SpeakingEvaluationResultsProps } from "../interfaces";
+import Markdown from "./MarkDown";
 
 export function SpeakingEvaluationResults({
   evaluation,
@@ -146,117 +147,119 @@ export function SpeakingEvaluationResults({
         {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
           {/* Left Column: Detailed Feedback */}
-          <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
-            <div className="p-4 flex-1 flex flex-col">
-              <div className="flex-1 overflow-y-auto">
-                <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/30 backdrop-blur-sm p-4 rounded-lg border border-gray-200/50">
-                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                    {evaluation?.detailed_feedback ||
-                      "No detailed feedback available."}
-                  </p>
-                </div>
+
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/30 backdrop-blur-sm p-4 rounded-lg border border-gray-200/50">
+                <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                  <Markdown
+                    passage={
+                      evaluation?.detailed_feedback ||
+                      "No detailed feedback available."
+                    }
+                  />
+                </p>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Right Column: Feedback Tabs */}
-          <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
-            <div className="p-4 flex-1 flex flex-col">
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full flex-1 flex flex-col"
-              >
-                <TabsList className="grid w-full grid-cols-3 mb-3 flex-shrink-0">
-                  <TabsTrigger
-                    value="strengths"
-                    className="text-xs font-medium capitalize py-2"
-                  >
-                    <div className="flex items-center gap-1">
-                      <div className="p-0.5 rounded from-green-100 to-green-200 text-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                      </div>
-                      <span className="hidden sm:inline">Strengths</span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="areas_for_improvement"
-                    className="text-xs font-medium capitalize py-2"
-                  >
-                    <div className="flex items-center gap-1">
-                      <div className="p-0.5 rounded from-blue-100 to-blue-200 text-blue-600">
-                        <TrendingUp className="h-4 w-4" />
-                      </div>
-                      <span className="hidden sm:inline">Improvements</span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="example"
-                    className="text-xs font-medium capitalize py-2"
-                  >
-                    <div className="flex items-center gap-1">
-                      <div className="p-0.5 rounded from-purple-100 to-purple-200 text-purple-600">
-                        <FileText className="h-4 w-4" />
-                      </div>
-                      <span className="hidden sm:inline">Example</span>
-                    </div>
-                  </TabsTrigger>
-                </TabsList>
 
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <TabsContent value="strengths" className="mt-0 h-full">
-                    <div className="h-full flex flex-col">
-                      <div className="flex-1 min-h-0">
-                        {evaluation?.feedback?.strengths?.length > 0 ? (
-                          renderFeedbackItems(evaluation.feedback.strengths)
-                        ) : (
-                          <div className="text-center text-gray-500 py-8">
-                            No strengths identified yet.
-                          </div>
-                        )}
-                      </div>
+          <div className="p-4 flex-1 flex flex-col">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full flex-1 flex flex-col"
+            >
+              <TabsList className="grid w-full grid-cols-3 mb-3 flex-shrink-0">
+                <TabsTrigger
+                  value="strengths"
+                  className="text-xs font-medium capitalize py-2"
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="p-0.5 rounded from-green-100 to-green-200 text-green-600">
+                      <CheckCircle className="h-4 w-4" />
                     </div>
-                  </TabsContent>
-
-                  <TabsContent
-                    value="areas_for_improvement"
-                    className="mt-0 h-full"
-                  >
-                    <div className="h-full flex flex-col">
-                      <div className="flex-1 min-h-0">
-                        {evaluation?.feedback?.areas_for_improvement?.length >
-                        0 ? (
-                          renderFeedbackItems(
-                            evaluation.feedback.areas_for_improvement
-                          )
-                        ) : (
-                          <div className="text-center text-gray-500 py-8">
-                            No areas for improvement identified yet.
-                          </div>
-                        )}
-                      </div>
+                    <span className="hidden sm:inline">Strengths</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="areas_for_improvement"
+                  className="text-xs font-medium capitalize py-2"
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="p-0.5 rounded from-blue-100 to-blue-200 text-blue-600">
+                      <TrendingUp className="h-4 w-4" />
                     </div>
-                  </TabsContent>
+                    <span className="hidden sm:inline">Improvements</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="example"
+                  className="text-xs font-medium capitalize py-2"
+                >
+                  <div className="flex items-center gap-1">
+                    <div className="p-0.5 rounded from-purple-100 to-purple-200 text-purple-600">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <span className="hidden sm:inline">Example</span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
 
-                  <TabsContent value="example" className="mt-0 h-full">
-                    <div className="h-full flex flex-col overflow-hidden">
-                      <div className="flex-1 min-h-0 overflow-y-auto">
-                        <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
-                          <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                            Example Response
-                          </h4>
-                          <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
-                            {evaluation?.example_response ||
-                              "No example available."}
-                          </p>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <TabsContent value="strengths" className="mt-0 h-full">
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      {evaluation?.feedback?.strengths?.length > 0 ? (
+                        renderFeedbackItems(evaluation.feedback.strengths)
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          No strengths identified yet.
                         </div>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent
+                  value="areas_for_improvement"
+                  className="mt-0 h-full"
+                >
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 min-h-0">
+                      {evaluation?.feedback?.areas_for_improvement?.length >
+                      0 ? (
+                        renderFeedbackItems(
+                          evaluation.feedback.areas_for_improvement
+                        )
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          No areas for improvement identified yet.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="example" className="mt-0 h-full">
+                  <div className="h-full flex flex-col overflow-hidden">
+                    <div className="flex-1 min-h-0 overflow-y-auto">
+                      <div className="bg-gradient-to-br from-green-50/50 to-green-100/30 backdrop-blur-sm p-4 rounded-lg border border-green-200/50 hover:border-green-300/50 transition-all duration-200">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                          Example Response
+                        </h4>
+                        <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                          {evaluation?.example_response ||
+                            "No example available."}
+                        </p>
                       </div>
                     </div>
-                  </TabsContent>
-                </div>
-              </Tabs>
-            </div>
-          </Card>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
         </div>
 
         {/* Action Buttons - Fixed at bottom */}
