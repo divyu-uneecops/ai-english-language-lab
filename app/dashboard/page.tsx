@@ -160,11 +160,6 @@ export default function EnglishLearningDashboard() {
                     <div className="p-3 bg-white/20 rounded-xl">
                       <Star className="h-8 w-8 text-yellow-300" />
                     </div>
-                    <div>
-                      <h2 className="text-2xl font-bold mb-2">
-                        🌟 First Star Achieved! 🌟
-                      </h2>
-                    </div>
                   </div>
                 </div>
 
@@ -232,19 +227,28 @@ export default function EnglishLearningDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {continuePracticing?.map((item: any, index: number) => {
               return (
-                <Link
+                <div
                   key={item?.id}
-                  href={item?.href}
-                  prefetch
-                  className="group cursor-pointer"
-                  aria-label={`Open ${item?.title}`}
+                  className="relative rounded-3xl p-6 shadow-lg transition-all duration-300 min-h-[220px] sm:min-h-[240px] lg:min-h-[280px] hover:shadow-2xl hover:scale-[1.015] group overflow-hidden border-2 border-transparent hover:border-orange-200"
                 >
-                  <div
-                    tabIndex={0}
-                    className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg transition-all duration-300 border border-white/20 cursor-pointer min-h-[220px] sm:min-h-[240px] lg:min-h-[260px] hover:shadow-2xl hover:border-orange-200/50 hover:bg-orange-50/40 hover:scale-[1.015] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                  >
-                    {/* Centered Content */}
-                    <div className="relative z-10 h-full flex flex-col items-center justify-center text-center gap-4">
+                  {/* Gradient Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-orange-50/40 to-orange-100/60"></div>
+                  <div className="absolute inset-0 bg-gradient-to-tl from-yellow-50/50 via-transparent to-transparent"></div>
+
+                  {/* Animated Gradient Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-100/70 via-orange-50/40 to-yellow-100/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                  {/* Gradient Glow Effect */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-br from-orange-400 via-orange-300 to-yellow-400 rounded-3xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500"></div>
+
+                  {/* Top Right ChevronRight Icon */}
+                  <div className="absolute top-4 right-4 p-2 bg-white/70 backdrop-blur-sm rounded-full transition-all duration-300 z-20 shadow-sm group-hover:bg-orange-100/80 group-hover:shadow-md">
+                    <ChevronRight className="h-5 w-5 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-orange-500" />
+                  </div>
+
+                  {/* Centered Content */}
+                  <div className="relative z-10 h-full flex flex-col items-center justify-between text-center gap-4">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-4">
                       <div className="relative">
                         <div
                           className={`p-6 rounded-2xl ${getSkillColor(
@@ -259,11 +263,16 @@ export default function EnglishLearningDashboard() {
                         {item?.title}
                       </h3>
                     </div>
-                    <div className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full transition-all duration-300">
-                      <ChevronRight className="h-5 w-5 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-orange-500" />
-                    </div>
+
+                    {/* Practice Button */}
+                    <Link href={item?.href} prefetch className="w-full">
+                      <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        Practice
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
