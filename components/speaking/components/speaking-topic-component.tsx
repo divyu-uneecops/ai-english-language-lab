@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Mic, Loader2, Sparkles } from "lucide-react";
+import { Mic, Loader2, Sparkles, MicOff, RotateCcw, Send } from "lucide-react";
 import LiveSpeechToText, {
   LiveSpeechToTextRef,
 } from "@/components/shared/components/LiveSpeechToText";
@@ -23,6 +23,8 @@ export function SpeakingTopicComponent({
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<SpeakingEvaluationData | null>(
     null
@@ -66,6 +68,15 @@ export function SpeakingTopicComponent({
   const handlePracticeAgain = () => {
     setShowEvaluation(false);
     setSpeechChunks([]);
+    setTranscript("");
+    liveSpeechRef.current?.handleRestart();
+  };
+
+  const handleStopListening = () => {
+    liveSpeechRef.current?.stopListening();
+  };
+
+  const handleRestartListening = () => {
     liveSpeechRef.current?.handleRestart();
   };
 
@@ -159,24 +170,49 @@ export function SpeakingTopicComponent({
               </h2>
             </div>
 
-            <Button
-              size="sm"
-              onClick={handleSubmitForEvaluation}
-              disabled={isEvaluating || speechChunks.length === 0}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
-            >
-              {isEvaluating ? (
+            <div className="flex items-center gap-2">
+              {isListening ? (
+                <Button
+                  onClick={handleStopListening}
+                  variant="destructive"
+                  size="sm"
+                  className="shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <MicOff className="h-4 w-4 mr-1.5" />
+                  Stop
+                </Button>
+              ) : transcript ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Evaluating...
+                  <Button
+                    onClick={handleRestartListening}
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-1.5" />
+                    Restart
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitForEvaluation}
+                    disabled={isEvaluating || speechChunks.length === 0}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                  >
+                    {isEvaluating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Evaluating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Get AI Feedback
+                      </>
+                    )}
+                  </Button>
                 </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Get AI Feedback
-                </>
-              )}
-            </Button>
+              ) : null}
+            </div>
           </div>
 
           {/* Speech Practice Content */}
@@ -185,6 +221,8 @@ export function SpeakingTopicComponent({
               <LiveSpeechToText
                 ref={liveSpeechRef}
                 onChunksUpdate={setSpeechChunks}
+                onListeningChange={setIsListening}
+                onTranscriptChange={setTranscript}
                 placeholderText="Start speaking about your topic"
                 listeningText="Listening to your speech..."
                 readyText="Ready to speak"

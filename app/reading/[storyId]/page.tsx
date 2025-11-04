@@ -15,6 +15,8 @@ import {
   Square,
   Send,
   CheckCircle,
+  MicOff,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
@@ -108,6 +110,8 @@ export default function StoryPage() {
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
   const liveSpeechRef = useRef<LiveSpeechToTextRef>(null);
 
   // Analysis results state
@@ -299,6 +303,7 @@ export default function StoryPage() {
     setAnalysisResult(null);
     setAnalysisError(null);
     setSpeechChunks([]);
+    setTranscript("");
   };
 
   const handleCloseAnalysis = () => {
@@ -309,6 +314,15 @@ export default function StoryPage() {
     setShowAnalysisResults(false);
     setAnalysisResult(null);
     setSpeechChunks([]);
+    setTranscript("");
+    liveSpeechRef.current?.handleRestart();
+  };
+
+  const handleStopListening = () => {
+    liveSpeechRef.current?.stopListening();
+  };
+
+  const handleRestartListening = () => {
     liveSpeechRef.current?.handleRestart();
   };
 
@@ -466,24 +480,49 @@ export default function StoryPage() {
                   Reading Practice
                 </h2>
               </div>
-              <Button
-                onClick={handleSubmitAnalysis}
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white font-medium"
-                disabled={speechChunks.length === 0 || isAnalyzing}
-              >
-                {isAnalyzing ? (
+              <div className="flex items-center gap-2">
+                {isListening ? (
+                  <Button
+                    onClick={handleStopListening}
+                    variant="destructive"
+                    size="sm"
+                    className="shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <MicOff className="h-4 w-4 mr-1.5" />
+                    Stop
+                  </Button>
+                ) : transcript ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                    Analyzing...
+                    <Button
+                      onClick={handleRestartListening}
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1.5" />
+                      Restart
+                    </Button>
+                    <Button
+                      onClick={handleSubmitAnalysis}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium"
+                      disabled={speechChunks.length === 0 || isAnalyzing}
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
                   </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Submit
-                  </>
-                )}
-              </Button>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -492,6 +531,8 @@ export default function StoryPage() {
             <LiveSpeechToText
               ref={liveSpeechRef}
               onChunksUpdate={setSpeechChunks}
+              onListeningChange={setIsListening}
+              onTranscriptChange={setTranscript}
             />
           </div>
         </div>

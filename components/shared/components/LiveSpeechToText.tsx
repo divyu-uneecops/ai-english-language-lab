@@ -9,8 +9,7 @@ import {
 } from "react";
 import { RealtimeClient } from "@speechmatics/real-time-client";
 import { createSpeechmaticsJWT } from "@speechmatics/auth";
-import { Button } from "@/components/ui/button";
-import { Mic, MicOff, CheckCircle2, RotateCcw } from "lucide-react";
+import { Mic, CheckCircle2 } from "lucide-react";
 
 interface SarvamResponse {
   request_id: string;
@@ -28,6 +27,8 @@ interface LiveSpeechToTextProps {
   onChunksUpdate?: (
     chunks: { text: string; startTime: number; endTime: number }[]
   ) => void;
+  onListeningChange?: (listening: boolean) => void;
+  onTranscriptChange?: (transcript: string) => void;
   placeholderText?: string;
   listeningText?: string;
   readyText?: string;
@@ -37,12 +38,17 @@ interface LiveSpeechToTextProps {
 export interface LiveSpeechToTextRef {
   handleRestart: () => void;
   stopListening: () => void;
+  startListening: () => void;
+  getTranscript: () => string;
+  isListening: () => boolean;
 }
 
 const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
   (
     {
       onChunksUpdate,
+      onListeningChange,
+      onTranscriptChange,
       placeholderText = "Start reading the story aloud",
       listeningText = "Listening...",
       readyText = "Ready to practice",
@@ -64,6 +70,14 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
     useEffect(() => {
       onChunksUpdate?.(chunks);
     }, [chunks]);
+
+    useEffect(() => {
+      onListeningChange?.(listening);
+    }, [listening]);
+
+    useEffect(() => {
+      onTranscriptChange?.(transcript);
+    }, [transcript]);
 
     const startListening = async () => {
       if (listening) return;
@@ -223,10 +237,13 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
       setChunks([]);
     };
 
-    // Expose handleRestart to parent component via ref
+    // Expose methods to parent component via ref
     useImperativeHandle(ref, () => ({
       handleRestart,
       stopListening,
+      startListening,
+      getTranscript: () => transcript,
+      isListening: () => listening,
     }));
 
     // Cleanup on component unmount
@@ -245,37 +262,12 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
               <div className="space-y-4">
                 <div className="space-y-4 pb-4 border-b border-gray-100">
                   {/* Header Section */}
-                  <div className="flex justify-between">
-                    <div className="flex items-center justify-baseline space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-700">
-                        Live Transcript
-                      </span>
-                    </div>
-
-                    {/* Action Buttons Section */}
-                    <div className="flex items-center gap-1">
-                      <Button
-                        onClick={handleRestart}
-                        size="sm"
-                        variant="outline"
-                        className="border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
-                      >
-                        <RotateCcw className="h-4 w-4 mr-1.5" />
-                        Restart
-                      </Button>
-                      {listening && (
-                        <Button
-                          onClick={stopListening}
-                          variant="destructive"
-                          size="sm"
-                          className="rounded-full shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
-                        >
-                          <MicOff className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                  <div className="flex items-center justify-baseline space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-700">
+                      Live Transcript
+                    </span>
                   </div>
                 </div>
                 <div className="prose prose-gray max-w-none">
@@ -310,18 +302,24 @@ const LiveSpeechToText = forwardRef<LiveSpeechToTextRef, LiveSpeechToTextProps>(
                     className="text-center space-y-6 cursor-pointer group"
                     onClick={startListening}
                   >
-                    <div className="relative">
-                      <div className="w-20 h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105">
-                        <Mic className="h-10 w-10 text-gray-500 group-hover:text-gray-600 transition-colors" />
+                    <div className="relative flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center space-y-1 mb-2">
+                        <p className="text-gray-500 text-base group-hover:text-blue-600 transition-colors">
+                          {clickToStartText}
+                        </p>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-gray-900 font-semibold text-lg group-hover:text-blue-600 transition-colors">
-                        {readyText}
-                      </p>
-                      <p className="text-gray-500 text-sm group-hover:text-blue-500 transition-colors">
-                        {clickToStartText}
-                      </p>
+                      <div className="relative flex items-center justify-center mt-2">
+                        {/* Soft animated halo */}
+                        <span className="absolute inline-flex h-24 w-24 rounded-full bg-blue-100 opacity-60 animate-pulse-slow"></span>
+                        <span className="absolute inline-flex h-28 w-28 rounded-full bg-blue-200 opacity-40 animate-pulse-extra-slow"></span>
+                        <button
+                          type="button"
+                          aria-label="Start Voice Input"
+                          className="relative z-10 w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-200 rounded-full shadow-lg flex items-center justify-center border-2 border-blue-300 group-hover:scale-110 group-hover:shadow-2xl group-active:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
+                        >
+                          <Mic className="h-10 w-10 text-blue-600 transition-colors group-hover:text-blue-800" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
