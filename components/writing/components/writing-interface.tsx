@@ -41,9 +41,6 @@ export function WritingInterface() {
   const [selectedLevel, setSelectedLevel] = useState<
     "beginner" | "intermediate" | "advanced" | "ai" | null
   >(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<
-    "easy" | "medium" | "hard" | null
-  >(null);
   // Combined dialog like Reading
 
   const [showFilterDialog, setShowFilterDialog] = useState<boolean>(false);
@@ -381,21 +378,19 @@ export function WritingInterface() {
     if (level === "ai") {
       setShowLevelDifficultyDialog(false);
       fetchWritingTopics(true);
-    }
-  };
+    } else {
+      // Automatically select all difficulties for the selected level
+      const allDifficulties = ["easy", "medium", "hard"];
+      const levelDifficultyKeys = allDifficulties.map(
+        (difficulty) => `${level}.${difficulty}`
+      );
 
-  const handleDifficultySelection = (
-    difficulty: "easy" | "medium" | "hard"
-  ) => {
-    setSelectedDifficulty(difficulty);
-    setShowLevelDifficultyDialog(false);
-
-    if (selectedLevel) {
-      const levelDifficultyKey = `${selectedLevel}.${difficulty}`;
       setFilters((prev) => ({
         ...prev,
-        level: [...prev.level, levelDifficultyKey],
+        level: [...prev.level, ...levelDifficultyKeys],
       }));
+
+      setShowLevelDifficultyDialog(false);
     }
   };
 
@@ -692,12 +687,10 @@ export function WritingInterface() {
                 Writing Practice Setup
               </div>
               <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Choose Your Level & Difficulty
+                Choose Your Level
               </DialogTitle>
               <DialogDescription className="text-white/90 text-sm mt-1">
-                {!selectedLevel
-                  ? "First, select your writing level"
-                  : "Now, choose the difficulty for your practice"}
+                Select your writing level to get started
               </DialogDescription>
             </div>
           </div>
@@ -784,87 +777,12 @@ export function WritingInterface() {
               </div>
             )}
 
-            {/* Difficulty Selection */}
-            {selectedLevel && selectedLevel !== "ai" && (
-              <div className="h-full flex flex-col">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-700">
-                      Select Difficulty
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Level:{" "}
-                      <span className="font-semibold capitalize text-gray-700">
-                        {selectedLevel}
-                      </span>
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedLevel(null)}
-                    className="text-xs text-gray-600 hover:text-gray-900"
-                  >
-                    Change Level
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 flex-1">
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                    onClick={() => handleDifficultySelection("easy")}
-                  >
-                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                      <Star className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Easy</div>
-                      <div className="text-xs text-gray-600">
-                        Simple vocabulary and short sentences
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                    onClick={() => handleDifficultySelection("medium")}
-                  >
-                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                      <Target className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Medium</div>
-                      <div className="text-xs text-gray-600">
-                        Moderate complexity with some challenging words
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                    onClick={() => handleDifficultySelection("hard")}
-                  >
-                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                      <Trophy className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Hard</div>
-                      <div className="text-xs text-gray-600">
-                        Complex vocabulary and advanced structures
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            )}
-
             <div className="mt-5 flex items-center justify-center gap-4">
               <Button
                 variant="ghost"
                 className="text-gray-600 hover:text-gray-900"
                 onClick={() => {
                   setSelectedLevel(null);
-                  setSelectedDifficulty(null);
                   setShowLevelDifficultyDialog(false);
                 }}
               >
