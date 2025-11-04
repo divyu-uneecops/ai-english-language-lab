@@ -347,10 +347,22 @@ export function ReadingInterface() {
     level: "beginner" | "intermediate" | "advanced" | "ai"
   ) => {
     setSelectedLevel(level);
-    // For AI, immediately fetch and navigate, no difficulty step
+    setShowLevelDifficultyDialog(false);
+
+    // For AI, immediately fetch and navigate
     if (level === "ai") {
-      setShowLevelDifficultyDialog(false);
       fetchStories(true);
+    } else {
+      // For other levels, select all difficulties for that level
+      const allDifficulties = ["easy", "medium", "hard"];
+      const levelDifficultyKeys = allDifficulties.map(
+        (difficulty) => `${level}.${difficulty}`
+      );
+
+      setFilters((prev) => ({
+        ...prev,
+        level: [...prev.level, ...levelDifficultyKeys],
+      }));
     }
   };
 
@@ -626,172 +638,90 @@ export function ReadingInterface() {
                 Reading Practice Setup
               </div>
               <DialogTitle className="text-2xl font-extrabold tracking-tight text-white">
-                Choose Your Level & Difficulty
+                Choose Your Reading Level
               </DialogTitle>
               <DialogDescription className="text-white/90 text-sm mt-1">
-                {!selectedLevel
-                  ? "First, select your reading level"
-                  : "Now, choose the difficulty for your practice"}
+                Select your reading level to get started
               </DialogDescription>
             </div>
           </div>
 
           <div className="p-6 bg-white">
             {/* Level Selection */}
-            {!selectedLevel && (
-              <div className="h-full flex flex-col">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Select Level
-                </h3>
-                <div className="grid grid-cols-1 gap-3 flex-1">
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                    onClick={() => handleLevelClick("beginner")}
-                  >
-                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                      <Star className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        Beginner
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        Short passages, simple vocabulary
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600" />
-                  </button>
-
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                    onClick={() => handleLevelClick("intermediate")}
-                  >
-                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                      <Target className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        Intermediate
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        Balanced challenge and comprehension
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-600" />
-                  </button>
-
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                    onClick={() => handleLevelClick("advanced")}
-                  >
-                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                      <Trophy className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        Advanced
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        Longer texts, complex structures
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-red-600" />
-                  </button>
-
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
-                    onClick={() => handleLevelClick("ai")}
-                  >
-                    <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
-                      <Brain className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">
-                        Let AI Decide
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        AI selects a suitable level and a random challenge
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Difficulty Selection */}
-            {selectedLevel && selectedLevel !== "ai" && (
-              <div className="h-full flex flex-col">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-700">
-                      Select Difficulty
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Level:{" "}
-                      <span className="font-semibold capitalize text-gray-700">
-                        {selectedLevel}
-                      </span>
-                    </p>
+            <div className="h-full flex flex-col">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Select Level
+              </h3>
+              <div className="grid grid-cols-1 gap-3 flex-1">
+                <button
+                  className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
+                  onClick={() => handleLevelClick("beginner")}
+                >
+                  <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
+                    <Star className="h-5 w-5" />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedLevel(null)}
-                    className="text-xs text-gray-600 hover:text-gray-900"
-                  >
-                    Change Level
-                  </Button>
-                </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Beginner</div>
+                    <div className="text-xs text-gray-600">
+                      Short passages, simple vocabulary
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-green-600" />
+                </button>
 
-                <div className="grid grid-cols-1 gap-3 flex-1">
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-green-200 hover:border-green-300 hover:shadow-md transition-all bg-gradient-to-br from-green-50 to-white"
-                    onClick={() => handleDifficultySelection("easy")}
-                  >
-                    <div className="p-2 rounded-lg bg-green-100 text-green-700 group-hover:scale-110 transition-transform">
-                      <Star className="h-5 w-5" />
+                <button
+                  className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
+                  onClick={() => handleLevelClick("intermediate")}
+                >
+                  <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
+                    <Target className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">
+                      Intermediate
                     </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Easy</div>
-                      <div className="text-xs text-gray-600">
-                        Simple vocabulary and short sentences
-                      </div>
+                    <div className="text-xs text-gray-600">
+                      Balanced challenge and comprehension
                     </div>
-                  </button>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-600" />
+                </button>
 
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-yellow-200 hover:border-yellow-300 hover:shadow-md transition-all bg-gradient-to-br from-yellow-50 to-white"
-                    onClick={() => handleDifficultySelection("medium")}
-                  >
-                    <div className="p-2 rounded-lg bg-yellow-100 text-yellow-700 group-hover:scale-110 transition-transform">
-                      <Target className="h-5 w-5" />
+                <button
+                  className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
+                  onClick={() => handleLevelClick("advanced")}
+                >
+                  <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
+                    <Trophy className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Advanced</div>
+                    <div className="text-xs text-gray-600">
+                      Longer texts, complex structures
                     </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Medium</div>
-                      <div className="text-xs text-gray-600">
-                        Moderate complexity with some challenging words
-                      </div>
-                    </div>
-                  </button>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-red-600" />
+                </button>
 
-                  <button
-                    className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-red-200 hover:border-red-300 hover:shadow-md transition-all bg-gradient-to-br from-red-50 to-white"
-                    onClick={() => handleDifficultySelection("hard")}
-                  >
-                    <div className="p-2 rounded-lg bg-red-100 text-red-700 group-hover:scale-110 transition-transform">
-                      <Trophy className="h-5 w-5" />
+                <button
+                  className="group w-full text-left flex items-center gap-3 p-4 rounded-xl border border-blue-200 hover:border-blue-300 hover:shadow-md transition-all bg-gradient-to-br from-blue-50 to-white"
+                  onClick={() => handleLevelClick("ai")}
+                >
+                  <div className="p-2 rounded-lg bg-blue-100 text-blue-700 group-hover:scale-110 transition-transform">
+                    <Brain className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">
+                      Let AI Decide
                     </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Hard</div>
-                      <div className="text-xs text-gray-600">
-                        Complex vocabulary and advanced structures
-                      </div>
+                    <div className="text-xs text-gray-600">
+                      AI selects a suitable level and a random challenge
                     </div>
-                  </button>
-                </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                </button>
               </div>
-            )}
+            </div>
 
             <div className="mt-5 flex items-center justify-center gap-4">
               <Button
