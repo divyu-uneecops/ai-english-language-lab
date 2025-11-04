@@ -45,14 +45,16 @@ export default function ReadingEvaluationResult({
         {feedbackItems.map((item, index) => (
           <div
             key={index}
-            className="flex items-start gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
+            className="flex items-center gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
           >
-            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center mt-0.5">
+            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
               <span className="text-xs font-bold text-orange-700">
                 {index + 1}
               </span>
             </div>
-            <p className="text-gray-700 leading-tight text-xs">{item}</p>
+            <p className="text-gray-700 leading-tight text-xs flex-1 self-center">
+              {item}
+            </p>
           </div>
         ))}
       </div>
@@ -206,15 +208,6 @@ export default function ReadingEvaluationResult({
             {result?.feedback && (
               <Card className="glass-card border-0 shadow-lg h-full">
                 <div className="p-4 h-full flex flex-col">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="p-1.5 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
-                      <MessageSquare className="h-4 w-4 text-orange-600" />
-                    </div>
-                    <h2 className="text-base font-bold text-gray-900">
-                      Personalized Feedback
-                    </h2>
-                  </div>
-
                   <Tabs
                     value={activeTab}
                     onValueChange={setActiveTab}

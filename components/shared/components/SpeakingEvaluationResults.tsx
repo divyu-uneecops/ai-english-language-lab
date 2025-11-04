@@ -43,14 +43,16 @@ export function SpeakingEvaluationResults({
         {feedbackItems?.map((item, index) => (
           <div
             key={index}
-            className="flex items-start gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
+            className="flex items-center gap-2 p-2 bg-white/60 backdrop-blur-sm rounded-md border border-white/30 hover:bg-white/80 transition-all duration-200"
           >
-            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center mt-0.5">
+            <div className="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-orange-100 to-orange-200 rounded-full flex items-center justify-center">
               <span className="text-xs font-bold text-orange-700">
                 {index + 1}
               </span>
             </div>
-            <p className="text-gray-700 leading-tight text-xs">{item}</p>
+            <p className="text-gray-700 leading-tight text-xs flex-1 self-center">
+              {item}
+            </p>
           </div>
         ))}
       </div>
@@ -146,15 +148,6 @@ export function SpeakingEvaluationResults({
           {/* Left Column: Detailed Feedback */}
           <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
             <div className="p-4 flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-1.5 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
-                  <MessageSquare className="h-4 w-4 text-orange-600" />
-                </div>
-                <h2 className="text-base font-bold text-gray-900">
-                  Detailed Analysis
-                </h2>
-              </div>
-
               <div className="flex-1 overflow-y-auto">
                 <div className="bg-gradient-to-br from-gray-50/50 to-gray-100/30 backdrop-blur-sm p-4 rounded-lg border border-gray-200/50">
                   <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
@@ -169,15 +162,6 @@ export function SpeakingEvaluationResults({
           {/* Right Column: Feedback Tabs */}
           <Card className="glass-card border-0 shadow-lg h-full flex flex-col">
             <div className="p-4 flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-1.5 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg">
-                  <Star className="h-4 w-4 text-orange-600" />
-                </div>
-                <h2 className="text-base font-bold text-gray-900">
-                  Personalized Feedback
-                </h2>
-              </div>
-
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
