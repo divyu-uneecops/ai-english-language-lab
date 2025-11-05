@@ -530,112 +530,117 @@ export function WritingInterface() {
                   </div>
                 ) : (
                   writingPrompts?.map((prompt) => (
-                    <Card
+                    <Link
                       key={prompt?.topic_id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0"
-                      onClick={() => handlePromptSelection(prompt)}
+                      href={`/writing/${prompt?.topic_id}`}
+                      prefetch={true}
+                      className="block"
                     >
-                      {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Card className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0">
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                      <div className="relative p-6">
-                        {/* Header with icon and badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                              <PenTool className="h-4 w-4 text-yellow-600" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                  prompt?.level
-                                )} shadow-sm`}
-                              >
-                                {prompt?.level}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                  prompt?.difficulty
-                                )} shadow-sm`}
-                              >
-                                {prompt?.difficulty}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Prompt title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                          {prompt?.title}
-                        </h3>
-
-                        {/* Description preview */}
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                          {prompt?.description}
-                        </p>
-
-                        {/* Guidelines preview */}
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                            Guidelines:
-                          </h4>
-                          <ul className="text-xs text-gray-600 space-y-1">
-                            {prompt?.guidelines
-                              ?.slice(0, 2)
-                              .map((guideline: string, idx: number) => (
-                                <li
-                                  key={idx}
-                                  className="flex items-start gap-2"
+                        <div className="relative p-6">
+                          {/* Header with icon and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <PenTool className="h-4 w-4 text-yellow-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    prompt?.level
+                                  )} shadow-sm`}
                                 >
-                                  <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                                  <span className="line-clamp-1">
-                                    {guideline}
-                                  </span>
-                                </li>
-                              ))}
-                            {prompt?.guidelines &&
-                              prompt?.guidelines?.length > 2 && (
-                                <li className="text-gray-500 text-xs">
-                                  +{prompt?.guidelines?.length - 2} more
-                                  guidelines
-                                </li>
-                              )}
-                          </ul>
-                        </div>
-
-                        {/* Stats and metadata */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Trophy className="h-3 w-3 text-yellow-500" />
-                              <span className="font-medium">Max Score: 10</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Clock className="h-3 w-3 text-orange-500" />
-                              <span className="font-medium">15-20 mins</span>
+                                  {prompt?.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    prompt?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {prompt?.difficulty}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Action button */}
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            className={
-                              "px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-                            }
-                          >
-                            Start Writing
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Button>
+                          {/* Prompt title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {prompt?.title}
+                          </h3>
+
+                          {/* Description preview */}
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {prompt?.description}
+                          </p>
+
+                          {/* Guidelines preview */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                              Guidelines:
+                            </h4>
+                            <ul className="text-xs text-gray-600 space-y-1">
+                              {prompt?.guidelines
+                                ?.slice(0, 2)
+                                .map((guideline: string, idx: number) => (
+                                  <li
+                                    key={idx}
+                                    className="flex items-start gap-2"
+                                  >
+                                    <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <span className="line-clamp-1">
+                                      {guideline}
+                                    </span>
+                                  </li>
+                                ))}
+                              {prompt?.guidelines &&
+                                prompt?.guidelines?.length > 2 && (
+                                  <li className="text-gray-500 text-xs">
+                                    +{prompt?.guidelines?.length - 2} more
+                                    guidelines
+                                  </li>
+                                )}
+                            </ul>
+                          </div>
+
+                          {/* Stats and metadata */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Trophy className="h-3 w-3 text-yellow-500" />
+                                <span className="font-medium">
+                                  Max Score: 10
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Clock className="h-3 w-3 text-orange-500" />
+                                <span className="font-medium">15-20 mins</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className={
+                                "px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                              }
+                            >
+                              Start Writing
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </Link>
                   ))
                 )}
 

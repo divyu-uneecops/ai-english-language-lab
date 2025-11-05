@@ -509,87 +509,90 @@ export function ReadingInterface() {
                   </div>
                 ) : (
                   stories.map((story) => (
-                    <Card
+                    <Link
                       key={story?.passage_id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0"
-                      onClick={() =>
-                        router.push(`/reading/${story?.passage_id}`)
-                      }
+                      href={`/reading/${story?.passage_id}`}
+                      prefetch={true}
+                      className="block"
                     >
-                      {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Card className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0">
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                      <div className="relative p-6">
-                        {/* Header with star and badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                              <Star className="h-4 w-4 text-yellow-600" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                  story?.level
-                                )} shadow-sm`}
-                              >
-                                {story?.level}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                  story?.difficulty
-                                )} shadow-sm`}
-                              >
-                                {story?.difficulty}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Story title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                          {story?.title}
-                        </h3>
-
-                        <Markdown
-                          passage={story?.passage}
-                          className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed"
-                        />
-
-                        {/* Stats and metadata */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Trophy className="h-3 w-3 text-yellow-500" />
-                              <span className="font-medium">Max Score: 10</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
-                              <Clock className="h-3 w-3 text-orange-500" />
-                              <span className="font-medium">
-                                {story?.readTime || "5 Min"}
-                              </span>
+                        <div className="relative p-6">
+                          {/* Header with star and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <Star className="h-4 w-4 text-yellow-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    story?.level
+                                  )} shadow-sm`}
+                                >
+                                  {story?.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    story?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {story?.difficulty}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Action button */}
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            className={
-                              "px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                            }
-                          >
-                            Start Reading
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Button>
+                          {/* Story title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {story?.title}
+                          </h3>
+
+                          <Markdown
+                            passage={story?.passage}
+                            className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed"
+                          />
+
+                          {/* Stats and metadata */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Trophy className="h-3 w-3 text-yellow-500" />
+                                <span className="font-medium">
+                                  Max Score: 10
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full">
+                                <Clock className="h-3 w-3 text-orange-500" />
+                                <span className="font-medium">
+                                  {story?.readTime || "5 Min"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className={
+                                "px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                              }
+                            >
+                              Start Reading
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </Link>
                   ))
                 )}
 

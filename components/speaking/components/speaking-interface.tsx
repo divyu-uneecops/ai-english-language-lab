@@ -522,66 +522,69 @@ export function SpeakingInterface() {
                   </div>
                 ) : (
                   speakingTopics?.map((topic) => (
-                    <Card
+                    <Link
                       key={topic?.topic_id}
-                      className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0"
-                      onClick={() => handleTopicSelection(topic)}
+                      href={`/speaking/${topic?.topic_id}`}
+                      prefetch={true}
+                      className="block"
                     >
-                      {/* Gradient overlay for visual appeal */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Card className="group relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl transition-all duration-300 cursor-pointer border border-white/20 hover:border-orange-200/50 py-0">
+                        {/* Gradient overlay for visual appeal */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/30 via-transparent to-orange-100/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                      <div className="relative p-6">
-                        {/* Header with icon and badges */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
-                              <Mic className="h-4 w-4 text-orange-600" />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
-                                  topic?.level
-                                )} shadow-sm`}
-                              >
-                                {topic?.level}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
-                                  topic?.difficulty
-                                )} shadow-sm`}
-                              >
-                                {topic?.difficulty}
-                              </Badge>
+                        <div className="relative p-6">
+                          {/* Header with icon and badges */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-r from-orange-100 to-orange-100 rounded-full group-hover:scale-110 transition-transform duration-200">
+                                <Mic className="h-4 w-4 text-orange-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getLevelColor(
+                                    topic?.level
+                                  )} shadow-sm`}
+                                >
+                                  {topic?.level}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${getDifficultyColor(
+                                    topic?.difficulty
+                                  )} shadow-sm`}
+                                >
+                                  {topic?.difficulty}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
+
+                          {/* Topic title */}
+                          <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
+                            {topic?.title}
+                          </h3>
+
+                          {/* Description preview */}
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {topic?.description}
+                          </p>
+
+                          {/* Action button */}
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                            >
+                              Start Speaking
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
                         </div>
-
-                        {/* Topic title */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors duration-200 line-clamp-1">
-                          {topic?.title}
-                        </h3>
-
-                        {/* Description preview */}
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
-                          {topic?.description}
-                        </p>
-
-                        {/* Action button */}
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            className="px-6 py-2 text-sm font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
-                          >
-                            Start Speaking
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </Link>
                   ))
                 )}
 
