@@ -540,7 +540,10 @@ export default function StoryPage() {
 
       {/* Analysis Results Dialog */}
       <Dialog open={showAnalysisResults} onOpenChange={setShowAnalysisResults}>
-        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+        <DialogContent
+          className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0"
+          showCloseButton={false}
+        >
           <div className="overflow-y-auto max-h-[90vh]">
             {analysisResult && (
               <ReadingEvaluationResult

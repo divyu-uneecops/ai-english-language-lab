@@ -238,7 +238,10 @@ export function WritingEditor({ prompt, onBack }: WritingEditorProps) {
 
       {/* Evaluation Results Dialog */}
       <Dialog open={showEvaluation} onOpenChange={setShowEvaluation}>
-        <DialogContent className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0">
+        <DialogContent
+          className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0"
+          showCloseButton={false}
+        >
           <div className="overflow-y-auto max-h-[90vh]">
             {evaluation && (
               <WritingEvaluationResults
