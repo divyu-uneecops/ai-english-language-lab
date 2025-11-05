@@ -110,19 +110,26 @@ export default function EnglishLearningDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 relative overflow-hidden">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* AI-Powered Personalized Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-orange-50/40 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgb(0 0 0) 1px, transparent 0)`,
+          backgroundSize: "32px 32px",
+        }}
+      ></div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Refined Header */}
+        <div className="mb-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
             <div className="flex items-center gap-4">
               {user && (
-                <div className="flex items-center gap-4 group">
-                  <div>
-                    <h1 className="text-sm text-gray-600">
-                      Welcome back, {user?.name || user?.email?.split("@")[0]}
-                    </h1>
-                  </div>
+                <div className="space-y-1">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent">
+                    Welcome back, {user?.name || user?.email?.split("@")[0]}
+                  </h1>
                 </div>
               )}
             </div>
@@ -130,150 +137,253 @@ export default function EnglishLearningDashboard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-gray-200/80 text-gray-700 font-medium rounded-lg shadow-sm hover:shadow-md hover:bg-white hover:border-orange-200 hover:text-orange-600 transition-all duration-200 group cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl shadow-sm hover:shadow-md hover:bg-gradient-to-r hover:from-orange-500 hover:to-orange-600 hover:border-orange-500 hover:text-white transition-all duration-300 group cursor-pointer"
               >
-                <div className="relative">
-                  <FileText className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
-                  <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                </div>
-                <span className="relative">
-                  View Submissions
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-orange-500 to-orange-600 group-hover:w-full transition-all duration-300 ease-out"></span>
-                </span>
-                <ChevronRight className="h-3.5 w-3.5 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+                <FileText className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                <span>View Submissions</span>
+                <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Simplified Achievement Section */}
-        <div className="mb-12">
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white relative overflow-hidden">
-            {/* Simple Background Element */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+        {/* Stats Overview - Modern Card Design */}
+        <div className="mb-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+            {/* Streak Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border border-gray-200/60 hover:border-orange-300/60 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50/50 via-transparent to-yellow-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-orange-200/20 to-yellow-200/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
 
-            <div className="relative z-10">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-                {/* Achievement Content */}
-                <div className="flex-1 text-center lg:text-left">
-                  <div className="flex items-center justify-center lg:justify-start gap-4 mb-6">
-                    <div className="p-3 bg-white/20 rounded-xl">
-                      <Star className="h-8 w-8 text-yellow-300" />
-                    </div>
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <TrendingUp className="h-5 w-5 text-orange-600" />
                   </div>
+                  <CheckCircle className="h-4 w-4 text-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">
+                    {userStats?.streak}
+                  </p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Day Streak
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                {/* Stats Grid */}
-                <div className="flex items-center gap-4">
-                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
-                    <TrendingUp className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">{userStats?.streak}</p>
-                    <p className="text-xs text-orange-100">Streak</p>
+            {/* Reading Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border border-gray-200/60 hover:border-blue-300/60 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-cyan-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-blue-200/20 to-cyan-200/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <BookOpen className="h-5 w-5 text-blue-600" />
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
-                    <BookOpen className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">
-                      {isLoadingSubmissions ? "..." : submissionCounts?.reading}
-                    </p>
-                    <p className="text-xs text-orange-100">{`Submission${
-                      submissionCounts?.reading !== 1 ? "s" : ""
-                    }`}</p>
+                  <CheckCircle className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">
+                    {isLoadingSubmissions ? "..." : submissionCounts?.reading}
+                  </p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Reading
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Speaking Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border border-gray-200/60 hover:border-pink-300/60 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 via-transparent to-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-pink-200/20 to-rose-200/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-pink-100 to-pink-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Mic className="h-5 w-5 text-pink-600" />
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
-                    <Mic className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">
-                      {isLoadingSubmissions
-                        ? "..."
-                        : submissionCounts?.speaking}
-                    </p>
-                    <p className="text-xs text-orange-100">
-                      {`Submission${
-                        submissionCounts?.speaking !== 1 ? "s" : ""
-                      }`}
-                    </p>
+                  <CheckCircle className="h-4 w-4 text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">
+                    {isLoadingSubmissions ? "..." : submissionCounts?.speaking}
+                  </p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Speaking
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Writing Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border border-gray-200/60 hover:border-green-300/60 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-transparent to-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-green-200/20 to-emerald-200/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-green-100 to-green-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <PenTool className="h-5 w-5 text-green-600" />
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
-                    <PenTool className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">
-                      {isLoadingSubmissions ? "..." : submissionCounts?.writing}
-                    </p>
-                    <p className="text-xs text-orange-100">{`Submission${
-                      submissionCounts?.writing !== 1 ? "s" : ""
-                    }`}</p>
+                  <CheckCircle className="h-4 w-4 text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">
+                    {isLoadingSubmissions ? "..." : submissionCounts?.writing}
+                  </p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Writing
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vocabulary Card */}
+            <div className="group relative bg-white rounded-2xl p-6 border border-gray-200/60 hover:border-purple-300/60 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-transparent to-violet-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-purple-200/20 to-violet-200/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+
+              <div className="relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-50 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <BookMarked className="h-5 w-5 text-purple-600" />
                   </div>
-                  <div className="bg-white/10 rounded-xl p-4 text-center w-28">
-                    <BookMarked className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="text-lg font-bold">
-                      {isLoadingSubmissions ? "..." : 15}
-                    </p>
-                    <p className="text-xs text-orange-100">Completed</p>
-                  </div>
+                  <CheckCircle className="h-4 w-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-gray-900 mb-1">
+                    {isLoadingSubmissions ? "..." : 15}
+                  </p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vocabulary
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* AI-Powered Learning Modules Section */}
+        {/* Learning Modules - Premium Card Design */}
         <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-                Continue Learning
+          <div className="flex items-center justify-between mb-8 sm:mb-10">
+            <div className="space-y-1">
+              <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Practice Areas
               </h2>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {continuePracticing?.map((item: any, index: number) => {
+              const colorSchemes = {
+                orange: {
+                  bg: "from-orange-50/80 to-orange-100/50",
+                  hoverBg:
+                    "group-hover:from-orange-100/90 group-hover:to-orange-200/60",
+                  border: "border-orange-200/40 hover:border-orange-300",
+                  iconBg: "bg-gradient-to-br from-orange-500 to-orange-600",
+                  glow: "from-orange-400/30 via-orange-300/20 to-orange-200/10",
+                  button:
+                    "from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700",
+                },
+                pink: {
+                  bg: "from-pink-50/80 to-pink-100/50",
+                  hoverBg:
+                    "group-hover:from-pink-100/90 group-hover:to-pink-200/60",
+                  border: "border-pink-200/40 hover:border-pink-300",
+                  iconBg: "bg-gradient-to-br from-pink-500 to-pink-600",
+                  glow: "from-pink-400/30 via-pink-300/20 to-pink-200/10",
+                  button:
+                    "from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700",
+                },
+                yellow: {
+                  bg: "from-yellow-50/80 to-yellow-100/50",
+                  hoverBg:
+                    "group-hover:from-yellow-100/90 group-hover:to-yellow-200/60",
+                  border: "border-yellow-200/40 hover:border-yellow-300",
+                  iconBg: "bg-gradient-to-br from-yellow-500 to-yellow-600",
+                  glow: "from-yellow-400/30 via-yellow-300/20 to-yellow-200/10",
+                  button:
+                    "from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700",
+                },
+                purple: {
+                  bg: "from-purple-50/80 to-purple-100/50",
+                  hoverBg:
+                    "group-hover:from-purple-100/90 group-hover:to-purple-200/60",
+                  border: "border-purple-200/40 hover:border-purple-300",
+                  iconBg: "bg-gradient-to-br from-purple-500 to-purple-600",
+                  glow: "from-purple-400/30 via-purple-300/20 to-purple-200/10",
+                  button:
+                    "from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700",
+                },
+              };
+
+              const scheme =
+                colorSchemes[item?.color as keyof typeof colorSchemes] ||
+                colorSchemes.orange;
+
               return (
                 <Link
+                  key={item?.id}
                   href={item?.href}
                   prefetch
-                  className="relative rounded-3xl p-6 shadow-lg transition-all duration-300 min-h-[220px] sm:min-h-[240px] lg:min-h-[280px] hover:shadow-2xl hover:scale-[1.015] group overflow-hidden border-2 border-transparent hover:border-orange-200 block"
-                  style={{ textDecoration: 'none' }}
+                  className="group relative block"
+                  style={{ textDecoration: "none" }}
                 >
-                  {/* Gradient Background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white via-orange-50/40 to-orange-100/60 pointer-events-none"></div>
-                  <div className="absolute inset-0 bg-gradient-to-tl from-yellow-50/50 via-transparent to-transparent pointer-events-none"></div>
+                  <div
+                    className={`relative bg-gradient-to-br ${scheme.bg} ${scheme.hoverBg} rounded-2xl p-8 border ${scheme.border} shadow-sm hover:shadow-2xl transition-all duration-500 min-h-[280px] flex flex-col overflow-hidden`}
+                  >
+                    {/* Animated glow on hover */}
+                    <div
+                      className={`absolute -inset-1 bg-gradient-to-br ${scheme.glow} rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500 -z-10`}
+                    ></div>
 
-                  {/* Animated Gradient Overlay on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-100/70 via-orange-50/40 to-yellow-100/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    {/* Decorative elements */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/30 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/20 rounded-full translate-y-12 -translate-x-12 group-hover:scale-150 transition-transform duration-700"></div>
 
-                  {/* Gradient Glow Effect */}
-                  <div className="absolute -inset-0.5 bg-gradient-to-br from-orange-400 via-orange-300 to-yellow-400 rounded-3xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500 pointer-events-none"></div>
-
-                  {/* Top Right ChevronRight Icon */}
-                  <div className="absolute top-4 right-4 p-2 bg-white/70 backdrop-blur-sm rounded-full transition-all duration-300 z-20 shadow-sm group-hover:bg-orange-100/80 group-hover:shadow-md pointer-events-none">
-                    <ChevronRight className="h-5 w-5 text-gray-400 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-orange-500" />
-                  </div>
-
-                  {/* Centered Content */}
-                  <div className="relative z-10 h-full flex flex-col items-center justify-between text-center gap-4 pointer-events-none">
-                    <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                      <div className="relative">
-                        <div
-                          className={`p-6 rounded-2xl ${getSkillColor(
-                            item?.color
-                          )} bg-opacity-10 transition-transform duration-300 group-hover:scale-110`}
-                        >
-                          {item?.icon}
-                        </div>
-                        <div className="absolute -inset-1 bg-gradient-to-r from-orange-200/20 to-yellow-200/20 rounded-2xl blur-sm opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-lg sm:text-xl tracking-tight group-hover:text-orange-600 transition-colors">
-                        {item?.title}
-                      </h3>
+                    {/* Arrow indicator */}
+                    <div className="absolute top-6 right-6 p-2 bg-white/60 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+                      <ChevronRight className="h-4 w-4 text-gray-700" />
                     </div>
 
-                    {/* Practice Button */}
-                    {/* Button remains visually the same, but click event is handled by outer Link */}
-                    <span className="w-full pointer-events-none">
-                      <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
-                        Practice
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </span>
+                    {/* Content */}
+                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                      {/* Icon */}
+                      <div className="relative">
+                        <div
+                          className={`${scheme.iconBg} p-5 rounded-2xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
+                        >
+                          <div className="text-white">{item?.icon}</div>
+                        </div>
+                        {/* Icon glow */}
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${scheme.glow} rounded-2xl blur-xl opacity-0 group-hover:opacity-80 transition-opacity duration-500`}
+                        ></div>
+                      </div>
+
+                      {/* Title */}
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-gray-900 text-xl tracking-tight">
+                          {item?.title}
+                        </h3>
+                        <div className="h-0.5 w-12 mx-auto bg-gradient-to-r from-transparent via-gray-300 to-transparent group-hover:w-20 transition-all duration-500"></div>
+                      </div>
+                    </div>
+
+                    {/* Action button */}
+                    <div className="relative z-10 mt-6">
+                      <div
+                        className={`w-full bg-gradient-to-r ${scheme.button} text-white font-semibold py-3 px-6 rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2`}
+                      >
+                        <span>Start Practice</span>
+                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </div>
                   </div>
                 </Link>
               );
