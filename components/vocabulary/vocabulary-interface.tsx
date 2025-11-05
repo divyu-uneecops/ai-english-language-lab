@@ -58,15 +58,54 @@ export function VocabularyInterface() {
     }
   }, [isCompleted, vocabularyData.length]);
 
-  const playCelebrationSound = () => {
-    // Play a celebratory voice message
-    const wordCount = vocabularyData.length || 15; // Fallback to 15 if somehow empty
-    const celebrationMessage = `Congratulations!`;
-    const utterance = new SpeechSynthesisUtterance(celebrationMessage);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    utterance.volume = 1;
-    speechSynthesis.speak(utterance);
+  const playCelebrationSound = async () => {
+    try {
+      const celebrationMessage = `Congratulations! Today's Goal is Completed`;
+
+      // Call Sarvam AI TTS REST API route
+      const response = await fetch("/api/sarvam-tts-rest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: celebrationMessage }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const data = await response.json();
+
+      // Convert base64 audio to playable format
+      const audioBlob = base64ToBlob(data.audio, data.mimeType);
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl); // Clean up
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl); // Clean up
+        console.error("Error playing celebration audio");
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error("Error with celebration sound:", error);
+    }
+  };
+
+  // Helper function to convert base64 to Blob
+  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
   };
 
   const handleExerciseComplete = () => {
