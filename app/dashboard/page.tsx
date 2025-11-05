@@ -190,7 +190,7 @@ export default function EnglishLearningDashboard() {
                     {isLoadingSubmissions ? "..." : submissionCounts?.reading}
                   </p>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Reading
+                    {`Submission${submissionCounts?.reading !== 1 ? "s" : ""}`}
                   </p>
                 </div>
               </div>
@@ -213,7 +213,7 @@ export default function EnglishLearningDashboard() {
                     {isLoadingSubmissions ? "..." : submissionCounts?.speaking}
                   </p>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Speaking
+                    {`Submission${submissionCounts?.speaking !== 1 ? "s" : ""}`}
                   </p>
                 </div>
               </div>
@@ -236,7 +236,7 @@ export default function EnglishLearningDashboard() {
                     {isLoadingSubmissions ? "..." : submissionCounts?.writing}
                   </p>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Writing
+                    {`Submission${submissionCounts?.writing !== 1 ? "s" : ""}`}
                   </p>
                 </div>
               </div>
