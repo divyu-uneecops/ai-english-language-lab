@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -181,6 +181,10 @@ export function SpeakingInterface() {
     setShowLevelDifficultyDialog(true);
   }, []);
 
+  useEffect(() => {
+    router.prefetch("/speaking/submissions");
+  }, [router]);
+
   const fetchSpeakingTopics = async (aiDecide = false) => {
     // Cancel previous request if active
     controllerRef.current?.abort();
@@ -215,7 +219,12 @@ export function SpeakingInterface() {
             return;
           }
 
-          router.push(`/speaking/${response?.topic_id}`);
+          const url = `/reading/${response.topic_id}`;
+          router.prefetch(url);
+
+          startTransition(() => {
+            router.push(url);
+          });
         }
       } else {
         const paginatedData: PaginatedResponse =
@@ -404,6 +413,7 @@ export function SpeakingInterface() {
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link
                 href="/dashboard"
+                prefetch={true}
                 className="hover:text-orange-600 transition-colors font-medium"
               >
                 Dashboard

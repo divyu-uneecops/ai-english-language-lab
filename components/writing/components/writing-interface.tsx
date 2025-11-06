@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -205,6 +205,10 @@ export function WritingInterface() {
     setShowLevelDifficultyDialog(true);
   }, []);
 
+  useEffect(() => {
+    router.prefetch("/writing/submissions");
+  }, [router]);
+
   // Helper function to extract selected filter values
   const getSelectedFilters = () => {
     const params: Record<string, string> = {};
@@ -283,7 +287,12 @@ export function WritingInterface() {
         // Only navigate if this is still the active request
         if (controllerRef.current === controller) {
           if (response?.topic_id) {
-            router.push(`/writing/${response?.topic_id}`);
+            const url = `/writing/${response.topic_id}`;
+            router.prefetch(url);
+
+            startTransition(() => {
+              router.push(url);
+            });
           }
         }
       } else {
@@ -412,6 +421,7 @@ export function WritingInterface() {
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link
                 href="/dashboard"
+                prefetch={true}
                 className="hover:text-orange-600 transition-colors font-medium"
               >
                 Dashboard

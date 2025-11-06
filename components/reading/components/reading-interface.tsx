@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -182,6 +182,10 @@ export function ReadingInterface() {
     setShowLevelDifficultyDialog(true);
   }, []);
 
+  useEffect(() => {
+    router.prefetch("/reading/submissions");
+  }, [router]);
+
   const fetchStories = async (aiDecide = false) => {
     // Cancel previous request if active
     controllerRef.current?.abort();
@@ -213,7 +217,12 @@ export function ReadingInterface() {
         // Only navigate if this is still the active request
         if (controllerRef.current === controller) {
           if (response?.passage_id) {
-            router.push(`/reading/${response?.passage_id}`);
+            const url = `/reading/${response.passage_id}`;
+            router.prefetch(url);
+
+            startTransition(() => {
+              router.push(url);
+            });
           }
         }
       } else {
@@ -391,6 +400,7 @@ export function ReadingInterface() {
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
               <Link
                 href="/dashboard"
+                prefetch={true}
                 className="hover:text-orange-600 transition-colors font-medium"
               >
                 Dashboard
