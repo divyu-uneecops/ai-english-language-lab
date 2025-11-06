@@ -133,7 +133,7 @@ export default function EnglishLearningDashboard() {
                 </div>
               )}
             </div>
-            <Link href="/submissions" prefetch>
+            <Link href="/submissions" prefetch={true}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -330,7 +330,7 @@ export default function EnglishLearningDashboard() {
                 <Link
                   key={item?.id}
                   href={item?.href}
-                  prefetch
+                  prefetch={true}
                   className="group relative block"
                   style={{ textDecoration: "none" }}
                 >
