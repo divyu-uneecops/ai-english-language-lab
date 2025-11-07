@@ -219,7 +219,7 @@ export function SpeakingInterface() {
             return;
           }
 
-          const url = `/reading/${response.topic_id}`;
+          const url = `/speaking/${response.topic_id}`;
           router.prefetch(url);
 
           startTransition(() => {

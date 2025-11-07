@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -55,9 +55,8 @@ export function LoginForm() {
 
     try {
       await login(formData);
-    } catch (error) {
-      // Error is handled by the auth context
-      console.error("Login error:", error);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Invalid credentials");
     }
   };
 

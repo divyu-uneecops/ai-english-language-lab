@@ -5,10 +5,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import { isEmpty } from "@/lib/utils";
 
 interface OtpVerificationProps {
   onBack: () => void;
@@ -34,6 +35,12 @@ export function OtpVerification({ onBack }: OtpVerificationProps) {
     }
 
     try {
+      const user = pendingUser;
+
+      if (isEmpty(user?.email)) {
+        delete user.email;
+      }
+
       await verifyOtp({
         user: pendingUser,
         otp: { otp },
