@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-
+import { toast } from "sonner";
 import { isEmpty } from "@/lib/utils";
 
 interface OtpVerificationProps {
@@ -45,7 +45,8 @@ export function OtpVerification({ onBack }: OtpVerificationProps) {
         user: pendingUser,
         otp: { otp },
       });
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.error("OTP verification error:", error);
     }
   };

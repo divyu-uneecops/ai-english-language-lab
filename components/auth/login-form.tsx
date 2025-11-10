@@ -29,7 +29,7 @@ export function LoginForm() {
       errors.phone_or_email = "Email or phone number is required";
     } else if (/\S+@\S+\.\S+/.test(formData.phone_or_email)) {
       // Valid email format
-    } else if (/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone_or_email)) {
+    } else if (/^\d{10}$/.test(formData.phone_or_email)) {
       // Valid phone format
     } else {
       errors.phone_or_email =
