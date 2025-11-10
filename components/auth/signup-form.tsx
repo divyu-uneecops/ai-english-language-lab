@@ -10,6 +10,7 @@ import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OtpVerification } from "./otp-verification";
+import { toast } from "sonner";
 
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -109,8 +110,8 @@ export function SignupForm() {
       const { confirmPassword, ...registerPayload } = formData;
       await register(registerPayload);
       setIsOtpSent(true);
-    } catch (error) {
-      // Error is handled by the auth context
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.error("Registration error:", error);
     }
   };
