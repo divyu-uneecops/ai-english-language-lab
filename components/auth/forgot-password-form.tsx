@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ForgotPasswordOtpVerification } from "./forgot-password-otp-verification";
 import { ResetPasswordForm } from "./reset-password-form";
+import { toast } from "sonner";
 
 export function ForgotPasswordForm() {
   const [phone, setPhone] = useState("");
@@ -30,8 +30,8 @@ export function ForgotPasswordForm() {
 
     if (!phone) {
       errors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(phone)) {
-      errors.phone = "Please enter a valid phone number";
+    } else if (!/^\d{10}$/.test(phone)) {
+      errors.phone = "Please enter a valid 10-digit phone number";
     }
 
     setValidationErrors(errors);
@@ -47,7 +47,8 @@ export function ForgotPasswordForm() {
 
     try {
       await forgotPassword({ phone });
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.error("Forgot password error:", error);
     }
   };
@@ -76,7 +77,7 @@ export function ForgotPasswordForm() {
 
   // Show reset password form if OTP is verified
   if (isPasswordResetVerified) {
-    return <ResetPasswordForm />;
+    return <ResetPasswordForm phone={phone} />;
   }
 
   // Show phone number input form

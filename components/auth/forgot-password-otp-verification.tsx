@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import { toast } from "sonner";
 
 interface ForgotPasswordOtpVerificationProps {
   phone: string;
@@ -38,7 +39,8 @@ export function ForgotPasswordOtpVerification({
 
     try {
       await verifyForgotPasswordOtp({ phone, otp });
-    } catch (error) {
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.error("OTP verification error:", error);
     }
   };
