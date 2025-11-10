@@ -54,8 +54,8 @@ export function SignupForm() {
 
     if (!formData.phone) {
       errors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-      errors.phone = "Please enter a valid phone number";
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      errors.phone = "Please enter a valid 10-digit phone number";
     }
 
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
