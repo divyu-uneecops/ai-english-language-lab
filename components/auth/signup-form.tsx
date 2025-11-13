@@ -17,7 +17,6 @@ export function SignupForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -59,9 +58,9 @@ export function SignupForm() {
       errors.phone = "Please enter a valid 10-digit phone number";
     }
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
+    // if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    //   errors.email = "Please enter a valid email address";
+    // }
 
     if (!formData.standard) {
       errors.standard = "Please select your standard";
@@ -201,7 +200,7 @@ export function SignupForm() {
             )}
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="email">Email Address (Optional)</Label>
             <Input
               id="email"
@@ -220,7 +219,7 @@ export function SignupForm() {
                 {validationErrors.email}
               </p>
             )}
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="standard">Standard *</Label>
