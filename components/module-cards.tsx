@@ -1,28 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  BookOpen,
-  Mic,
-  MessageCircle,
-  PenTool,
-  ArrowRight,
-  Lock,
-  Sparkles,
-  Star,
-  Zap,
-  Play,
-  TrendingUp,
-  Award,
-  BookMarked,
-} from "lucide-react";
+import { BookOpen, Mic, MessageCircle, PenTool, Play } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { useState } from "react";
@@ -159,7 +138,7 @@ export function ModuleCards() {
 
           {/* Features */}
           <ul className="space-y-2 mb-6">
-            {module.features.map((feature: string, idx: number) => (
+            {module?.features?.map((feature: string, idx: number) => (
               <li
                 key={idx}
                 className="flex items-center gap-2 text-xs text-slate-500"
@@ -183,7 +162,7 @@ export function ModuleCards() {
 
         {/* Button */}
         {user && (
-          <Link href={module.href}>
+          <Link href={module?.href}>
             <Button
               className={`w-full py-2.5 text-sm font-semibold transition-all duration-300 ${
                 module.variant === "default"
@@ -194,7 +173,7 @@ export function ModuleCards() {
               }`}
             >
               <Play className="h-3 w-3 mr-2" />
-              {module.buttonText}
+              {module?.buttonText}
             </Button>
           </Link>
         )}
@@ -293,7 +272,7 @@ export function ModuleCards() {
         {/* Cards Grid */}
         <div className="max-w-7xl mx-auto mt-20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {modules.map((module, index) => (
+            {modules?.map((module, index) => (
               <ModuleCard key={index} module={module} index={index} />
             ))}
           </div>

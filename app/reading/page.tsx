@@ -1,4 +1,6 @@
-import { ReadingInterface } from "@/components/reading/reading-interface";
+"use client";
+
+import { ReadingInterface } from "@/components/reading/components/reading-interface";
 import { ProtectedRoute } from "@/components/protected-route";
 
 export default function ReadingPage() {

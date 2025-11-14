@@ -1,9 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   ArrowLeft,
   XCircle,
@@ -12,31 +13,47 @@ import {
   Play,
   Pause,
   Square,
-  Mic,
   Send,
+  CheckCircle,
+  MicOff,
+  RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { readingService } from "@/services/readingService";
-import LiveSpeechToText from "@/components/reading/LiveSpeechToText";
-import { getDifficultyColor } from "@/lib/utils";
-
-interface Question {
-  question_id: string;
-  question: string;
-  options: string[];
-  answer: string;
-  explanation: string;
-}
+import LiveSpeechToText, {
+  LiveSpeechToTextRef,
+} from "@/components/shared/components/LiveSpeechToText";
+import { getDifficultyColor, getLevelColor, isEmpty } from "@/lib/utils";
+import Markdown from "@/components/shared/components/MarkDown";
+import ReadingEvaluationResult from "@/components/shared/components/ReadingEvaluationResult";
 
 interface Story {
-  _id: string;
   passage_id: string;
   title: string;
   passage: string;
   difficulty: string;
-  standard: number;
-  questions: Question[];
-  created_at: string;
+  level: string;
+}
+
+interface AnalysisResult {
+  overall_score: number;
+  scoreBreakdown: {
+    accuracy: number;
+    fluency: number;
+    consistency: number;
+  };
+  detailedMetrics: {
+    accuracy: string;
+    fluency: string;
+    consistency: string;
+  };
+  feedback: {
+    accuracy: string[];
+    fluency: string[];
+    consistency: string[];
+    overall: string[];
+  };
+  submitted_at: string;
 }
 
 // Simple TTS Service for English only
@@ -72,17 +89,17 @@ class TTSService {
 }
 
 export default function StoryPage() {
+  const router = useRouter();
   const params = useParams();
-  const storyId = params.storyId as string;
+  const storyId = params?.storyId as string;
   const [story, setStory] = useState<Story | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Text-to-speech state
   const [ttsService] = useState(new TTSService());
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState(-1);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
@@ -93,30 +110,19 @@ export default function StoryPage() {
   const [speechChunks, setSpeechChunks] = useState<
     { text: string; startTime: number; endTime: number }[]
   >([]);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const liveSpeechRef = useRef<LiveSpeechToTextRef>(null);
+
+  // Analysis results state
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [showAnalysisResults, setShowAnalysisResults] = useState(false);
 
   useEffect(() => {
-    const fetchStory = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Fetch the specific story by ID
-        const response = await readingService.fetchStoryById(storyId);
-        const storyData: Story[] = response;
-
-        if (storyData && storyData.length > 0) {
-          setStory(storyData[0]);
-        } else {
-          setError("Story not found");
-        }
-      } catch (err) {
-        console.error("Error fetching story:", err);
-        setError("Failed to load story. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (storyId) {
       fetchStory();
     }
@@ -129,9 +135,30 @@ export default function StoryPage() {
     };
   }, []);
 
-  // TTS functions
-  const splitTextIntoWords = (text: string) => {
-    return text.split(/\s+/).filter((word) => word.trim().length > 0);
+  const fetchStory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch the specific story by ID
+      const response = await readingService?.fetchStoryById(storyId);
+
+      const storyData: Story = response;
+
+      if (!isEmpty(storyData)) {
+        setStory(storyData);
+      }
+    } catch (err: any) {
+      if (err?.response) {
+        // If using axios
+        setError(
+          err?.response?.data?.message ||
+            "Failed to load story. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const generateAndPlaySpeech = async (text: string) => {
@@ -142,7 +169,7 @@ export default function StoryPage() {
 
       // Stop any existing audio
       if (audioElement) {
-        audioElement.pause();
+        audioElement?.pause();
         audioElement.currentTime = 0;
       }
 
@@ -159,31 +186,9 @@ export default function StoryPage() {
       const audio = new Audio(generatedAudioUrl);
       setAudioElement(audio);
 
-      const words = splitTextIntoWords(text);
-      let currentIndex = 0;
-
-      // Update current word based on time
-      audio.ontimeupdate = () => {
-        if (words.length > 0 && audio.duration && audio.duration > 0) {
-          const currentTime = audio.currentTime;
-          const duration = audio.duration;
-          const progress = currentTime / duration;
-          const estimatedIndex = Math.min(
-            Math.floor(progress * words.length),
-            words.length - 1
-          );
-
-          if (estimatedIndex !== currentIndex) {
-            currentIndex = estimatedIndex;
-            setCurrentWordIndex(currentIndex);
-          }
-        }
-      };
-
       audio.onended = () => {
         setIsPlaying(false);
         setIsPaused(false);
-        setCurrentWordIndex(-1);
         // Clean up URL object
         if (audioUrl) {
           URL.revokeObjectURL(audioUrl);
@@ -195,7 +200,6 @@ export default function StoryPage() {
         console.error("Audio playback error:", e);
         setIsPlaying(false);
         setIsPaused(false);
-        setCurrentWordIndex(-1);
         setIsGenerating(false);
       };
 
@@ -216,44 +220,27 @@ export default function StoryPage() {
     if (audioElement && !audioElement.paused) {
       audioElement.pause();
       setIsPaused(true);
-    } else if ("speechSynthesis" in window && speechSynthesis.speaking) {
-      speechSynthesis.pause();
-      setIsPaused(true);
     }
   };
 
   const resumeSpeech = () => {
     if (audioElement && audioElement.paused) {
       audioElement.play().then(() => setIsPaused(false));
-    } else if ("speechSynthesis" in window && speechSynthesis.paused) {
-      speechSynthesis.resume();
-      setIsPaused(false);
     }
   };
 
   const stopSpeech = () => {
     if (audioElement) {
-      audioElement.pause();
+      audioElement?.pause();
       audioElement.currentTime = 0;
-    }
-
-    if ("speechSynthesis" in window) {
-      speechSynthesis.cancel();
-    }
-
-    // Clean up URL object
-    if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
-      setAudioUrl(null);
     }
 
     setIsPlaying(false);
     setIsPaused(false);
-    setCurrentWordIndex(-1);
     setIsGenerating(false);
   };
 
-  const handleSpeakerClick = () => {
+  const handleSpeakerClick = async () => {
     if (!story) return;
 
     if (isPlaying) {
@@ -263,7 +250,14 @@ export default function StoryPage() {
         pauseSpeech();
       }
     } else {
-      generateAndPlaySpeech(story.passage);
+      if (audioElement) {
+        await audioElement.play();
+        setIsPlaying(true);
+        setIsPaused(false);
+        setIsGenerating(false);
+      } else {
+        generateAndPlaySpeech(story.passage);
+      }
     }
   };
 
@@ -271,47 +265,65 @@ export default function StoryPage() {
     stopSpeech();
   };
 
-  const handleSubmitAnalysis = () => {
+  const handleSubmitAnalysis = async () => {
+    liveSpeechRef.current?.stopListening();
     if (speechChunks.length === 0) {
-      console.log("No speech chunks available to submit");
       return;
     }
-    console.log(speechChunks);
+
+    if (!story) {
+      return;
+    }
+
+    try {
+      setIsAnalyzing(true);
+      setAnalysisError(null);
+
+      const result = await readingService.evaluateReading(
+        story.passage_id,
+        speechChunks
+      );
+
+      setAnalysisResult(result);
+      setShowAnalysisResults(true);
+    } catch (error) {
+      console.error("Error submitting analysis:", error);
+      setAnalysisError(
+        error instanceof Error
+          ? error.message
+          : "Failed to analyze reading. Please try again."
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
-  const renderStoryWithHighlighting = (text: string) => {
-    if (!text) return null;
+  const handleRetryAnalysis = () => {
+    setShowAnalysisResults(false);
+    setAnalysisResult(null);
+    setAnalysisError(null);
+    setSpeechChunks([]);
+    setTranscript("");
+  };
 
-    // Split text into words and spaces separately for better control
-    const parts = text.split(/(\s+)/);
-    let wordCount = 0;
+  const handleCloseAnalysis = () => {
+    router.push("/reading");
+  };
 
-    return (
-      <div className="text-xl leading-relaxed text-slate-700 font-medium">
-        {parts.map((part, index) => {
-          const isWord = part.trim().length > 0 && !/^\s+$/.test(part);
-          const isHighlighted =
-            isWord && wordCount === currentWordIndex && isPlaying;
+  const handleRetryReading = () => {
+    setShowAnalysisResults(false);
+    setAnalysisResult(null);
+    setSpeechChunks([]);
+    setTranscript("");
+    liveSpeechRef.current?.handleRestart();
+  };
 
-          if (isWord) {
-            wordCount++;
-          }
+  const handleStopListening = () => {
+    liveSpeechRef.current?.stopListening();
+  };
 
-          return (
-            <span
-              key={index}
-              className={`${
-                isHighlighted
-                  ? "bg-gradient-to-r from-yellow-300 to-amber-300 text-amber-900"
-                  : ""
-              }`}
-            >
-              {part}
-            </span>
-          );
-        })}
-      </div>
-    );
+  const handleRestartListening = () => {
+    liveSpeechRef.current?.handleRestart();
   };
 
   if (loading) {
@@ -359,149 +371,228 @@ export default function StoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
-            <Link
-              href="/reading"
-              className="hover:text-blue-600 transition-colors font-medium"
-            >
-              Reading
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900 font-semibold">{story?.title}</span>
-          </nav>
-
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <Badge
-                  variant="secondary"
-                  className={`text-xs font-medium border ${getDifficultyColor(
-                    story?.difficulty
-                  )}`}
-                >
-                  {story?.difficulty}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Clock className="h-4 w-4" />
-                  <span>5 Min</span>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header Bar - HackerRank Style */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <nav className="flex items-center space-x-2 text-sm text-gray-500">
+              <Link
+                href="/reading"
+                className="hover:text-blue-600 transition-colors"
+              >
+                Reading
+              </Link>
+              <span>/</span>
+              <span className="text-gray-900 font-medium">{story?.title}</span>
+            </nav>
           </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Two-Column Layout */}
-          <div
-            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            style={{ height: "calc(100vh - 250px)" }}
-          >
-            {/* Story Text Panel */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {/* <Volume2 className="h-5 w-5 text-gray-600" /> */}
-                    <h3 className="font-semibold text-gray-900">Story Text</h3>
-                  </div>
-                  {/* Audio Controls */}
-                  <div className="flex items-center space-x-3">
-                    <Button
-                      onClick={handleSpeakerClick}
-                      disabled={isGenerating}
-                      variant={isPlaying ? "secondary" : "outline"}
-                      size="sm"
-                      className="group font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 hover:border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
-                          <span className="group-hover:text-blue-600 transition-colors">
-                            Generating
-                          </span>
-                        </>
-                      ) : isPlaying ? (
-                        isPaused ? (
-                          <>
-                            <Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="group-hover:text-green-600 transition-colors">
-                              Resume Audio
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Pause className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="group-hover:text-orange-600 transition-colors">
-                              Pause Audio
-                            </span>
-                          </>
-                        )
-                      ) : (
-                        <>
-                          <Volume2 className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-blue-600 transition-all duration-200" />
-                          <span className="group-hover:text-blue-600 transition-colors">
-                            Play Audio
-                          </span>
-                        </>
-                      )}
-                    </Button>
-
-                    {(isPlaying || isGenerating) && (
-                      <Button
-                        onClick={handleStopClick}
-                        disabled={isGenerating}
-                        variant="outline"
-                        size="sm"
-                        className="group transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-red-500/25 hover:border-red-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                      >
-                        <Square className="h-4 w-4 mr-2 group-hover:scale-110 group-hover:text-red-600 transition-all duration-200" />
-                        <span className="group-hover:text-red-600 transition-colors">
-                          Stop
-                        </span>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 h-full overflow-y-auto">
-                <div className="prose prose-lg max-w-none">
-                  {renderStoryWithHighlighting(story?.passage || "")}
-                </div>
-              </div>
-            </div>
-
-            {/* Speech Practice Panel */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Mic className="h-5 w-5 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900">
-                      Speech Practice
-                    </h3>
-                  </div>
-                  <Button
-                    onClick={handleSubmitAnalysis}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
-                    disabled={speechChunks.length === 0}
-                  >
-                    <Send className="h-4 w-4 mr-1.5" />
-                    Submit Analysis
-                  </Button>
-                </div>
-              </div>
-              <div className="p-6 h-full overflow-hidden">
-                <LiveSpeechToText onChunksUpdate={setSpeechChunks} />
-              </div>
-            </div>
+          <div className="flex items-center space-x-3">
+            <Badge
+              variant="secondary"
+              className={`text-xs font-medium px-3 py-1 capitalize ${getLevelColor(
+                story?.level
+              )}`}
+            >
+              {story?.level}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className={`text-xs font-medium px-3 py-1 capitalize ${getDifficultyColor(
+                story?.difficulty
+              )}`}
+            >
+              {story?.difficulty}
+            </Badge>
           </div>
         </div>
       </div>
+
+      {/* Main Content - Two Panel Layout */}
+      <div className="flex h-[calc(100vh-80px)]">
+        {/* Left Panel - Passage */}
+        <div className="flex-1 bg-white border-r border-gray-200 flex flex-col">
+          {/* Passage Header */}
+          <div className="bg-white border-b border-gray-200 px-6 flex items-center justify-between py-4">
+            <h2 className="text-lg font-semibold text-gray-900">Passage</h2>
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={handleSpeakerClick}
+                disabled={isGenerating}
+                variant={isPlaying ? "secondary" : "outline"}
+                size="sm"
+                className="font-medium"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                    Generating
+                  </>
+                ) : isPlaying ? (
+                  isPaused ? (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Resume
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="h-4 w-4 mr-2" />
+                      Pause
+                    </>
+                  )
+                ) : (
+                  <>
+                    <Volume2 className="h-4 w-4 mr-2" />
+                    Play Audio
+                  </>
+                )}
+              </Button>
+              {(isPlaying || isGenerating) && (
+                <Button
+                  onClick={handleStopClick}
+                  disabled={isGenerating}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Square className="h-4 w-4 mr-2" />
+                  Stop
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Passage Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="prose prose-lg max-w-none">
+              <Markdown passage={story?.passage || ""} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Speech Practice */}
+        <div className="w-1/2 bg-white flex flex-col">
+          {/* Right Panel Header */}
+          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Reading Practice
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                {isListening ? (
+                  <Button
+                    onClick={handleStopListening}
+                    variant="destructive"
+                    size="sm"
+                    className="shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <MicOff className="h-4 w-4 mr-1.5" />
+                    Stop
+                  </Button>
+                ) : transcript ? (
+                  <>
+                    <Button
+                      onClick={handleRestartListening}
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1.5" />
+                      Restart
+                    </Button>
+                    <Button
+                      onClick={handleSubmitAnalysis}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium"
+                      disabled={speechChunks.length === 0 || isAnalyzing}
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></div>
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {/* Speech Practice Content */}
+          <div className="flex-1 overflow-hidden">
+            <LiveSpeechToText
+              ref={liveSpeechRef}
+              onChunksUpdate={setSpeechChunks}
+              onListeningChange={setIsListening}
+              onTranscriptChange={setTranscript}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Analysis Results Dialog */}
+      <Dialog open={showAnalysisResults} onOpenChange={setShowAnalysisResults}>
+        <DialogContent
+          className="sm:max-w-6xl max-h-[90vh] overflow-hidden p-0 rounded-2xl shadow-2xl border-0"
+          showCloseButton={false}
+        >
+          <div className="overflow-y-auto max-h-[90vh]">
+            {analysisResult && (
+              <ReadingEvaluationResult
+                result={analysisResult}
+                onClose={handleCloseAnalysis}
+                onRetry={handleRetryReading}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analysis Error Modal */}
+      {analysisError && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-red-100 rounded-full">
+                  <XCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-red-800 mb-2">
+                    Analysis Failed
+                  </h3>
+                  <p className="text-red-700 leading-relaxed">
+                    {analysisError}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button
+                  onClick={() => setAnalysisError(null)}
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                >
+                  Dismiss
+                </Button>
+                <Button
+                  onClick={handleRetryAnalysis}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

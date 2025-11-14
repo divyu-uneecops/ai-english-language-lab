@@ -10,13 +10,13 @@ import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OtpVerification } from "./otp-verification";
+import { toast } from "sonner";
 
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     phone: "",
     password: "",
     confirmPassword: "",
@@ -54,13 +54,13 @@ export function SignupForm() {
 
     if (!formData.phone) {
       errors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-      errors.phone = "Please enter a valid phone number";
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      errors.phone = "Please enter a valid 10-digit phone number";
     }
 
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
+    // if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    //   errors.email = "Please enter a valid email address";
+    // }
 
     if (!formData.standard) {
       errors.standard = "Please select your standard";
@@ -109,8 +109,8 @@ export function SignupForm() {
       const { confirmPassword, ...registerPayload } = formData;
       await register(registerPayload);
       setIsOtpSent(true);
-    } catch (error) {
-      // Error is handled by the auth context
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.error("Registration error:", error);
     }
   };
@@ -200,7 +200,7 @@ export function SignupForm() {
             )}
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="email">Email Address (Optional)</Label>
             <Input
               id="email"
@@ -219,7 +219,7 @@ export function SignupForm() {
                 {validationErrors.email}
               </p>
             )}
-          </div>
+          </div> */}
 
           <div className="space-y-2">
             <Label htmlFor="standard">Standard *</Label>

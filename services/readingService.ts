@@ -1,18 +1,20 @@
 import serverInterfaceService from "./serverInterfaceService";
 
 export const readingService = {
-  fetchStories: (page: number = 1, pageSize: number = 10) =>
-    serverInterfaceService.get(
-      `/reading/stories?page=${page}&page_size=${pageSize}`
-    ),
+  fetchStories: (params?: Record<string, any>, signal?: AbortSignal) => {
+    return serverInterfaceService.get(`/reading/passages`, params, signal);
+  },
   fetchStoryById: (storyId: string) =>
-    serverInterfaceService.get(`/reading/stories/${storyId}`),
-  verifyAnswers: (
-    storyId: string,
-    answers: Array<{ question_id: string; answer: string }>
+    serverInterfaceService.get(`/reading/passages/${storyId}`),
+  evaluateReading: (
+    passageId: string,
+    audioData: Array<{ text: string; startTime: number; endTime: number }>
   ) =>
-    serverInterfaceService.post("/reading/verify", {
-      story_id: storyId,
-      answers: answers,
+    serverInterfaceService.post("/reading/evaluate-reading", {
+      passage_id: passageId,
+      audio_data: audioData,
     }),
+  // Fetch all submissions for the user
+  fetchAllSubmissions: () =>
+    serverInterfaceService.get(`/reading/passages/submissions`),
 };

@@ -1,5 +1,6 @@
+"use client";
+
 import { LoginForm } from "@/components/auth/login-form";
-import { BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {

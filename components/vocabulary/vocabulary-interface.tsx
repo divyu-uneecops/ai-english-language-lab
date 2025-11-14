@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Volume2, RotateCcw } from "lucide-react";
+import {
+  Volume2,
+  RotateCcw,
+  Trophy,
+  Sparkles,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import { VocabularyCard } from "./vocabulary-card";
 import { vocabularyService } from "@/services/vocabularyService";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface VocabularyItem {
   word: string;
@@ -14,9 +22,12 @@ interface VocabularyItem {
 }
 
 export function VocabularyInterface() {
+  const router = useRouter();
   const [vocabularyData, setVocabularyData] = useState<VocabularyItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const hasPlayedCelebration = useRef(false);
 
   const fetchVocabulary = async () => {
     setLoading(true);
@@ -36,8 +47,73 @@ export function VocabularyInterface() {
     fetchVocabulary();
   }, []);
 
+  useEffect(() => {
+    if (
+      isCompleted &&
+      !hasPlayedCelebration.current &&
+      vocabularyData.length > 0
+    ) {
+      hasPlayedCelebration.current = true;
+      playCelebrationSound();
+    }
+  }, [isCompleted, vocabularyData.length]);
+
+  const playCelebrationSound = async () => {
+    try {
+      const celebrationMessage = `Congratulations! Today's Goal is Completed`;
+
+      // Call Sarvam AI TTS REST API route
+      const response = await fetch("/api/sarvam-tts-rest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: celebrationMessage }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const data = await response.json();
+
+      // Convert base64 audio to playable format
+      const audioBlob = base64ToBlob(data.audio, data.mimeType);
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl); // Clean up
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl); // Clean up
+        console.error("Error playing celebration audio");
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error("Error with celebration sound:", error);
+    }
+  };
+
+  // Helper function to convert base64 to Blob
+  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  };
+
   const handleExerciseComplete = () => {
-    console.log("Vocabulary learning completed!");
+    setIsCompleted(true);
+  };
+
+  const handleGoToDashboard = () => {
+    router.push(`/dashboard`);
   };
 
   return (
@@ -65,11 +141,18 @@ export function VocabularyInterface() {
         {/* Content Section */}
         <div className="flex justify-center">
           {loading ? (
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Loading vocabulary...
-              </p>
+            <div className="flex items-center justify-center py-16 w-full">
+              <div className="text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
+                <div className="p-4 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-orange-600 dark:text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Loading vocabulary...
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Please wait while we fetch the content
+                </p>
+              </div>
             </div>
           ) : error ? (
             <div className="text-center">
@@ -87,6 +170,82 @@ export function VocabularyInterface() {
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
+            </div>
+          ) : isCompleted ? (
+            <div className="w-full max-w-2xl mx-auto">
+              <div className="text-center py-12 px-6">
+                {/* Celebration Animation Container */}
+                <div className="relative mb-8">
+                  {/* Animated Trophy Icon */}
+                  <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-yellow-400 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                    <div className="relative w-32 h-32 bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-2xl transform animate-bounce">
+                      <Trophy className="h-16 w-16 text-white" />
+                    </div>
+                  </div>
+
+                  {/* Floating Sparkles */}
+                  <div className="absolute top-0 left-1/4">
+                    <Sparkles
+                      className="h-8 w-8 text-yellow-400 animate-pulse"
+                      style={{ animationDelay: "0s" }}
+                    />
+                  </div>
+                  <div className="absolute top-0 right-1/4">
+                    <Sparkles
+                      className="h-8 w-8 text-orange-400 animate-pulse"
+                      style={{ animationDelay: "0.5s" }}
+                    />
+                  </div>
+                  <div className="absolute bottom-0 left-1/3">
+                    <Sparkles
+                      className="h-6 w-6 text-yellow-300 animate-pulse"
+                      style={{ animationDelay: "1s" }}
+                    />
+                  </div>
+                  <div className="absolute bottom-0 right-1/3">
+                    <Sparkles
+                      className="h-6 w-6 text-orange-300 animate-pulse"
+                      style={{ animationDelay: "1.5s" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Achievement Message */}
+                <div className="space-y-4 mb-8">
+                  <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-transparent bg-clip-text">
+                    🎉 Congratulations! 🎉
+                  </h2>
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border-2 border-green-200 dark:border-green-700 shadow-lg">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-white">
+                        Today's Goal is Completed!
+                      </p>
+                    </div>
+                    <p className="text-xl text-gray-700 dark:text-gray-300 font-medium">
+                      You learned{" "}
+                      <span className="font-bold text-green-600 dark:text-green-400">
+                        {vocabularyData.length} Vocabulary
+                      </span>{" "}
+                      words
+                    </p>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">
+                    Keep up the excellent work! Your dedication to learning is
+                    inspiring.
+                  </p>
+                </div>
+
+                {/* Action Button */}
+                <Button
+                  onClick={handleGoToDashboard}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-6 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  Go to Dashboard
+                  <Sparkles className="h-5 w-5 ml-2" />
+                </Button>
+              </div>
             </div>
           ) : (
             <VocabularyCard

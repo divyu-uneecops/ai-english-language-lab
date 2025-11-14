@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ phone }: { phone: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -63,9 +63,13 @@ export function ResetPasswordForm() {
     }
 
     try {
-      await resetPassword({ password: formData.password });
-    } catch (error) {
-      console.error("Password reset error:", error);
+      const response: any = await resetPassword({
+        password: formData.password,
+        phone,
+      });
+      toast.success("Password reset successfully");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
 

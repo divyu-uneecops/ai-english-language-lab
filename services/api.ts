@@ -6,7 +6,7 @@ import axios, {
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:8004",
   headers: {
     "Content-Type": "application/json",
   },
@@ -44,11 +44,6 @@ api.interceptors.response.use(
         localStorage.removeItem("user");
         window.location.href = "/auth/login";
       }
-    }
-
-    // Handle network errors
-    if (!error.response) {
-      console.error("Network error:", error.message);
     }
 
     return Promise.reject(error);

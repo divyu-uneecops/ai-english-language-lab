@@ -45,16 +45,59 @@ export function VocabularyCard({
       ? ((currentWordIndex + 1) / wordsToLearn.length) * 100
       : 0;
 
-  const speakWord = (text: string) => {
+  const speakWord = async (text: string) => {
     if (isPlaying) return;
 
     setIsPlaying(true);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.8;
-    utterance.pitch = 1;
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-    speechSynthesis.speak(utterance);
+
+    try {
+      // Call Sarvam AI TTS REST API route
+      const response = await fetch("/api/sarvam-tts-rest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const data = await response.json();
+
+      // Convert base64 audio to playable format
+      const audioBlob = base64ToBlob(data.audio, data.mimeType);
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create and play audio
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl); // Clean up
+      };
+      audio.onerror = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl); // Clean up
+        console.error("Error playing audio");
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error("Error with Sarvam TTS:", error);
+      setIsPlaying(false);
+    }
+  };
+
+  // Helper function to convert base64 to Blob
+  const base64ToBlob = (base64: string, mimeType: string): Blob => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
   };
 
   const markWordLearned = () => {
